@@ -33,11 +33,21 @@ class CartController extends Controller
         $product = Product::with('category')->findOrFail($id);
 
         if (! $product->status) {
-            return back()->with('error', 'This product is unavailable.');
+            return $request->ajax()
+                ? response()->json(['success' => false, 'message' => 'This product is unavailable.'])
+                : back()->with('error', 'This product is unavailable.');
         }
 
         $quantity = min($request->quantity, $product->stock);
         $this->cart->add($product, $quantity);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Product added to cart!',
+                'count' => $this->cart->getCount(),
+            ]);
+        }
 
         return redirect()->route('cart.index')->with('success', 'Product added to cart!');
     }

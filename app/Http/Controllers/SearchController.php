@@ -8,6 +8,31 @@ use Illuminate\Http\Request;
 
 class SearchController extends Controller
 {
+    public function suggestions(Request $request)
+    {
+        $q = $request->get('q');
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+        $products = Product::with('category')->active()
+            ->where(function ($qb) use ($q) {
+                $qb->where('name', 'LIKE', "%{$q}%")
+                    ->orWhere('fabric', 'LIKE', "%{$q}%")
+                    ->orWhere('color', 'LIKE', "%{$q}%");
+            })
+            ->limit(6)
+            ->get(['id', 'name', 'slug', 'price', 'image']);
+
+        return response()->json($products->map(fn ($p) => [
+            'id' => $p->id,
+            'name' => $p->name,
+            'slug' => $p->slug,
+            'url' => route('products.show', $p->slug),
+            'price' => formatPrice($p->price),
+            'image' => $p->image ? '<img src="' . asset('storage/' . $p->image) . '" class="w-full h-full object-cover rounded-lg">' : null,
+        ]));
+    }
+
     public function index(Request $request)
     {
         $query = Product::with('category')->active();

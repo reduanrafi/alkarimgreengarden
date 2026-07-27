@@ -17,11 +17,15 @@ class BannerObserver
         unset($changed['updated_at']);
         if (empty($changed)) return;
 
+        $ns = app(\App\Services\NotificationService::class);
+
         if (isset($changed['image'])) {
             logActivity('Replaced', 'Banner', "Banner '{$banner->title}' image was replaced.");
+            $ns->create('banner_updated', 'Banner', "Banner Updated: {$banner->title}", "Banner '{$banner->title}' image was replaced.");
         } else {
             $fields = array_keys($changed);
             logActivity('Updated', 'Banner', "Banner '{$banner->title}' was updated. (" . implode(', ', $fields) . ')');
+            $ns->create('banner_updated', 'Banner', "Banner Updated: {$banner->title}", "Banner '{$banner->title}' was updated.");
         }
     }
 

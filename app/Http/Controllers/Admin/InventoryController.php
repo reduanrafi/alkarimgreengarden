@@ -86,6 +86,9 @@ class InventoryController extends Controller
 
         logActivity('Stock In', 'Inventory', "{$data['quantity']} units added to '{$product->name}'.");
 
+        $ns = app(\App\Services\NotificationService::class);
+        $ns->create('stock_in', 'Inventory', "Stock In: {$product->name}", "{$data['quantity']} units of '{$product->name}' were added to stock.");
+
         return redirect()->route('admin.inventory.index')
             ->with('success', "Stock added: {$data['quantity']} units of {$product->name}.");
     }
@@ -133,6 +136,9 @@ class InventoryController extends Controller
         });
 
         logActivity('Stock Out', 'Inventory', "{$data['quantity']} units removed from '{$product->name}'.");
+
+        $ns = app(\App\Services\NotificationService::class);
+        $ns->create('stock_out', 'Inventory', "Stock Out: {$product->name}", "{$data['quantity']} units of '{$product->name}' were removed from stock.");
 
         return redirect()->route('admin.inventory.index')
             ->with('success', "Stock removed: {$data['quantity']} units of {$product->name}.");

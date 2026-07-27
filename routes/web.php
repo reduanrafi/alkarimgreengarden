@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLogController;
 use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
+use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\AttributeController as AdminAttributeController;
@@ -44,6 +45,7 @@ Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 Route::get('/search', [SearchController::class, 'index'])->name('search');
+Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
 Route::get('/dashboard', function () {
     if (auth()->user()?->is_admin) {
@@ -119,6 +121,12 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/activity-logs/export/csv', [AdminActivityLogController::class, 'exportCsv'])->name('activity-logs.export.csv');
+
+    Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('/notifications/{notification}/read', [AdminNotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::get('/notifications/{notification}/delete', [AdminNotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::get('/notifications/clear-all', [AdminNotificationController::class, 'clearAll'])->name('notifications.clear-all');
 
     Route::get('/attributes', [AdminAttributeController::class, 'index'])->name('attributes.index');
     Route::get('/attributes/create', [AdminAttributeController::class, 'create'])->name('attributes.create');

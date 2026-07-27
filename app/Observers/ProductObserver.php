@@ -19,6 +19,10 @@ class ProductObserver
 
         $fields = array_keys($changed);
         logActivity('Updated', 'Product', "Product '{$product->name}' was updated. (" . implode(', ', $fields) . ')');
+
+        if (isset($changed['stock'])) {
+            $this->checkStockNotification($product);
+        }
     }
 
     public function deleted(Product $product): void
@@ -29,5 +33,25 @@ class ProductObserver
     public function restored(Product $product): void
     {
         logActivity('Restored', 'Product', "Product '{$product->name}' was restored.");
+    }
+
+    protected function checkStockNotification(Product $product): void
+    {
+        $ns = app(\App\Services\NotificationService::class);
+        if ($product->stock <= 0) {
+            $ns->create(
+                'out_of_stock',
+                'Product',
+                "Out of Stock: {$product->name}",
+                "Product '{$product->name}' ({$product->sku}) is out of stock."
+            );
+        } elseif ($product->is_low_stock) {
+            $ns->create(
+                'low_stock',
+                'Product',
+                "Low Stock: {$product->name}",
+                "Product '{$product->name}' ({$product->sku}) has only {$product->stock} units left."
+            );
+        }
     }
 }

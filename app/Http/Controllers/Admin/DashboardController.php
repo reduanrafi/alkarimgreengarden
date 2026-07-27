@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\InventoryTransaction;
+use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -25,6 +26,10 @@ class DashboardController extends Controller
         $lowStockProducts = $inventory->getLowStockProducts(10);
         $recentOrders   = Order::with('user')->latest()->limit(10)->get();
         $latestProducts = Product::with('category')->latest()->limit(10)->get();
+        $recentNotifications = Notification::latest()->limit(5)->get()->map(function ($n) {
+            $n->is_read = $n->isReadBy(auth()->user());
+            return $n;
+        });
 
         // Inventory stats
         $totalStockQty = Product::sum('stock');
@@ -62,7 +67,8 @@ class DashboardController extends Controller
             'lowStockProducts', 'recentOrders', 'latestProducts',
             'months', 'monthlyRevenue', 'weekLabels', 'weeklySales',
             'currencySymbol', 'totalStockQty', 'outOfStockCount',
-            'stockValue', 'todayStockIn', 'todayStockOut'
+            'stockValue', 'todayStockIn', 'todayStockOut',
+            'recentNotifications'
         ));
     }
 }

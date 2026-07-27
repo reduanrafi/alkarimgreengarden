@@ -32,18 +32,25 @@ class BannerController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'type' => 'required|in:hero_banner,homepage_carousel,homepage_fixed,especially_for_you',
+            'display_order' => 'nullable|integer|min:0',
             'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'button_text' => 'nullable|string|max:255',
+            'short_description' => 'nullable|string|max:500',
+            'redirect_url' => 'nullable|string|max:500',
+            'background_color' => 'nullable|string|max:20',
             'status' => 'boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         $validated['image'] = $this->imageService->upload($request->file('image'), null, 'banners');
 
-        $banner = Banner::create($validated);
-
-        if (!empty($validated['status'])) {
-            $banner->status = true;
-            $banner->save();
+        if (empty($validated['display_order'])) {
+            $validated['display_order'] = 0;
         }
+
+        Banner::create($validated);
 
         return redirect()->route('admin.banners.index')
             ->with('success', 'Banner created successfully.');
@@ -58,8 +65,16 @@ class BannerController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'type' => 'required|in:hero_banner,homepage_carousel,homepage_fixed,especially_for_you',
+            'display_order' => 'nullable|integer|min:0',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'button_text' => 'nullable|string|max:255',
+            'short_description' => 'nullable|string|max:500',
+            'redirect_url' => 'nullable|string|max:500',
+            'background_color' => 'nullable|string|max:20',
             'status' => 'boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         if ($request->hasFile('image')) {
@@ -68,12 +83,11 @@ class BannerController extends Controller
             $validated['image'] = $banner->image;
         }
 
-        $banner->update($validated);
-
-        if (!empty($validated['status'])) {
-            $banner->status = true;
-            $banner->save();
+        if (empty($validated['display_order'])) {
+            $validated['display_order'] = 0;
         }
+
+        $banner->update($validated);
 
         return redirect()->route('admin.banners.index')
             ->with('success', 'Banner updated successfully.');

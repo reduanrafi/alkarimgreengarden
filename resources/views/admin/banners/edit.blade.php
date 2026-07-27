@@ -17,10 +17,28 @@
         @csrf @method('PUT')
 
         <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Banner Type</label>
+            <select name="type" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
+                <option value="hero_banner" {{ old('type', $banner->type) === 'hero_banner' ? 'selected' : '' }}>Hero Banner</option>
+                <option value="homepage_carousel" {{ old('type', $banner->type) === 'homepage_carousel' ? 'selected' : '' }}>Homepage Carousel Banner</option>
+                <option value="homepage_fixed" {{ old('type', $banner->type) === 'homepage_fixed' ? 'selected' : '' }}>Homepage Fixed Banner</option>
+                <option value="especially_for_you" {{ old('type', $banner->type) === 'especially_for_you' ? 'selected' : '' }}>Especially For You Card</option>
+            </select>
+            @error('type') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Banner Title</label>
             <input type="text" name="title" value="{{ old('title', $banner->title) }}" required
                    class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
             @error('title') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Display Order</label>
+            <input type="number" name="display_order" value="{{ old('display_order', $banner->display_order) }}" min="0"
+                   class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
+            @error('display_order') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
         </div>
 
         <div>
@@ -41,12 +59,61 @@
             @error('image') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Button Text (Optional)</label>
+            <input type="text" name="button_text" value="{{ old('button_text', $banner->button_text) }}"
+                   class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+                   placeholder="e.g. Shop Now">
+            @error('button_text') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Short Description (Optional)</label>
+            <textarea name="short_description" rows="2"
+                      class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+                      placeholder="e.g. Curated just for you">{{ old('short_description', $banner->short_description) }}</textarea>
+            @error('short_description') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Redirect URL (Optional)</label>
+            <input type="url" name="redirect_url" value="{{ old('redirect_url', $banner->redirect_url) }}"
+                   class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+                   placeholder="e.g. https://example.com/summer-collection">
+            @error('redirect_url') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Background Color (Optional)</label>
+            <div class="flex items-center gap-3">
+                <input type="color" name="background_color" value="{{ old('background_color', $banner->background_color ?? '#6366f1') }}"
+                       class="w-10 h-10 rounded-lg border border-gray-700/50 cursor-pointer bg-transparent">
+                <span class="text-xs text-gray-500">Pick a background color for the card</span>
+            </div>
+            @error('background_color') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Start Date (Optional)</label>
+                <input type="date" name="start_date" value="{{ old('start_date', $banner->start_date ? $banner->start_date->format('Y-m-d') : '') }}"
+                       class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
+                @error('start_date') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">End Date (Optional)</label>
+                <input type="date" name="end_date" value="{{ old('end_date', $banner->end_date ? $banner->end_date->format('Y-m-d') : '') }}"
+                       class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
+                @error('end_date') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+            </div>
+        </div>
+
         <div class="flex items-center gap-3">
             <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" name="status" value="1" class="sr-only peer" {{ old('status', $banner->status) ? 'checked' : '' }}>
                 <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
             </label>
-            <span class="text-sm text-gray-300">Set as active banner</span>
+            <span class="text-sm text-gray-300">Active</span>
         </div>
 
         <div class="flex items-center gap-3 pt-2">

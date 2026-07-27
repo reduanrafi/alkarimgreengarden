@@ -25,13 +25,23 @@ class WishlistController extends Controller
 
         if ($existing) {
             $existing->delete();
-
-            return back()->with('success', 'Removed from wishlist.');
+            $inWishlist = false;
+            $message = 'Removed from wishlist.';
+        } else {
+            $user->wishlists()->create(['product_id' => $product->id]);
+            $inWishlist = true;
+            $message = 'Added to wishlist.';
         }
 
-        $user->wishlists()->create(['product_id' => $product->id]);
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'in_wishlist' => $inWishlist,
+                'message' => $message,
+            ]);
+        }
 
-        return back()->with('success', 'Added to wishlist.');
+        return back()->with('success', $message);
     }
 
     public function moveToCart(Product $product)
