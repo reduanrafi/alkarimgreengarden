@@ -48,8 +48,12 @@ Route::get('/search', [SearchController::class, 'index'])->name('search');
 Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
 Route::get('/dashboard', function () {
-    if (auth()->user()?->is_admin) {
+    $user = auth()->user();
+    if ($user?->isAdmin()) {
         return redirect()->intended(route('admin.dashboard'));
+    }
+    if ($user?->isSeller()) {
+        return redirect()->intended(route('seller.dashboard'));
     }
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -68,6 +72,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::get('/order/success/{order}', [OrderController::class, 'success'])->name('orders.success');
+        Route::get('/order/failed', [OrderController::class, 'failed'])->name('orders.failed');
     });
 
     // Wishlist

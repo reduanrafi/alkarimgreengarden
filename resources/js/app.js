@@ -86,6 +86,7 @@ document.addEventListener('alpine:init', () => {
                         document.body.appendChild(toast);
                         setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(40px)'; toast.style.transition = 'all 0.3s ease-out'; setTimeout(() => toast.remove(), 300); }, 3000);
                     }
+                    window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
                 }
             })
             .catch(() => { this.loading = false; });

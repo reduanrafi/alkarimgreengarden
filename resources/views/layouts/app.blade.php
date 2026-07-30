@@ -29,6 +29,20 @@
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         @include('layouts.navigation')
 
+        @if (session('status'))
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="bg-emerald-50 border-b border-emerald-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-sm text-emerald-800">
+                        <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>{{ session('status') }}</span>
+                    </div>
+                    <button @click="show = false" class="text-emerald-500 hover:text-emerald-700 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+        @endif
+
         @isset($header)
             <header class="bg-white border-b border-gray-100">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

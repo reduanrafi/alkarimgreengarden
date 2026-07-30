@@ -1,17 +1,17 @@
 @extends('layouts.guest')
 
-@section('title', __('Login') . ' — ' . config('app.name'))
+@section('title', __('Seller Login') . ' — ' . config('app.name'))
 
-@section('heading', 'Welcome Back')
-@section('subheading', 'Sign in to continue shopping.')
+@section('heading', 'Seller Login')
+@section('subheading', 'Sign in to manage your store.')
 
 @section('content')
-    <form method="POST" action="{{ route('login') }}" class="space-y-5" x-data="{ loading: false, showPassword: false }" @submit="loading = true">
+    <form method="POST" action="{{ route('seller.login') }}" class="space-y-5" x-data="{ loading: false, showPassword: false }" @submit="loading = true">
         @csrf
 
         <div class="space-y-1.5">
             <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
-            <input id="email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="you@example.com"
+            <input id="email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="seller@example.com"
                    class="w-full bg-white/60 border border-gray-200 rounded-xl py-3 px-4 text-gray-800 placeholder-gray-400 text-sm outline-none transition-all duration-200 focus:border-[#66D9F1] focus:ring-2 focus:ring-[#66D9F1]/20 @error('email') border-red-300 bg-red-50 @enderror">
             <x-input-error :messages="$errors->get('email')" class="mt-1" />
         </div>
@@ -36,13 +36,11 @@
                 <span class="text-sm text-gray-500">Remember me</span>
             </label>
             @if (Route::has('password.request'))
-                <a href="{{ route('password.request') }}" class="text-sm text-[#66D9F1] hover:text-[#4CC9F0] font-medium transition-colors">
-                    Forgot password?
-                </a>
+                <a href="{{ route('password.request') }}" class="text-sm text-[#66D9F1] hover:text-[#4CC9F0] font-medium transition-colors">Forgot password?</a>
             @endif
         </div>
 
-        <x-google-button route="{{ route('google.redirect', 'customer') }}" />
+        <x-google-button route="{{ route('google.redirect', 'seller') }}" />
 
         <div class="relative flex items-center">
             <div class="flex-grow border-t border-gray-200"></div>
@@ -52,28 +50,13 @@
 
         <button type="submit" :disabled="loading"
                 class="w-full py-3 px-6 rounded-xl text-white font-semibold text-sm bg-gradient-to-r from-[#66D9F1] to-[#4CC9F0] shadow-lg shadow-[#66D9F1]/20 hover:shadow-xl hover:shadow-[#66D9F1]/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2">
-            <template x-if="!loading">
-                <span>Sign In</span>
-            </template>
-            <template x-if="loading">
-                <span class="flex items-center gap-2">
-                    <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
-                    Signing in...
-                </span>
-            </template>
+            <template x-if="!loading"><span>Sign In as Seller</span></template>
+            <template x-if="loading"><span class="flex items-center gap-2"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg> Signing in...</span></template>
         </button>
 
-        <div class="text-center space-y-1.5">
-            <p class="text-sm text-gray-400">
-                Don't have an account?
-                <a href="{{ route('register') }}" class="text-[#66D9F1] hover:text-[#4CC9F0] font-medium transition-colors">Create one</a>
-            </p>
-            <p class="text-xs text-gray-300">
-                Want to sell?
-                <a href="{{ route('seller.register') }}" class="text-[#66D9F1] hover:text-[#4CC9F0] font-medium transition-colors">Register as Seller</a>
-                ·
-                <a href="{{ route('seller.login') }}" class="text-[#66D9F1] hover:text-[#4CC9F0] font-medium transition-colors">Seller Login</a>
-            </p>
-        </div>
+        <p class="text-center text-sm text-gray-400">
+            Not a seller?
+            <a href="{{ route('login') }}" class="text-[#66D9F1] hover:text-[#4CC9F0] font-medium transition-colors">Customer login</a>
+        </p>
     </form>
 @endsection

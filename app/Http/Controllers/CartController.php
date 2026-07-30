@@ -15,13 +15,32 @@ class CartController extends Controller
         $this->cart = $cart;
     }
 
+    protected function cartResponse()
+    {
+        $items = $this->cart->getCart();
+        $subtotal = array_sum(array_map(fn ($i) => ($i['final_price'] ?? $i['price']) * $i['quantity'], $items));
+        $count = $this->cart->getCount();
+        $shippingCharge = $subtotal >= 100 ? 0 : 9.99;
+        $discount = session('coupon.discount', 0);
+
+        return [
+            'items' => $items,
+            'count' => $count,
+            'subtotal' => $subtotal,
+            'shipping_charge' => $shippingCharge,
+            'discount' => $discount,
+            'grand_total' => max(0, $subtotal + $shippingCharge - $discount),
+        ];
+    }
+
     public function index()
     {
-        $cartItems = $this->cart->getCart();
-        $total = $this->cart->getTotal();
-        $count = $this->cart->getCount();
+        $data = $this->cartResponse();
 
-        return view('cart.index', compact('cartItems', 'total', 'count'));
+        return view('cart.index', array_merge($data, [
+            'shippingCharge' => $data['shipping_charge'],
+            'grandTotal' => $data['grand_total'],
+        ]));
     }
 
     public function add(Request $request, $id)
@@ -46,7 +65,7 @@ class CartController extends Controller
                 'success' => true,
                 'message' => 'Product added to cart!',
                 'count' => $this->cart->getCount(),
-            ]);
+            ] + $this->cartResponse());
         }
 
         return redirect()->route('cart.index')->with('success', 'Product added to cart!');
@@ -62,6 +81,13 @@ class CartController extends Controller
         $quantity = min($request->quantity, $product->stock);
         $this->cart->update($id, $quantity);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cart updated!',
+            ] + $this->cartResponse());
+        }
+
         return redirect()->route('cart.index')->with('success', 'Cart updated!');
     }
 
@@ -69,12 +95,31 @@ class CartController extends Controller
     {
         $this->cart->remove($id);
 
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Item removed from cart.',
+            ] + $this->cartResponse());
+        }
+
         return redirect()->route('cart.index')->with('success', 'Item removed from cart.');
     }
 
     public function clear()
     {
         $this->cart->clear();
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cart cleared.',
+                'count' => 0,
+                'subtotal' => 0,
+                'shipping_charge' => 0,
+                'discount' => 0,
+                'grand_total' => 0,
+            ]);
+        }
 
         return redirect()->route('cart.index')->with('success', 'Cart cleared.');
     }

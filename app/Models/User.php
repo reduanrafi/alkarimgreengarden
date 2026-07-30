@@ -23,8 +23,10 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'business_name',
         'username',
         'email',
+        'role',
         'password',
         'is_admin',
         'phone',
@@ -38,6 +40,8 @@ class User extends Authenticatable
         'postal_code',
         'last_login_at',
         'bio',
+        'google_id',
+        'avatar',
     ];
 
     /**
@@ -98,6 +102,26 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return (bool) $this->is_admin;
+        return $this->role === 'admin' || (bool) $this->is_admin;
+    }
+
+    public function isSeller(): bool
+    {
+        return $this->role === 'seller';
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === 'customer';
+    }
+
+    public function scopeSellers($query)
+    {
+        return $query->where('role', 'seller');
+    }
+
+    public function scopeCustomers($query)
+    {
+        return $query->where('role', 'customer');
     }
 }

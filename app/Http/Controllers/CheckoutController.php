@@ -21,39 +21,61 @@ class CheckoutController extends Controller
         $this->cart = $cart;
     }
 
+    protected function calculateCart(string $shippingMethod = 'standard')
+    {
+        $raw = $this->cart->getRawCart();
+        $cartItems = $this->cart->getCart();
+        $subtotal = array_sum(array_map(fn ($i) => ($i['final_price'] ?? $i['price']) * $i['quantity'], $cartItems));
+
+        $shippingRates = [
+            'standard' => 9.99,
+            'express' => 19.99,
+            'store_pickup' => 0,
+        ];
+        $shippingCharge = $subtotal >= 100 ? 0 : ($shippingRates[$shippingMethod] ?? 9.99);
+        $discount = session('coupon.discount', 0);
+        $tax = round($subtotal * 0.05, 2);
+        $grandTotal = max(0, $subtotal + $shippingCharge + $tax - $discount);
+
+        return compact('cartItems', 'raw', 'subtotal', 'shippingCharge', 'discount', 'tax', 'grandTotal');
+    }
+
     public function create()
     {
-        $cartItems = $this->cart->getCart();
+        $data = $this->calculateCart();
 
-        if (empty($cartItems)) {
+        if (empty($data['cartItems'])) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
-        $subtotal = $this->cart->getTotal();
-        $shippingCharge = $subtotal >= 100 ? 0 : 9.99;
-        $discount = session('coupon.discount', 0);
-        $grandTotal = max(0, $subtotal + $shippingCharge - $discount);
-        $count = $this->cart->getCount();
+        $data['count'] = $this->cart->getCount();
 
-        return view('checkout.index', compact('cartItems', 'subtotal', 'shippingCharge', 'discount', 'grandTotal', 'count'));
+        return view('checkout.index', $data);
     }
 
     public function store(StoreOrderRequest $request)
     {
-        $cartItems = $this->cart->getCart();
+        $data = $this->calculateCart($request->shipping_method ?? 'standard');
 
-        if (empty($cartItems)) {
+        if (empty($data['cartItems'])) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
-        $subtotal = $this->cart->getTotal();
-        $shippingCharge = $subtotal >= 100 ? 0 : 9.99;
-        $discount = session('coupon.discount', 0);
-        $grandTotal = max(0, $subtotal + $shippingCharge - $discount);
+        $subtotal = $data['subtotal'];
+        $shippingCharge = $data['shippingCharge'];
+        $discount = $data['discount'];
+        $tax = $data['tax'];
+        $grandTotal = $data['grandTotal'];
 
         DB::beginTransaction();
 
         try {
+            $notes = $request->notes;
+            if ($request->shipping_method) {
+                $shippingLabels = ['standard' => 'Standard Delivery', 'express' => 'Express Delivery', 'store_pickup' => 'Store Pickup'];
+                $notes = ($notes ? $notes . "\n\n" : '') . 'Shipping Method: ' . ($shippingLabels[$request->shipping_method] ?? $request->shipping_method);
+            }
+
             $order = Order::create([
                 'user_id' => auth()->id(),
                 'customer_name' => $request->customer_name,
@@ -69,14 +91,15 @@ class CheckoutController extends Controller
                 'subtotal' => $subtotal,
                 'shipping_charge' => $shippingCharge,
                 'discount' => $discount,
+                'tax' => $tax,
                 'grand_total' => $grandTotal,
                 'total' => $grandTotal,
                 'status' => 'pending',
-                'notes' => $request->notes,
+                'notes' => $notes,
                 'ordered_at' => now(),
             ]);
 
-            foreach ($cartItems as $id => $item) {
+            foreach ($data['raw'] as $id => $item) {
                 $product = Product::findOrFail($id);
 
                 if ($product->stock < $item['quantity']) {
@@ -85,7 +108,7 @@ class CheckoutController extends Controller
 
                 $order->items()->create([
                     'product_id' => $product->id,
-                    'price' => $product->price,
+                    'price' => $item['price'],
                     'quantity' => $item['quantity'],
                 ]);
 
@@ -113,7 +136,13 @@ class CheckoutController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return back()->with('error', $e->getMessage())->withInput();
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
+
+            return redirect()->route('checkout.create')
+                ->with('error', $e->getMessage())
+                ->withInput();
         }
     }
 }

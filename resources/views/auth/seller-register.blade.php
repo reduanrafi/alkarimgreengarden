@@ -1,33 +1,48 @@
 @extends('layouts.guest')
 
-@section('title', __('Register') . ' — ' . config('app.name'))
+@section('title', __('Seller Registration') . ' — ' . config('app.name'))
 
-@section('heading', 'Create Account')
-@section('subheading', 'Join us and start shopping.')
+@section('heading', 'Become a Seller')
+@section('subheading', 'Start selling your products today.')
 
 @section('content')
-    <form method="POST" action="{{ route('register') }}" class="space-y-5" x-data="{ loading: false, showPassword: false, showPasswordConfirmation: false }" @submit="loading = true">
+    <form method="POST" action="{{ route('seller.register') }}" class="space-y-5" x-data="{ loading: false, showPassword: false, showPasswordConfirmation: false }" @submit="loading = true">
         @csrf
 
         <div class="space-y-1.5">
-            <label for="name" class="block text-sm font-medium text-gray-600">Full Name</label>
-            <input id="name" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" placeholder="John Doe"
+            <label for="business_name" class="block text-sm font-medium text-gray-600">Business Name</label>
+            <input id="business_name" type="text" name="business_name" value="{{ old('business_name') }}" required
+                   placeholder="Your Store Name"
+                   class="w-full bg-white/60 border border-gray-200 rounded-xl py-3 px-4 text-gray-800 placeholder-gray-400 text-sm outline-none transition-all duration-200 focus:border-[#66D9F1] focus:ring-2 focus:ring-[#66D9F1]/20 @error('business_name') border-red-300 bg-red-50 @enderror">
+            <x-input-error :messages="$errors->get('business_name')" class="mt-1" />
+        </div>
+
+        <div class="space-y-1.5">
+            <label for="name" class="block text-sm font-medium text-gray-600">Owner Name</label>
+            <input id="name" type="text" name="name" value="{{ old('name') }}" required placeholder="John Doe"
                    class="w-full bg-white/60 border border-gray-200 rounded-xl py-3 px-4 text-gray-800 placeholder-gray-400 text-sm outline-none transition-all duration-200 focus:border-[#66D9F1] focus:ring-2 focus:ring-[#66D9F1]/20 @error('name') border-red-300 bg-red-50 @enderror">
             <x-input-error :messages="$errors->get('name')" class="mt-1" />
         </div>
 
         <div class="space-y-1.5">
             <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
-            <input id="email" type="email" name="email" :value="old('email')" required autocomplete="username" placeholder="you@example.com"
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required placeholder="seller@example.com"
                    class="w-full bg-white/60 border border-gray-200 rounded-xl py-3 px-4 text-gray-800 placeholder-gray-400 text-sm outline-none transition-all duration-200 focus:border-[#66D9F1] focus:ring-2 focus:ring-[#66D9F1]/20 @error('email') border-red-300 bg-red-50 @enderror">
             <x-input-error :messages="$errors->get('email')" class="mt-1" />
         </div>
 
         <div class="space-y-1.5">
-            <label for="phone" class="block text-sm font-medium text-gray-600">Phone (optional)</label>
-            <input id="phone" type="text" name="phone" :value="old('phone')" placeholder="+880 1XXX-XXXXXX"
+            <label for="phone" class="block text-sm font-medium text-gray-600">Phone</label>
+            <input id="phone" type="text" name="phone" value="{{ old('phone') }}" required placeholder="+880 1XXX-XXXXXX"
                    class="w-full bg-white/60 border border-gray-200 rounded-xl py-3 px-4 text-gray-800 placeholder-gray-400 text-sm outline-none transition-all duration-200 focus:border-[#66D9F1] focus:ring-2 focus:ring-[#66D9F1]/20 @error('phone') border-red-300 bg-red-50 @enderror">
             <x-input-error :messages="$errors->get('phone')" class="mt-1" />
+        </div>
+
+        <div class="space-y-1.5">
+            <label for="address" class="block text-sm font-medium text-gray-600">Address</label>
+            <textarea id="address" name="address" required placeholder="Your business address"
+                      class="w-full bg-white/60 border border-gray-200 rounded-xl py-3 px-4 text-gray-800 placeholder-gray-400 text-sm outline-none transition-all duration-200 focus:border-[#66D9F1] focus:ring-2 focus:ring-[#66D9F1]/20 @error('address') border-red-300 bg-red-50 @enderror">{{ old('address') }}</textarea>
+            <x-input-error :messages="$errors->get('address')" class="mt-1" />
         </div>
 
         <div class="space-y-1.5">
@@ -55,7 +70,7 @@
             </div>
         </div>
 
-        <x-google-button route="{{ route('google.redirect', 'customer') }}" />
+        <x-google-button route="{{ route('google.redirect', 'seller') }}" />
 
         <div class="relative flex items-center">
             <div class="flex-grow border-t border-gray-200"></div>
@@ -65,26 +80,13 @@
 
         <button type="submit" :disabled="loading"
                 class="w-full py-3 px-6 rounded-xl text-white font-semibold text-sm bg-gradient-to-r from-[#66D9F1] to-[#4CC9F0] shadow-lg shadow-[#66D9F1]/20 hover:shadow-xl hover:shadow-[#66D9F1]/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2">
-            <template x-if="!loading">
-                <span>Create Account</span>
-            </template>
-            <template x-if="loading">
-                <span class="flex items-center gap-2">
-                    <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
-                    Creating account...
-                </span>
-            </template>
+            <template x-if="!loading"><span>Register as Seller</span></template>
+            <template x-if="loading"><span class="flex items-center gap-2"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg> Registering...</span></template>
         </button>
 
-        <div class="text-center space-y-1.5">
-            <p class="text-sm text-gray-400">
-                Already have an account?
-                <a href="{{ route('login') }}" class="text-[#66D9F1] hover:text-[#4CC9F0] font-medium transition-colors">Sign in</a>
-            </p>
-            <p class="text-xs text-gray-300">
-                Want to sell?
-                <a href="{{ route('seller.register') }}" class="text-[#66D9F1] hover:text-[#4CC9F0] font-medium transition-colors">Register as Seller</a>
-            </p>
-        </div>
+        <p class="text-center text-sm text-gray-400">
+            Already a seller?
+            <a href="{{ route('seller.login') }}" class="text-[#66D9F1] hover:text-[#4CC9F0] font-medium transition-colors">Sign in</a>
+        </p>
     </form>
 @endsection

@@ -48,6 +48,14 @@ class ProductController extends Controller
             $query->where('color', $color);
         }
 
+        if ($request->boolean('in_stock')) {
+            $query->where('stock', '>', 0);
+        }
+
+        if ($request->boolean('discounted')) {
+            $query->whereNotNull('discount_price')->where('discount_price', '>', 0);
+        }
+
         $sort = $request->get('sort', 'latest');
         $query->matchSort($sort);
 
