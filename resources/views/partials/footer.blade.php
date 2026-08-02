@@ -10,7 +10,7 @@
                 <form method="POST" action="#" class="flex gap-2 w-full sm:w-auto">
                     @csrf
                     <input type="email" name="email" placeholder="Enter your email" required
-                           class="flex-1 sm:w-72 px-4 py-2.5 rounded-xl border-0 bg-gray-800 text-white text-sm placeholder-gray-500 focus:ring-2 focus:ring-indigo-500/50 outline-none">
+                           class="flex-1 min-w-0 sm:w-72 px-4 py-2.5 rounded-xl border-0 bg-gray-800 text-white text-sm placeholder-gray-500 focus:ring-2 focus:ring-indigo-500/50 outline-none">
                     <button type="submit"
                             class="px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition text-sm shadow-sm whitespace-nowrap">
                         Subscribe

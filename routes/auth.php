@@ -27,8 +27,12 @@ Route::middleware('guest')->group(function () {
     Route::post('seller/login', [SellerAuthController::class, 'storeLogin']);
 
     // Google OAuth
-    Route::get('auth/google/{role}', [SocialiteController::class, 'redirectToGoogle'])->name('google.redirect');
+    // NOTE: The static callback route MUST be registered before the parameterized
+    // {role} route, otherwise "callback" would be captured by {role} and the
+    // callback handler would never run.
     Route::get('auth/google/callback', [SocialiteController::class, 'handleGoogleCallback'])->name('google.callback');
+    Route::get('auth/google/{role}', [SocialiteController::class, 'redirectToGoogle'])->name('google.redirect')
+        ->where('role', 'customer|seller');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');

@@ -24,7 +24,7 @@ class CouponController extends Controller
         }
 
         $cart = app(CartService::class);
-        $subtotal = $cart->getTotal();
+        $subtotal = $cart->getSubtotal();
 
         if ($coupon->min_order_amount && $subtotal < $coupon->min_order_amount) {
             $msg = 'Minimum order amount of ' . formatPrice($coupon->min_order_amount) . ' required.';
@@ -39,6 +39,9 @@ class CouponController extends Controller
         $msg = 'Coupon applied! You saved ' . formatPrice($discount);
 
         if ($request->ajax()) {
+            $shippingCharge = $subtotal >= 100 ? 0 : 9.99;
+            $tax = round($subtotal * 0.05, 2);
+
             return response()->json([
                 'success' => true,
                 'message' => $msg,
@@ -46,8 +49,9 @@ class CouponController extends Controller
                 'code' => $coupon->code,
                 'count' => $cart->getCount(),
                 'subtotal' => $subtotal,
-                'shipping_charge' => $subtotal >= 100 ? 0 : 9.99,
-                'grand_total' => max(0, $subtotal + ($subtotal >= 100 ? 0 : 9.99) - $discount),
+                'shipping_charge' => $shippingCharge,
+                'tax' => $tax,
+                'grand_total' => max(0, $subtotal + $shippingCharge + $tax - $discount),
             ]);
         }
 
@@ -60,9 +64,9 @@ class CouponController extends Controller
 
         if (request()->ajax()) {
             $cart = app(CartService::class);
-            $items = $cart->getCart();
-            $subtotal = array_sum(array_map(fn ($i) => ($i['final_price'] ?? $i['price']) * $i['quantity'], $items));
+            $subtotal = $cart->getSubtotal();
             $shippingCharge = $subtotal >= 100 ? 0 : 9.99;
+            $tax = round($subtotal * 0.05, 2);
 
             return response()->json([
                 'success' => true,
@@ -71,7 +75,8 @@ class CouponController extends Controller
                 'count' => $cart->getCount(),
                 'subtotal' => $subtotal,
                 'shipping_charge' => $shippingCharge,
-                'grand_total' => max(0, $subtotal + $shippingCharge),
+                'tax' => $tax,
+                'grand_total' => max(0, $subtotal + $shippingCharge + $tax),
             ]);
         }
 

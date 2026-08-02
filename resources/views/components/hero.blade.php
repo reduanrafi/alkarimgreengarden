@@ -1,7 +1,7 @@
-@props(['categories' => [], 'banner' => null])
+@props(['categories' => [], 'banner' => null, 'heroBanners' => null])
 
 @php
-    $heroBanners = \App\Models\Banner::hero()->active()->orderBy('display_order')->get();
+    $heroBanners = $heroBanners ?? collect([$banner])->filter();
     $heroTitle = $banner?->title ?? 'Discover Your Style';
     $heroSubtitle = 'Premium fashion curated for those who dare to be different.';
 @endphp
@@ -49,8 +49,9 @@
                      x-transition:leave-end="opacity-0 scale-105"
                      class="absolute inset-0">
                     <div class="relative w-full h-full" style="min-height: 65vh;">
+                        <div class="w-full h-full absolute inset-0 bg-gray-800 skeleton"></div>
                         <template x-if="item.image">
-                            <img :src="item.image" :alt="item.title" loading="lazy" class="w-full h-full absolute inset-0 object-cover select-none pointer-events-none">
+                            <img :src="item.image" :alt="item.title" loading="lazy" x-init="$el.classList.add('fade-img'); $el.addEventListener('load', () => $el.classList.add('img-loaded'));" class="w-full h-full absolute inset-0 object-cover select-none pointer-events-none">
                         </template>
                         <template x-if="!item.image">
                             <div class="w-full h-full absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-900"></div>

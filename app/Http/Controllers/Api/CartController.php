@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use App\Services\CartService;
+use App\Services\ApiCartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,7 +12,7 @@ class CartController extends Controller
 {
     protected $cart;
 
-    public function __construct(CartService $cart)
+    public function __construct(ApiCartService $cart)
     {
         $this->cart = $cart;
     }
@@ -22,15 +22,19 @@ class CartController extends Controller
         $cartItems = $this->cart->getCart();
         $total = $this->cart->getTotal();
         $count = $this->cart->getCount();
+        $shippingCharge = $total >= 100 ? 0 : 9.99;
+        $discount = $this->cart->getCoupon()['discount'] ?? 0;
+        $tax = round($total * 0.05, 2);
 
         return response()->json([
             'items' => $cartItems,
             'total' => $total,
             'count' => $count,
             'subtotal' => $total,
-            'shipping_charge' => $total >= 100 ? 0 : 9.99,
-            'grand_total' => $total >= 100 ? $total : $total + 9.99,
-            'discount' => session('coupon.discount', 0),
+            'shipping_charge' => $shippingCharge,
+            'tax' => $tax,
+            'grand_total' => max(0, $total + $shippingCharge + $tax - $discount),
+            'discount' => $discount,
         ]);
     }
 
@@ -103,18 +107,21 @@ class CartController extends Controller
         $subtotal = $this->cart->getTotal();
         $discount = $coupon->apply($subtotal);
 
-        session(['coupon' => ['code' => $coupon->code, 'discount' => $discount]]);
+        $this->cart->setCoupon(['code' => $coupon->code, 'discount' => $discount]);
+
+        $shippingCharge = $subtotal >= 100 ? 0 : 9.99;
+        $tax = round($subtotal * 0.05, 2);
 
         return response()->json([
             'message' => 'Coupon applied!',
             'discount' => $discount,
-            'grand_total' => $subtotal - $discount,
+            'grand_total' => max(0, $subtotal + $shippingCharge + $tax - $discount),
         ]);
     }
 
     public function removeCoupon(): JsonResponse
     {
-        session()->forget('coupon');
+        $this->cart->removeCoupon();
 
         return response()->json(['message' => 'Coupon removed.']);
     }

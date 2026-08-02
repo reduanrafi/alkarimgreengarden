@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Product;
+use App\Services\CatalogService;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -71,9 +71,9 @@ class SearchController extends Controller
         $query->matchSort($sort);
 
         $products = $query->paginate(12)->withQueryString();
-        $categories = Category::active()->get();
-        $fabrics = Product::active()->whereNotNull('fabric')->distinct()->pluck('fabric');
-        $colors = Product::active()->whereNotNull('color')->distinct()->pluck('color');
+        $categories = CatalogService::categories();
+        $fabrics = CatalogService::fabrics();
+        $colors = CatalogService::colors();
 
         return view('search.index', compact('products', 'categories', 'fabrics', 'colors', 'q'));
     }

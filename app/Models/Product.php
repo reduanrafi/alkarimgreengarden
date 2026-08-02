@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CatalogService;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -100,11 +101,19 @@ class Product extends Model
 
     public function getAvgRatingAttribute(): float
     {
+        if (array_key_exists('reviews_avg_rating', $this->attributes)) {
+            return round((float) $this->attributes['reviews_avg_rating'], 1);
+        }
+
         return round($this->reviews()->where('status', true)->avg('rating') ?? 0, 1);
     }
 
     public function getReviewsCountAttribute(): int
     {
+        if (array_key_exists('reviews_count', $this->attributes)) {
+            return (int) $this->attributes['reviews_count'];
+        }
+
         return $this->reviews()->where('status', true)->count();
     }
 
@@ -112,6 +121,10 @@ class Product extends Model
     {
         if (! $userId) {
             return false;
+        }
+
+        if ($this->relationLoaded('wishlists')) {
+            return $this->wishlists->contains('user_id', $userId);
         }
 
         return $this->wishlists()->where('user_id', $userId)->exists();
@@ -170,6 +183,8 @@ class Product extends Model
             'stock_asc' => $query->orderBy('stock'),
             'stock_desc' => $query->orderByDesc('stock'),
             'oldest' => $query->oldest(),
+            'best_selling' => $query->withCount('orderItems')->orderByDesc('order_items_count'),
+            'popular' => $query->withAvg(['reviews' => fn ($q) => $q->where('status', true)], 'rating')->orderByDesc('reviews_avg_rating'),
             default => $query->latest(),
         };
     }
@@ -192,5 +207,19 @@ class Product extends Model
     public function getIsLowStockAttribute(): bool
     {
         return $this->stock_status === 'low_stock';
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function ($product) {
+            if ($product->wasRecentlyCreated
+                || $product->wasChanged('brand')
+                || $product->wasChanged('fabric')
+                || $product->wasChanged('color')) {
+                CatalogService::flushFacets();
+            }
+        });
+
+        static::deleted(fn () => CatalogService::flushFacets());
     }
 }

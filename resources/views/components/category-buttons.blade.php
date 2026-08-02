@@ -12,10 +12,12 @@
         @foreach($categories as $category)
             <a href="{{ route('products.category', $category->slug) }}"
                class="group relative bg-[#FFF7E6] rounded-[18px] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden">
-                <div class="h-[180px] sm:h-[200px] flex items-center justify-center p-5 sm:p-6">
+                <div class="h-[180px] sm:h-[200px] flex items-center justify-center p-5 sm:p-6 skeleton-sm">
                     @if($category->image)
                         <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"
-                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
+                             loading="lazy"
+                             onload="this.classList.add('img-loaded')"
+                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 fade-img relative">
                     @else
                         <div class="text-5xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">
                             @switch($category->slug)
@@ -34,4 +36,14 @@
         @endforeach
     </div>
 </section>
+@else
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 scroll-fade-in">
+        <x-empty-state
+            icon="categories"
+            title="Categories coming soon"
+            message="We're organizing our collection. Check back shortly to browse by category."
+            :action="route('products.index')"
+            actionText="Shop All Products"
+        />
+    </section>
 @endif

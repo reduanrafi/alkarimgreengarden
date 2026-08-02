@@ -10,7 +10,7 @@
     </div>
 
     {{-- Search Form --}}
-    <form method="GET" action="{{ route('search') }}" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8">
+    <form method="GET" action="{{ route('search') }}" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8" data-ajax>
         <div class="relative mb-6">
             <svg class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -61,9 +61,9 @@
         <div class="flex flex-wrap items-center gap-3 mt-5 pt-5 border-t border-gray-100">
             <div class="flex items-center gap-2">
                 <span class="text-xs text-gray-500">Price:</span>
-                <input type="number" name="min_price" value="{{ request('min_price') }}" placeholder="Min" class="w-24 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition">
+                <input type="number" name="min_price" value="{{ request('min_price') }}" placeholder="Min" class="w-20 sm:w-24 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition">
                 <span class="text-gray-300">—</span>
-                <input type="number" name="max_price" value="{{ request('max_price') }}" placeholder="Max" class="w-24 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition">
+                <input type="number" name="max_price" value="{{ request('max_price') }}" placeholder="Max" class="w-20 sm:w-24 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition">
             </div>
             <div class="flex items-center gap-2 ml-auto">
                 <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm flex items-center gap-2">
@@ -135,27 +135,20 @@
         <div class="mt-8">{{ $products->links() }}</div>
     @elseif(request()->anyFilled(['q','category','fabric','color','min_price','max_price']))
         {{-- Empty State --}}
-        <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-50 mb-6">
-                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">No Results Found</h3>
-            <p class="text-gray-400 text-sm mb-8 max-w-sm mx-auto">We couldn't find any products matching your search. Try different keywords or filters.</p>
-            <a href="{{ route('products.index') }}" class="inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm">Browse All Products</a>
-        </div>
+        <x-empty-state
+            icon="search"
+            title="No Results Found"
+            message="We couldn't find any products matching your search. Try different keywords or filters."
+            :action="route('products.index')"
+            actionText="Browse All Products"
+        />
     @else
         {{-- Initial State --}}
-        <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-50 mb-6">
-                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Search our collection</h3>
-            <p class="text-gray-400 text-sm max-w-sm mx-auto">Enter a keyword above to find exactly what you're looking for.</p>
-        </div>
+        <x-empty-state
+            icon="search"
+            title="Search our collection"
+            message="Enter a keyword above to find exactly what you're looking for."
+        />
     @endif
 </div>
 <x-product-preview />

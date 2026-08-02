@@ -1,6 +1,5 @@
 @php
     $user = Auth::user();
-    $orders = $user->orders()->latest()->take(5)->get();
     $ordersCount = $user->orders()->count();
     $wishlistCount = $user->wishlists()->count();
     $totalSpent = $user->totalSpent();

@@ -11,6 +11,7 @@
     if ($event.detail.subtotal !== undefined) subtotal = $event.detail.subtotal;
     if ($event.detail.shipping_charge !== undefined) shipping = $event.detail.shipping_charge;
     if ($event.detail.discount !== undefined) discount = $event.detail.discount;
+    if ($event.detail.tax !== undefined) tax = $event.detail.tax;
     if ($event.detail.grand_total !== undefined) grand = $event.detail.grand_total;
     if ($event.detail.count !== undefined) count = $event.detail.count;
 ">

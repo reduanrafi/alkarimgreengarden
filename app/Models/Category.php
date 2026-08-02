@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CatalogService;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -36,5 +37,12 @@ class Category extends Model
     public function scopeActive($query)
     {
         return $query->where('status', true);
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => CatalogService::flushCategories());
+        static::deleted(fn () => CatalogService::flushCategories());
+        static::restored(fn () => CatalogService::flushCategories());
     }
 }

@@ -14,15 +14,20 @@
      data-print="{{ $product->print }}"
      data-size="{{ $product->size }}"
      data-stock="{{ $product->stock }}"
-     data-description="{{ \Illuminate\Support\Str::limit(strip_tags($product->description), 200) }}"
+     data-description="{{ \Illuminate\Support\Str::limit(strip_tags((string) $product->description), 200) }}"
      data-image="{{ $product->image ? asset('storage/' . $product->image) : '' }}"
-     data-slug="{{ $product->slug }}">
+     data-slug="{{ $product->slug }}"
+     onmouseenter="if (window.showPreview) showPreview(this)"
+     onmouseleave="if (window.onCardLeave) onCardLeave(this)">
 
     <div class="aspect-square bg-gray-50 flex items-center justify-center p-4 relative overflow-hidden">
         <a href="{{ route('products.show', $product->slug) }}" class="block w-full h-full">
             @if($product->image)
                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
-                     class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" loading="lazy">
+                     class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                     loading="lazy"
+                     onerror="this.onerror=null; var emoji=this.dataset.fallback||'✨'; this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-5xl select-none\'>'+emoji+'</div>';"
+                     data-fallback="@switch($product->category->slug ?? '')@case('mens-t-shirt')👕@break@case('womens-t-shirt')👚@break@case('bags')👜@break@default✨@endswitch">
             @else
                 <div class="w-full h-full flex items-center justify-center text-5xl select-none">
                     @switch($product->category->slug ?? '')
@@ -57,6 +62,15 @@
 
         {{-- Hover actions --}}
         <div class="absolute top-2.5 right-2.5 flex flex-col gap-1.5 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-10">
+            <button type="button"
+                    onclick="if (window.showPreview) { event.stopPropagation(); showPreview(this.closest('[data-slug]')); }"
+                    class="w-9 h-9 rounded-full bg-white shadow-md hover:shadow-lg flex items-center justify-center transition-all hover:scale-110"
+                    title="Quick view">
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+            </button>
             @auth
                 <form action="{{ route('wishlist.toggle', $product) }}" method="POST" onclick="event.stopPropagation()">
                     @csrf
@@ -101,8 +115,8 @@
                 </div>
             @endif
 
-            <div class="flex items-center justify-between pt-1">
-                <div class="flex items-center gap-1.5">
+            <div class="flex flex-wrap items-center justify-between gap-x-1.5 gap-y-1 pt-1">
+                <div class="flex items-center gap-1.5 min-w-0">
                     @if($product->discount_price)
                         <span class="text-base font-bold text-gray-900">{{ formatPrice($product->final_price) }}</span>
                         <span class="text-xs text-gray-400 line-through">{{ formatPrice($product->price) }}</span>

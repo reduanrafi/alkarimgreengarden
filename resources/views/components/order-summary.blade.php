@@ -12,9 +12,9 @@
     <div class="px-5 sm:px-6 py-4 space-y-3 max-h-72 overflow-y-auto custom-scrollbar">
         @foreach($cartItems as $item)
             <div class="flex items-center gap-3 {{ !$loop->last ? 'pb-3 border-b border-gray-50' : '' }}">
-                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-xl shrink-0 overflow-hidden skeleton-sm">
                     @if(!empty($item['image']))
-                        <img src="{{ asset('storage/' . $item['image']) }}" alt="{{ $item['name'] }}" class="w-full h-full object-cover">
+                        <img src="{{ asset('storage/' . $item['image']) }}" alt="{{ $item['name'] }}" class="w-full h-full object-cover fade-img relative" loading="lazy">
                     @else
                         @switch($item['category_slug'] ?? '')
                             @case('mens-t-shirt') 👕 @break

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CatalogService;
 use Illuminate\Database\Eloquent\Model;
 
 class Banner extends Model
@@ -70,5 +71,8 @@ class Banner extends Model
                     ->update(['status' => false]);
             }
         });
+
+        static::saved(fn () => CatalogService::flushBanners());
+        static::deleted(fn () => CatalogService::flushBanners());
     }
 }

@@ -1,5 +1,5 @@
 @php
-    $brands = \App\Models\Product::active()->whereNotNull('brand')->distinct()->pluck('brand')->sort();
+    $brands = \App\Services\CatalogService::brands();
     $trendingProducts = $featuredProducts->count() > 0 ? $featuredProducts : $latestProducts;
 @endphp
 
@@ -10,7 +10,7 @@
 
 @section('content')
     {{-- Hero Carousel --}}
-    <x-hero :categories="$categories" :banner="$banner" />
+    <x-hero :categories="$categories" :banner="$banner" :heroBanners="$heroBanners" />
 
     {{-- Feature Cards --}}
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
@@ -71,7 +71,61 @@
             <p class="text-gray-400 text-sm mt-1.5">Handpicked deals crafted just for you</p>
         </div>
 
-        <div class="hidden sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-5">
+        @if($especiallyForYou->count() > 0)
+            <div class="hidden sm:grid sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+                @foreach($especiallyForYou as $banner)
+                    <a href="{{ $banner->redirect_url ?: route('products.index') }}"
+                       class="group relative rounded-[22px] overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 cursor-pointer block"
+                       style="height: 280px; @if($banner->image) background-image: url('{{ asset('storage/' . $banner->image) }}'); background-size: cover; background-position: center; @else background: {{ $banner->background_color ?: 'linear-gradient(145deg, #ecfdf5 0%, #a7f3d0 100%)' }}; @endif">
+                        @if($banner->image)
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @endif
+                        <div class="relative h-full flex flex-col justify-between p-6 pt-14">
+                            <div class="pr-14">
+                                <h3 class="text-lg font-bold {{ $banner->image ? 'text-white' : 'text-gray-900' }} leading-tight">{{ $banner->title }}</h3>
+                                @if($banner->short_description)
+                                    <p class="text-xs {{ $banner->image ? 'text-gray-200' : 'text-gray-500' }} mt-1.5 leading-relaxed">{{ $banner->short_description }}</p>
+                                @endif
+                            </div>
+                            @if($banner->button_text)
+                                <div class="text-center">
+                                    <span class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-gray-900 shadow-sm transition-all duration-300 group-hover:shadow-lg">
+                                        {{ $banner->button_text }}
+                                        <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            <div class="sm:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 pb-2">
+                @foreach($especiallyForYou as $banner)
+                    <a href="{{ $banner->redirect_url ?: route('products.index') }}"
+                       class="group relative rounded-[22px] overflow-hidden shadow-md snap-center shrink-0 block"
+                       style="width: 240px; height: 260px; @if($banner->image) background-image: url('{{ asset('storage/' . $banner->image) }}'); background-size: cover; background-position: center; @else background: {{ $banner->background_color ?: 'linear-gradient(145deg, #ecfdf5 0%, #a7f3d0 100%)' }}; @endif">
+                        @if($banner->image)
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        @endif
+                        <div class="relative h-full flex flex-col justify-between p-5 pt-12">
+                            <div class="pr-10">
+                                <h3 class="text-base font-bold {{ $banner->image ? 'text-white' : 'text-gray-900' }} leading-tight">{{ $banner->title }}</h3>
+                                @if($banner->short_description)
+                                    <p class="text-xs {{ $banner->image ? 'text-gray-200' : 'text-gray-500' }} mt-1 leading-relaxed">{{ $banner->short_description }}</p>
+                                @endif
+                            </div>
+                            @if($banner->button_text)
+                                <div class="text-center">
+                                    <span class="inline-flex items-center gap-1 px-4 py-2 rounded-full text-xs font-semibold bg-white text-gray-900 shadow-sm">{{ $banner->button_text }} <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></span>
+                                </div>
+                            @endif
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        @else
+        <div class="hidden sm:grid sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-5">
             {{-- Card 1: Light Green --}}
             <div class="group relative rounded-[22px] overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 cursor-pointer"
                  style="height: 280px; background: linear-gradient(145deg, #ecfdf5 0%, #a7f3d0 100%);">
@@ -296,6 +350,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </section>
 
     {{-- Shop by Category --}}
@@ -305,78 +360,110 @@
     <x-promo-banners :carouselBanners="$carouselBanners" :fixedBanner="$fixedBanner" />
 
     {{-- New Arrivals --}}
-    @if($latestProducts->count() > 0)
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 scroll-fade-in">
-            <div class="flex items-end justify-between mb-10">
-                <div>
-                    <span class="inline-block px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-full mb-3">Fresh</span>
-                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-serif">New Arrivals</h2>
-                    <p class="text-gray-400 text-sm mt-1">The latest additions to our collection</p>
-                </div>
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 scroll-fade-in">
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <span class="inline-block px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-full mb-3">Fresh</span>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-serif">New Arrivals</h2>
+                <p class="text-gray-400 text-sm mt-1">The latest additions to our collection</p>
+            </div>
+            @if($latestProducts->count() > 0)
                 <a href="{{ route('products.index') }}" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition group">
                     View All
                     <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
-            </div>
+            @endif
+        </div>
+        @if($latestProducts->count() > 0)
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 @foreach($latestProducts as $product)
                     <x-product-card :product="$product" />
                 @endforeach
             </div>
+        @else
+            <x-empty-state
+                icon="sparkles"
+                title="New arrivals are on their way"
+                message="We're refreshing our collection right now. Check back soon for the latest styles."
+                :action="route('products.index')"
+                actionText="Browse All Products"
+            />
+        @endif
+        @if($latestProducts->count() > 0)
             <div class="text-center mt-10 sm:hidden">
                 <a href="{{ route('products.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm">
                     View All Products
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
             </div>
-        </section>
-    @endif
+        @endif
+    </section>
 
     {{-- Best Sellers --}}
-    @if(isset($bestSellers) && $bestSellers->count() > 0)
-        <section class="bg-gray-50/50 py-16 sm:py-20 scroll-fade-in">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-end justify-between mb-10">
-                    <div>
-                        <span class="inline-block px-3 py-1 bg-amber-50 text-amber-600 text-xs font-semibold rounded-full mb-3">Bestselling</span>
-                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-serif">Best Sellers</h2>
-                        <p class="text-gray-400 text-sm mt-1">Most popular products our customers love</p>
-                    </div>
-                    <a href="{{ route('products.index', ['sort' => 'popular']) }}" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition group">
+    <section class="bg-gray-50/50 py-16 sm:py-20 scroll-fade-in">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-end justify-between mb-10">
+                <div>
+                    <span class="inline-block px-3 py-1 bg-amber-50 text-amber-600 text-xs font-semibold rounded-full mb-3">Bestselling</span>
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-serif">Best Sellers</h2>
+                    <p class="text-gray-400 text-sm mt-1">Most popular products our customers love</p>
+                </div>
+                @if(isset($bestSellers) && $bestSellers->count() > 0)
+                    <a href="{{ route('products.index', ['sort' => 'best_selling']) }}" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition group">
                         View All
                         <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
-                </div>
+                @endif
+            </div>
+            @if(isset($bestSellers) && $bestSellers->count() > 0)
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                     @foreach($bestSellers as $product)
                         <x-product-card :product="$product" />
                     @endforeach
                 </div>
-            </div>
-        </section>
-    @endif
+            @else
+                <x-empty-state
+                    icon="sparkles"
+                    title="Best sellers coming soon"
+                    message="Popular picks will appear here once orders start rolling in."
+                    :action="route('products.index')"
+                    actionText="Shop Collection"
+                />
+            @endif
+        </div>
+    </section>
 
     {{-- Trending Products --}}
-    @if($trendingProducts->count() > 0)
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 scroll-fade-in">
-            <div class="flex items-end justify-between mb-10">
-                <div>
-                    <span class="inline-block px-3 py-1 bg-purple-50 text-purple-600 text-xs font-semibold rounded-full mb-3">Trending</span>
-                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-serif">Trending Now</h2>
-                    <p class="text-gray-400 text-sm mt-1">What everyone's talking about</p>
-                </div>
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 scroll-fade-in">
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <span class="inline-block px-3 py-1 bg-purple-50 text-purple-600 text-xs font-semibold rounded-full mb-3">Trending</span>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-serif">Trending Now</h2>
+                <p class="text-gray-400 text-sm mt-1">What everyone's talking about</p>
+            </div>
+            @if($trendingProducts->count() > 0)
                 <a href="{{ route('products.index') }}" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition group">
                     View All
                     <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
-            </div>
+            @endif
+        </div>
+        @if($trendingProducts->count() > 0)
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 @foreach($trendingProducts as $product)
                     <x-product-card :product="$product" />
                 @endforeach
             </div>
-        </section>
-    @endif
+        @else
+            <x-empty-state
+                icon="sparkles"
+                title="Nothing trending right now"
+                message="Trending items will show up here as more people shop."
+                :action="route('products.index')"
+                actionText="Browse Products"
+            />
+        @endif
+    </section>
 
     {{-- Brands --}}
     @if($brands->count() > 0)
@@ -407,16 +494,40 @@
                 </div>
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white font-serif mb-3">Join Our Newsletter</h2>
                 <p class="text-indigo-200 text-sm sm:text-base mb-8 leading-relaxed">Subscribe to get special offers, free giveaways, and early access to new arrivals.</p>
-                <form method="POST" action="#" class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-                    @csrf
-                    <input type="email" name="email" placeholder="Enter your email address" required
-                           class="flex-1 px-5 py-3.5 rounded-xl border-0 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-white/30 outline-none shadow-sm">
-                    <button type="submit"
-                            class="px-8 py-3.5 bg-white text-indigo-700 font-semibold rounded-xl hover:bg-indigo-50 transition-all shadow-sm text-sm whitespace-nowrap">
-                        Subscribe
-                    </button>
-                </form>
-                <p class="text-indigo-300/70 text-xs mt-4">No spam. Unsubscribe anytime.</p>
+                <div x-data="{
+                    email: '',
+                    error: '',
+                    submitting: false,
+                    submit() {
+                        if (this.submitting) return;
+                        if (!this.email.trim()) { this.error = 'Please enter your email address.'; return; }
+                        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.trim())) { this.error = 'Please enter a valid email address.'; return; }
+                        this.error = '';
+                        this.submitting = true;
+                        window.setTimeout(() => {
+                            this.submitting = false;
+                            this.email = '';
+                            window.Fashion.success('Thanks for subscribing! Check your inbox for a confirmation.');
+                        }, 600);
+                    }
+                }">
+                    <form method="POST" action="#" @submit.prevent="submit" class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto" novalidate>
+                        <input type="email" name="email" x-model="email" placeholder="Enter your email address"
+                               :class="error ? 'ring-2 ring-red-400' : 'focus:ring-2 focus:ring-white/30'"
+                               class="flex-1 px-5 py-3.5 rounded-xl border-0 text-sm text-gray-900 placeholder-gray-400 outline-none shadow-sm transition">
+                        <button type="submit" :disabled="submitting"
+                                :class="submitting ? 'opacity-70 cursor-wait' : 'hover:bg-indigo-50'"
+                                class="px-8 py-3.5 bg-white text-indigo-700 font-semibold rounded-xl transition-all shadow-sm text-sm whitespace-nowrap">
+                            <span x-show="!submitting">Subscribe</span>
+                            <span x-show="submitting" class="inline-flex items-center gap-2">
+                                <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                Subscribing…
+                            </span>
+                        </button>
+                    </form>
+                    <p x-show="error" x-cloak x-text="error" class="text-red-200 text-sm mt-3"></p>
+                    <p class="text-indigo-300/70 text-xs mt-4">No spam. Unsubscribe anytime.</p>
+                </div>
             </div>
         </div>
     </section>

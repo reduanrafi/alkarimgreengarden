@@ -8,10 +8,10 @@ class OrderService
 {
     const STATUSES = [
         'pending', 'confirmed', 'processing', 'packed',
-        'shipped', 'delivered', 'cancelled', 'returned', 'refunded',
+        'shipped', 'delivered', 'completed', 'cancelled', 'returned', 'refunded',
     ];
 
-    const PAYMENT_STATUSES = ['pending', 'paid', 'unpaid', 'refunded'];
+    const PAYMENT_STATUSES = ['pending', 'paid', 'unpaid', 'completed', 'refunded'];
 
     const PAYMENT_METHODS = [
         'cod' => 'Cash On Delivery',
@@ -29,6 +29,7 @@ class OrderService
         'packed'     => 'Packed',
         'shipped'    => 'Shipped',
         'delivered'  => 'Delivered',
+        'completed'  => 'Completed',
         'cancelled'  => 'Cancelled',
         'returned'   => 'Returned',
         'refunded'   => 'Refunded',

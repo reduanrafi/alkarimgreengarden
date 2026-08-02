@@ -48,8 +48,10 @@
                                  x-transition:leave-end="opacity-0"
                                  class="absolute inset-0">
                                 <a :href="banner.redirect_url || '#'" :title="banner.title" class="block w-full h-full">
+                                    <div class="w-full h-full absolute inset-0 skeleton-sm"></div>
                                     <img :src="banner.image" :alt="banner.title"
-                                         class="w-full h-full object-cover" loading="lazy">
+                                         x-init="$el.classList.add('fade-img'); $el.addEventListener('load', () => $el.classList.add('img-loaded'));"
+                                         class="w-full h-full object-cover relative" loading="lazy">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent"></div>
                                     <div class="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
                                         <h3 class="text-white text-base sm:text-lg lg:text-xl font-bold drop-shadow-lg leading-snug" x-text="banner.title"></h3>
@@ -82,9 +84,11 @@
                 <div class="@if($carouselBanners->count() > 0) md:col-span-5 lg:col-span-4 @else md:col-span-12 @endif">
                     <a href="{{ $fixedBanner->redirect_url ?: '#' }}"
                        class="block relative w-full h-[260px] sm:h-[340px] lg:h-[400px] rounded-2xl overflow-hidden shadow-md bg-gray-100 group">
+                        <div class="w-full h-full absolute inset-0 skeleton-sm"></div>
                         <img src="{{ asset('storage/' . $fixedBanner->image) }}"
                              alt="{{ $fixedBanner->title }}"
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                             onload="this.classList.add('img-loaded')"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 fade-img relative"
                              loading="lazy">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent"></div>
                         <div class="absolute bottom-0 left-0 right-0 p-5 sm:p-7">

@@ -18,10 +18,11 @@ class CartController extends Controller
     protected function cartResponse()
     {
         $items = $this->cart->getCart();
-        $subtotal = array_sum(array_map(fn ($i) => ($i['final_price'] ?? $i['price']) * $i['quantity'], $items));
+        $subtotal = $this->cart->getSubtotal();
         $count = $this->cart->getCount();
         $shippingCharge = $subtotal >= 100 ? 0 : 9.99;
         $discount = session('coupon.discount', 0);
+        $tax = round($subtotal * 0.05, 2);
 
         return [
             'items' => $items,
@@ -29,7 +30,8 @@ class CartController extends Controller
             'subtotal' => $subtotal,
             'shipping_charge' => $shippingCharge,
             'discount' => $discount,
-            'grand_total' => max(0, $subtotal + $shippingCharge - $discount),
+            'tax' => $tax,
+            'grand_total' => max(0, $subtotal + $shippingCharge + $tax - $discount),
         ];
     }
 
@@ -40,6 +42,7 @@ class CartController extends Controller
         return view('cart.index', array_merge($data, [
             'shippingCharge' => $data['shipping_charge'],
             'grandTotal' => $data['grand_total'],
+            'tax' => $data['tax'],
         ]));
     }
 

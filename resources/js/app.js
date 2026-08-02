@@ -1,9 +1,5 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
-import { Chart, registerables } from 'chart.js';
-
-Chart.register(...registerables);
-window.Chart = Chart;
 
 window.Alpine = Alpine;
 
@@ -16,21 +12,25 @@ document.addEventListener('alpine:init', () => {
         selectedIndex: -1,
         show: false,
         init() {
+            let timer = null;
             this.$watch('query', value => {
+                clearTimeout(timer);
                 if (value.length < 2) {
                     this.results = [];
                     this.open = false;
                     return;
                 }
                 this.loading = true;
-                fetch(`/search/suggestions?q=${encodeURIComponent(value)}`)
-                    .then(r => r.json())
-                    .then(data => {
-                        this.results = data;
-                        this.open = true;
-                        this.loading = false;
-                    })
-                    .catch(() => { this.loading = false; });
+                timer = setTimeout(() => {
+                    fetch(`/search/suggestions?q=${encodeURIComponent(value)}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            this.results = data;
+                            this.open = true;
+                            this.loading = false;
+                        })
+                        .catch(() => { this.loading = false; });
+                }, 250);
             });
         },
         select(index) {
@@ -47,19 +47,6 @@ document.addEventListener('alpine:init', () => {
             } else if (e.key === 'Escape') {
                 this.open = false;
             }
-        }
-    }));
-
-    Alpine.data('cartQty', () => ({
-        loading: false,
-        update(form) {
-            this.loading = true;
-            const formData = new FormData(form);
-            fetch(form.action, {
-                method: 'PATCH',
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                body: formData,
-            }).then(() => { this.loading = false; location.reload(); }).catch(() => { this.loading = false; });
         }
     }));
 
@@ -127,6 +114,282 @@ document.addEventListener('alpine:init', () => {
         open: false,
         query: '',
     }));
+
+    Alpine.data('productCatalog', (config = {}) => ({
+        q: config.q || '',
+        filters: config.filters || {},
+        sort: config.sort || 'latest',
+        page: config.page || 1,
+        total: config.total || 0,
+        baseUrl: config.baseUrl || '/products',
+        categoryLabels: config.categoryLabels || {},
+        loading: false,
+        error: false,
+        mobileFiltersOpen: false,
+
+        init() {
+            const catalog = this.$refs.catalog;
+
+            catalog.addEventListener('click', (e) => {
+                const clearBtn = e.target.closest('[data-clear-filters]');
+                if (clearBtn) {
+                    e.preventDefault();
+                    this.clearFilters();
+                    return;
+                }
+
+                const pageLink = e.target.closest('[data-pagination] a[href]');
+                if (pageLink) {
+                    e.preventDefault();
+                    const url = new URL(pageLink.getAttribute('href'), window.location.origin);
+                    const page = url.searchParams.get('page');
+                    if (page && Number(page) !== this.page) {
+                        this.page = Number(page);
+                        this.fetchProducts();
+                    }
+                }
+            });
+        },
+
+        get activeFilters() {
+            const list = [];
+
+            if (this.q) {
+                list.push({ key: 'q', label: `"${this.q}"` });
+            }
+
+            if (this.filters.category) {
+                const name = this.categoryLabels[this.filters.category] || this.filters.category;
+                list.push({ key: 'category', label: `Category: ${name}` });
+            }
+
+            if (this.filters.brand) {
+                list.push({ key: 'brand', label: `Brand: ${this.filters.brand}` });
+            }
+
+            if (this.filters.fabric) {
+                list.push({ key: 'fabric', label: `Fabric: ${this.filters.fabric}` });
+            }
+
+            if (this.filters.color) {
+                list.push({ key: 'color', label: `Color: ${this.filters.color}` });
+            }
+
+            if (this.filters.min_price || this.filters.max_price) {
+                list.push({
+                    key: 'price',
+                    label: `Price: $${this.filters.min_price || '0'} - $${this.filters.max_price || 'Any'}`,
+                });
+            }
+
+            if (this.filters.in_stock) {
+                list.push({ key: 'in_stock', label: 'In Stock' });
+            }
+
+            if (this.filters.discounted) {
+                list.push({ key: 'discounted', label: 'Discounted' });
+            }
+
+            return list;
+        },
+
+        buildParams() {
+            const params = new URLSearchParams();
+
+            if (this.q) params.set('q', this.q);
+
+            Object.entries(this.filters).forEach(([key, value]) => {
+                if (value !== '' && value !== null && value !== undefined) {
+                    params.set(key, value);
+                }
+            });
+
+            if (this.sort && this.sort !== 'latest') params.set('sort', this.sort);
+
+            if (this.page > 1) params.set('page', this.page);
+
+            return params;
+        },
+
+        async fetchProducts() {
+            const params = this.buildParams();
+            const query = params.toString();
+
+            this.loading = true;
+            this.error = false;
+
+            const url = this.baseUrl + (query ? '?' + query : '');
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                });
+
+                if (!response.ok) throw new Error('Request failed');
+
+                const data = await response.json();
+                this.$refs.catalog.innerHTML = data.html;
+                this.total = data.total;
+                this.loading = false;
+
+                if (window.history.replaceState) {
+                    window.history.replaceState({}, '', url);
+                }
+            } catch (err) {
+                this.loading = false;
+                this.error = true;
+            }
+        },
+
+        setFilter(key, value) {
+            const next = this.filters[key] === value ? '' : value;
+            if (this.filters[key] === next) return;
+            this.filters[key] = next;
+            this.page = 1;
+            this.fetchProducts();
+        },
+
+        toggleBool(key) {
+            this.filters[key] = this.filters[key] ? '' : '1';
+            this.page = 1;
+            this.fetchProducts();
+        },
+
+        applyPrice() {
+            const min = Number(this.filters.min_price);
+            const max = Number(this.filters.max_price);
+            if ((this.filters.min_price !== '' && (isNaN(min) || min < 0)) ||
+                (this.filters.max_price !== '' && (isNaN(max) || max < 0))) {
+                window.Fashion.error('Please enter a valid price range.');
+                return;
+            }
+            if (this.filters.min_price !== '' && this.filters.max_price !== '' && min > max) {
+                window.Fashion.error('Minimum price cannot be greater than maximum price.');
+                return;
+            }
+            this.page = 1;
+            this.fetchProducts();
+        },
+
+        removeFilter(key) {
+            if (key === 'price') {
+                delete this.filters.min_price;
+                delete this.filters.max_price;
+            } else if (key === 'q') {
+                this.q = '';
+            } else {
+                delete this.filters[key];
+            }
+            this.page = 1;
+            this.fetchProducts();
+        },
+
+        clearFilters() {
+            this.q = '';
+            this.filters = {};
+            this.sort = 'latest';
+            this.page = 1;
+            this.fetchProducts();
+        },
+    }));
+});
+
+window.Fashion = {
+    csrf() {
+        return document.querySelector('meta[name="csrf-token"]')?.content || '';
+    },
+    showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = type === 'error' ? 'toast toast-error' : 'toast toast-success';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(40px)';
+            toast.style.transition = 'all 0.3s ease-out';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    },
+    error(message) { this.showToast(message, 'error'); },
+    success(message) { this.showToast(message, 'success'); },
+    async api(url, options = {}) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 30000);
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': this.csrf(),
+                    'Accept': 'application/json',
+                    ...(options.headers || {}),
+                },
+                signal: controller.signal,
+                ...options,
+            });
+            return res;
+        } finally {
+            clearTimeout(timer);
+        }
+    },
+    friendlyError(err) {
+        if (err && err.name === 'AbortError') return 'The request took too long. Please check your connection and try again.';
+        return 'A network error occurred. Please check your connection and try again.';
+    },
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('img.fade-img').forEach(img => {
+        if (img.complete) { img.classList.add('img-loaded'); }
+        else img.addEventListener('load', () => img.classList.add('img-loaded'), { once: true });
+    });
+
+    document.querySelectorAll('img').forEach(img => {
+        if (img.dataset.emojiFallback !== undefined) return;
+        img.addEventListener('error', function handler() {
+            img.removeEventListener('error', handler);
+            const fallback = img.dataset.fallback;
+            if (fallback) {
+                img.remove();
+                const holder = document.createElement('div');
+                holder.className = 'w-full h-full flex items-center justify-center text-4xl select-none';
+                holder.textContent = fallback;
+                if (img.parentElement) img.parentElement.appendChild(holder);
+            }
+        }, { once: true });
+    });
+
+    document.querySelectorAll('form[data-ajax]').forEach(form => {
+        const btn = form.querySelector('[type="submit"], button[type="button"]');
+        form.addEventListener('submit', () => {
+            if (btn && !btn.disabled) btn.disabled = true;
+            setTimeout(() => { if (btn && form.dataset.ajax !== 'keep-disabled') btn.disabled = false; }, 2500);
+        });
+    });
+
+    document.addEventListener('error', (e) => {
+        const target = e.target;
+        if (target && target.tagName === 'IMG' && target.dataset.emojiFallback !== undefined) {
+            const holder = document.createElement('div');
+            holder.className = 'w-full h-full flex items-center justify-center text-4xl select-none';
+            holder.textContent = target.dataset.emojiFallback;
+            if (target.parentElement) target.parentElement.appendChild(holder);
+            target.remove();
+        }
+    }, true);
+
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (!form || form.tagName !== 'FORM') return;
+        if (form.hasAttribute('data-ajax') || form.hasAttribute('x-on:submit') || form.hasAttribute('@submit')) return;
+        const btn = form.querySelector('[type="submit"]');
+        if (btn && !btn.disabled) {
+            btn.disabled = true;
+            setTimeout(() => { if (document.body.contains(btn)) btn.disabled = false; }, 2500);
+        }
+    }, true);
 });
 
 Alpine.start();

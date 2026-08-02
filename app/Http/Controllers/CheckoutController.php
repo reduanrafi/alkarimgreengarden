@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Services\CartService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class CheckoutController extends Controller
@@ -55,9 +56,35 @@ class CheckoutController extends Controller
 
     public function store(StoreOrderRequest $request)
     {
+        // Idempotency guard FIRST: if this checkout token already placed an order,
+        // return that order instead of creating a duplicate (double-submit or retry
+        // after a lost response) — even when the cart has already been cleared.
+        $checkoutToken = (string) $request->input('checkout_token', '');
+
+        if ($checkoutToken !== '' && ($existingOrderId = session()->get('checkout.token.' . $checkoutToken))) {
+            if ($existingOrder = Order::find($existingOrderId)) {
+                return $request->ajax()
+                    ? response()->json([
+                        'success' => true,
+                        'message' => 'Order already placed.',
+                        'redirect' => route('orders.success', $existingOrder),
+                    ])
+                    : redirect()->route('orders.success', $existingOrder)
+                        ->with('success', 'Order placed successfully!');
+            }
+        }
+
         $data = $this->calculateCart($request->shipping_method ?? 'standard');
 
         if (empty($data['cartItems'])) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your cart is empty.',
+                    'redirect' => route('cart.index'),
+                ], 422);
+            }
+
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
@@ -120,29 +147,66 @@ class CheckoutController extends Controller
             }
 
             DB::commit();
-
-            try {
-                Mail::to($order->email)->send(new OrderPlaced($order));
-            } catch (\Exception $e) {
-                // Silently fail if email cannot be sent
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
             }
 
-            $this->cart->clear();
-            session()->forget('coupon');
+            Log::error('Checkout failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
 
-            return redirect()->route('orders.success', $order)
-                ->with('success', 'Order placed successfully!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
+            session()->flash('error', $e->getMessage());
 
             if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'redirect' => route('orders.failed'),
+                ], 422);
             }
 
-            return redirect()->route('checkout.create')
-                ->with('error', $e->getMessage())
-                ->withInput();
+            return redirect()->route('orders.failed')
+                ->with('error', $e->getMessage());
         }
+
+        // ------------------------------------------------------------------
+        // The order is committed at this point. Always return success — the
+        // confirmation email and cart cleanup must never delay or fail the
+        // response (order must not be duplicated by a retry).
+        // ------------------------------------------------------------------
+
+        if ($checkoutToken !== '') {
+            session(['checkout.token.' . $checkoutToken => $order->id]);
+        }
+
+        try {
+            $this->cart->clear();
+            session()->forget('coupon');
+        } catch (\Throwable $e) {
+            Log::error('Checkout cleanup failed: ' . $e->getMessage());
+        }
+
+        if ($request->ajax()) {
+            $response = response()->json([
+                'success' => true,
+                'message' => 'Order placed successfully!',
+                'redirect' => route('orders.success', $order),
+            ]);
+        } else {
+            $response = redirect()->route('orders.success', $order)
+                ->with('success', 'Order placed successfully!');
+        }
+
+        // Send the confirmation email after the response has been sent to the
+        // client, so a slow/unreachable mail server can never leave the user
+        // stuck on "Processing..." — the response always returns immediately.
+        app()->terminating(function () use ($order) {
+            try {
+                Mail::to($order->email)->send(new OrderPlaced($order));
+            } catch (\Throwable $e) {
+                Log::warning('Order confirmation email failed: ' . $e->getMessage());
+            }
+        });
+
+        return $response;
     }
 }

@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\ApiCartService;
 use Illuminate\Http\JsonResponse;
 
 class WishlistController extends Controller
 {
-    public function __construct()
+    public function __construct(protected ApiCartService $cart)
     {
         $this->middleware('auth:sanctum');
     }
@@ -43,22 +44,8 @@ class WishlistController extends Controller
 
     public function moveToCart(Product $product): JsonResponse
     {
-        $cart = session('cart', []);
-        $id = $product->id;
-
-        if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = min($cart[$id]['quantity'] + 1, $product->stock);
-        } else {
-            $cart[$id] = [
-                'name' => $product->name,
-                'price' => $product->price,
-                'quantity' => 1,
-                'category_slug' => $product->category->slug ?? '',
-            ];
-        }
-
-        session(['cart' => $cart]);
-        auth()->user()->wishlists()->where('product_id', $id)->delete();
+        $this->cart->add($product, 1);
+        auth()->user()->wishlists()->where('product_id', $product->id)->delete();
 
         return response()->json(['message' => 'Product moved to cart.']);
     }

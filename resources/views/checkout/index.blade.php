@@ -3,7 +3,42 @@
 @section('title', 'Checkout - ' . config('app.name'))
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8" x-data="{ submitting: false }">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8" x-on:checkout-submit.window="submitOrder()" x-data="{
+    submitting: false,
+    errorMsg: '',
+    submitOrder() {
+        if (this.submitting) return;
+        const form = document.getElementById('checkout-form');
+        if (!form) return;
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+        this.submitting = true;
+        this.errorMsg = '';
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 30000);
+        fetch(form.action, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: new FormData(form),
+            signal: controller.signal
+        })
+        .then(async res => {
+            let data = {};
+            try { data = await res.json(); } catch (e) {}
+            if (data.redirect) { window.location.href = data.redirect; return; }
+            this.submitting = false;
+            if (res.status === 419) { this.errorMsg = 'Your session has expired. Please refresh the page and try again.'; return; }
+            if (data.errors) { this.errorMsg = Object.values(data.errors).flat()[0] || 'Please fix the highlighted fields.'; return; }
+            this.errorMsg = data.message || 'Unable to place your order. Please try again.';
+        })
+        .catch(err => {
+            this.submitting = false;
+            this.errorMsg = err && err.name === 'AbortError'
+                ? 'The request took too long. Please check your connection and try again.'
+                : 'A network error occurred. Please check your connection and try again.';
+        })
+        .finally(() => clearTimeout(timer));
+    }
+}">
     {{-- Breadcrumb --}}
     <nav class="flex items-center gap-2 text-sm text-gray-400 mb-6" aria-label="Breadcrumb">
         <a href="{{ route('home') }}" class="hover:text-indigo-600 transition">Home</a>
@@ -73,7 +108,7 @@
                                 <p class="text-xs text-gray-500">Code: <strong class="text-emerald-600">{{ session('coupon.code') }}</strong> &mdash; Saved <strong>{{ formatPrice(session('coupon.discount')) }}</strong></p>
                             </div>
                         </div>
-                        <form action="{{ route('coupon.remove') }}" method="POST">
+                        <form action="{{ route('coupon.remove') }}" method="POST" data-ajax>
                             @csrf
                             <button type="submit" class="text-xs text-red-500 hover:text-red-600 transition px-3 py-1.5 rounded-lg hover:bg-red-50 border border-red-100">Remove</button>
                         </form>
@@ -84,18 +119,26 @@
                             <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                             Have a coupon?
                         </h3>
-                        <form action="{{ route('coupon.apply') }}" method="POST" class="flex gap-2">
+                        <form action="{{ route('coupon.apply') }}" method="POST" class="flex gap-2" data-ajax>
                             @csrf
                             <input type="text" name="code" placeholder="Enter coupon code"
                                    class="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none uppercase tracking-wider">
-                            <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm shrink-0">Apply</button>
+                            <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm shrink-0 disabled:opacity-60 disabled:cursor-wait">Apply</button>
                         </form>
                     </div>
                 @endif
 
+                {{-- AJAX Error --}}
+                <template x-if="errorMsg">
+                    <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-3.5 text-sm flex items-start gap-2">
+                        <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <p x-text="errorMsg"></p>
+                    </div>
+                </template>
+
                 {{-- Place Order Button --}}
-                <button type="submit" form="checkout-form" @click="const f = document.getElementById('checkout-form'); if (f && f.checkValidity()) submitting = true;" :class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                        class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all text-sm shadow-sm hover:shadow-md flex items-center justify-center gap-2">
+                <button type="submit" form="checkout-form" :disabled="submitting"
+                        class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all text-sm shadow-sm hover:shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:from-indigo-600 disabled:hover:to-indigo-700">
                     <template x-if="!submitting">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </template>

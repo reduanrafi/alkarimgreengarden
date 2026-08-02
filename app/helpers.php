@@ -1,14 +1,19 @@
 <?php
 
-if (!function_exists('getCurrencySymbol')) {
-    function getCurrencySymbol(): string
+if (!function_exists('getActiveCurrency')) {
+    function getActiveCurrency(): ?\App\Models\CurrencySetting
     {
-        $currency = cache()->remember('active_currency', 3600, function () {
+        return cache()->remember('active_currency', 3600, function () {
             return \App\Models\CurrencySetting::where('status', true)->first()
                 ?? \App\Models\CurrencySetting::where('is_default', true)->first();
         });
+    }
+}
 
-        return $currency ? $currency->symbol : '$';
+if (!function_exists('getCurrencySymbol')) {
+    function getCurrencySymbol(): string
+    {
+        return getActiveCurrency()?->symbol ?? '$';
     }
 }
 
@@ -22,10 +27,7 @@ if (!function_exists('logActivity')) {
 if (!function_exists('formatPrice')) {
     function formatPrice(float|int $amount): string
     {
-        $currency = cache()->remember('active_currency', 3600, function () {
-            return \App\Models\CurrencySetting::where('status', true)->first()
-                ?? \App\Models\CurrencySetting::where('is_default', true)->first();
-        });
+        $currency = getActiveCurrency();
 
         if (!$currency) {
             return '$' . number_format($amount, 2);

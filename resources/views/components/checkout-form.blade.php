@@ -1,7 +1,8 @@
 @props(['old' => []])
 
-<form action="{{ route('checkout.store') }}" method="POST" id="checkout-form" class="space-y-6" x-data="{ billingSame: true, shippingMethod: 'standard', paymentMethod: 'cash_on_delivery' }">
+<form action="{{ route('checkout.store') }}" method="POST" id="checkout-form" class="space-y-6" x-data="{ billingSame: true, shippingMethod: 'standard', paymentMethod: 'cash_on_delivery', checkoutToken: window.crypto && crypto.randomUUID ? crypto.randomUUID() : ('co-' + Date.now() + '-' + Math.random().toString(36).slice(2)) }" @submit.prevent="window.dispatchEvent(new CustomEvent('checkout-submit'))">
     @csrf
+    <input type="hidden" name="checkout_token" :value="checkoutToken">
 
     {{-- Shipping Address --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-5">

@@ -1,6 +1,6 @@
 @php
     $cartCount = array_sum(array_column(session('cart', []), 'quantity'));
-    $categories = \App\Models\Category::where('status', true)->get();
+    $categories = $navbarCategories ?? collect();
 @endphp
 
 <nav x-data="{ open: false, searchOpen: false, locationOpen: false, accountOpen: false, announcementVisible: true, cartCount: {{ $cartCount }} }"
@@ -8,7 +8,7 @@
      class="sticky top-0 z-40">
     {{-- Announcement Bar --}}
     <div x-show="announcementVisible" x-cloak class="bg-gray-900 text-white text-xs sm:text-sm py-2.5 relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center gap-2">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center gap-2 pr-12 sm:pr-16 lg:pr-24">
             <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             <span class="text-center">Free shipping on all orders over $100 &mdash; <a href="{{ route('products.index') }}" class="text-emerald-400 hover:text-emerald-300 underline font-medium">Shop Now</a></span>
             <button @click="announcementVisible = false" class="absolute right-4 text-white/50 hover:text-white transition">
@@ -19,13 +19,13 @@
 
     {{-- Main Header --}}
     <div class="bg-white shadow-sm border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 lg:h-[72px] gap-3 lg:gap-6">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 lg:h-[72px] gap-2 lg:gap-6">
 
                 {{-- Left: Logo + Location --}}
-                <div class="flex items-center gap-4 lg:gap-6 shrink-0">
-                    <a href="{{ route('home') }}" class="shrink-0 flex items-center gap-2">
-                        <span class="text-xl lg:text-2xl font-bold text-gray-900 tracking-tight font-serif">{{ config('app.name') }}</span>
+                <div class="flex items-center gap-4 lg:gap-6 min-w-0">
+                    <a href="{{ route('home') }}" class="shrink flex items-center gap-2 min-w-0">
+                        <span class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 tracking-tight font-serif truncate">{{ config('app.name') }}</span>
                     </a>
                     <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer hover:bg-gray-50 transition relative" @click="locationOpen = !locationOpen" @click.away="locationOpen = false">
                         <svg class="w-[18px] h-[18px] text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -186,7 +186,7 @@
                     </a>
 
                     {{-- Cart --}}
-                    <a href="{{ route('cart.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition group relative">
+                    <a href="{{ route('cart.index') }}" class="flex items-center gap-2 px-1 sm:px-3 py-2 rounded-lg hover:bg-gray-50 transition group relative">
                         <div class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-indigo-50 transition relative">
                             <svg class="h-5 w-5 text-gray-600 group-hover:text-indigo-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
                             <template x-if="cartCount > 0">
@@ -200,7 +200,7 @@
                     </a>
 
                     {{-- Mobile Menu --}}
-                    <button @click="open = !open" class="lg:hidden p-2 text-gray-600 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition ml-1">
+                    <button @click="open = !open" class="lg:hidden p-2 text-gray-600 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition">
                         <svg class="h-5 w-5" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                             <path :class="{'hidden': open, 'inline-flex': !open}" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                             <path :class="{'hidden': !open, 'inline-flex': open}" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

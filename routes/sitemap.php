@@ -5,8 +5,8 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/sitemap.xml', function () {
-    $products = Product::active()->get();
-    $categories = Category::active()->get();
+    $products = Product::active()->orderBy('id')->cursor();
+    $categories = Category::active()->orderBy('id')->cursor();
 
     return response()->view('sitemap', [
         'products' => $products,

@@ -8,7 +8,7 @@ use App\Mail\OrderPlaced;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
-use App\Services\CartService;
+use App\Services\ApiCartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -17,7 +17,7 @@ class CheckoutController extends Controller
 {
     protected $cart;
 
-    public function __construct(CartService $cart)
+    public function __construct(ApiCartService $cart)
     {
         $this->middleware('auth:sanctum');
         $this->cart = $cart;
@@ -33,8 +33,9 @@ class CheckoutController extends Controller
 
         $subtotal = $this->cart->getTotal();
         $shippingCharge = $subtotal >= 100 ? 0 : 9.99;
-        $discount = session('coupon.discount', 0);
-        $grandTotal = max(0, $subtotal + $shippingCharge - $discount);
+        $discount = $this->cart->getCoupon()['discount'] ?? 0;
+        $tax = round($subtotal * 0.05, 2);
+        $grandTotal = max(0, $subtotal + $shippingCharge + $tax - $discount);
 
         DB::beginTransaction();
 
@@ -54,6 +55,7 @@ class CheckoutController extends Controller
                 'subtotal' => $subtotal,
                 'shipping_charge' => $shippingCharge,
                 'discount' => $discount,
+                'tax' => $tax,
                 'grand_total' => $grandTotal,
                 'total' => $grandTotal,
                 'status' => 'pending',
@@ -77,7 +79,7 @@ class CheckoutController extends Controller
                 $product->decrement('stock', $item['quantity']);
             }
 
-            if ($couponCode = session('coupon.code')) {
+            if ($couponCode = $this->cart->getCoupon()['code'] ?? null) {
                 Coupon::where('code', $couponCode)->increment('used_count');
             }
 
@@ -89,7 +91,7 @@ class CheckoutController extends Controller
             }
 
             $this->cart->clear();
-            session()->forget('coupon');
+            $this->cart->removeCoupon();
 
             return response()->json([
                 'message' => 'Order placed successfully!',

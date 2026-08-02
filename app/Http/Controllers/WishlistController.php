@@ -53,8 +53,9 @@ class WishlistController extends Controller
             $cart[$id]['quantity'] = min($cart[$id]['quantity'] + 1, $product->stock);
         } else {
             $cart[$id] = [
+                'id' => $product->id,
                 'name' => $product->name,
-                'price' => $product->price,
+                'price' => (float) $product->price,
                 'quantity' => 1,
                 'category_slug' => $product->category->slug ?? '',
             ];

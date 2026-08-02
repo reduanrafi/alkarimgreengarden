@@ -39,12 +39,23 @@ class SearchController extends Controller
             return response()->json([]);
         }
 
-        $products = Product::active()
-            ->where('name', 'LIKE', "%{$query}%")
-            ->orWhere('brand', 'LIKE', "%{$query}%")
+        $products = Product::with('category')->active()
+            ->where(function ($qb) use ($query) {
+                $qb->where('name', 'LIKE', "%{$query}%")
+                    ->orWhere('fabric', 'LIKE', "%{$query}%")
+                    ->orWhere('color', 'LIKE', "%{$query}%");
+            })
             ->limit(8)
             ->get(['id', 'name', 'slug', 'price', 'image']);
 
-        return response()->json($products);
+        return response()->json($products->map(fn ($p) => [
+            'id' => $p->id,
+            'name' => $p->name,
+            'slug' => $p->slug,
+            'url' => route('products.show', $p->slug),
+            'price' => formatPrice($p->price),
+            'image' => $p->image ? '<img src="' . asset('storage/' . $p->image) . '" class="w-full h-full object-cover rounded-lg">' : null,
+            'category' => $p->category?->name,
+        ]));
     }
 }

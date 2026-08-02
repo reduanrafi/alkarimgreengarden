@@ -12,10 +12,11 @@ input[type=number] { -moz-appearance: textfield; }
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
      x-data="{
-        loaded: true,
+        loaded: false,
         cartCount: {{ $count }},
         cartSubtotal: {{ $subtotal }},
         cartShipping: {{ $shippingCharge ?? 0 }},
+        cartTax: {{ $tax ?? 0 }},
         cartDiscount: {{ $discount }},
         cartGrand: {{ $grandTotal ?? 0 }},
         couponCode: '{{ session('coupon.code', '') }}',
@@ -23,37 +24,50 @@ input[type=number] { -moz-appearance: textfield; }
         couponDiscount: {{ $discount ?? 0 }},
         couponMsg: '',
         couponError: '',
+        couponLoading: false,
+        couponRemoving: false,
+        clearing: false,
         get csrf() { return document.querySelector('meta[name=csrf-token]')?.content || ''; },
+        init() { setTimeout(() => this.loaded = true, 300); },
         async applyCoupon(form) {
+            if (this.couponLoading) return;
             const formData = new FormData(form);
             this.couponError = '';
             this.couponMsg = '';
+            this.couponLoading = true;
             try {
                 const res = await fetch(form.action, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: formData });
                 const data = await res.json();
-                if (!res.ok) { this.couponError = data.message; return; }
+                if (!res.ok) { this.couponError = data.message || 'Could not apply this coupon.'; return; }
                 this.couponApplied = true;
                 this.couponCode = data.code;
                 this.couponDiscount = data.discount;
                 this.couponMsg = data.message;
                 window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
                 setTimeout(() => this.couponMsg = '', 3000);
-            } catch(e) { this.couponError = 'Failed to apply coupon.'; }
+            } catch(e) { this.couponError = window.Fashion.friendlyError(e); }
+            finally { this.couponLoading = false; }
         },
         async removeCoupon() {
+            if (this.couponRemoving) return;
+            this.couponRemoving = true;
             const form = new FormData();
             form.append('_token', this.csrf);
             try {
                 const res = await fetch('{{ route('coupon.remove') }}', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
                 const data = await res.json();
+                if (!res.ok) throw new Error();
                 this.couponApplied = false;
                 this.couponCode = '';
                 this.couponDiscount = 0;
                 window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-            } catch(e) {}
+            } catch(e) { window.Fashion.error('Could not remove the coupon. Please try again.'); }
+            finally { this.couponRemoving = false; }
         },
         async clearCart() {
+            if (this.clearing) return;
             if (!confirm('Clear all items from cart?')) return;
+            this.clearing = true;
             try {
                 const form = new FormData();
                 form.append('_token', this.csrf);
@@ -62,13 +76,15 @@ input[type=number] { -moz-appearance: textfield; }
                 const data = await res.json();
                 if (!res.ok) throw new Error();
                 window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-            } catch(e) {}
+            } catch(e) { window.Fashion.error('Could not clear the cart. Please try again.'); }
+            finally { this.clearing = false; }
         }
      }"
      x-on:cart-updated.window="
         cartCount = $event.detail.count;
         cartSubtotal = $event.detail.subtotal;
         cartShipping = $event.detail.shipping_charge;
+        cartTax = $event.detail.tax;
         cartDiscount = $event.detail.discount;
         cartGrand = $event.detail.grand_total;
      ">
@@ -89,9 +105,10 @@ input[type=number] { -moz-appearance: textfield; }
             </h1>
         </div>
         <template x-if="cartCount > 0">
-            <button @click="clearCart" class="text-sm text-red-500 hover:text-red-600 transition flex items-center gap-1.5 px-4 py-2 rounded-xl hover:bg-red-50 border border-red-100">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                Clear Cart
+            <button @click="clearCart" :disabled="clearing" class="text-sm text-red-500 hover:text-red-600 transition flex items-center gap-1.5 px-4 py-2 rounded-xl hover:bg-red-50 border border-red-100 disabled:opacity-50 disabled:cursor-wait">
+                <svg x-show="!clearing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                <svg x-show="clearing" x-cloak class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                <span x-text="clearing ? 'Clearing…' : 'Clear Cart'"></span>
             </button>
         </template>
     </div>
@@ -137,42 +154,10 @@ input[type=number] { -moz-appearance: textfield; }
     {{-- Skeleton Loading --}}
     <div x-show="!loaded" x-cloak class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 space-y-4">
-            @for($i = 0; $i < 3; $i++)
-                <div class="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
-                    <div class="flex items-center gap-6">
-                        <div class="w-24 h-24 skeleton rounded-xl"></div>
-                        <div class="flex-1 space-y-3">
-                            <div class="h-4 w-48 skeleton rounded"></div>
-                            <div class="h-3 w-32 skeleton rounded"></div>
-                            <div class="h-5 w-20 skeleton rounded"></div>
-                        </div>
-                        <div class="space-y-3">
-                            <div class="flex gap-2">
-                                <div class="w-9 h-9 skeleton rounded-xl"></div>
-                                <div class="w-14 h-9 skeleton rounded-xl"></div>
-                                <div class="w-9 h-9 skeleton rounded-xl"></div>
-                            </div>
-                        </div>
-                        <div class="space-y-2 text-right">
-                            <div class="h-5 w-20 skeleton rounded"></div>
-                            <div class="h-3 w-16 skeleton rounded ml-auto"></div>
-                        </div>
-                    </div>
-                </div>
-            @endfor
+            <x-skeletons.cart-item :count="3" />
         </div>
         <div>
-            <div class="bg-white rounded-2xl border border-gray-100 p-6 space-y-4 animate-pulse">
-                <div class="h-5 w-32 skeleton rounded"></div>
-                <div class="space-y-3">
-                    <div class="flex justify-between"><div class="h-4 w-20 skeleton rounded"></div><div class="h-4 w-16 skeleton rounded"></div></div>
-                    <div class="flex justify-between"><div class="h-4 w-20 skeleton rounded"></div><div class="h-4 w-16 skeleton rounded"></div></div>
-                    <div class="flex justify-between"><div class="h-4 w-20 skeleton rounded"></div><div class="h-4 w-16 skeleton rounded"></div></div>
-                    <div class="border-t pt-3 flex justify-between"><div class="h-5 w-24 skeleton rounded"></div><div class="h-5 w-20 skeleton rounded"></div></div>
-                </div>
-                <div class="h-12 skeleton rounded-xl"></div>
-                <div class="h-12 skeleton rounded-xl"></div>
-            </div>
+            <x-skeletons.checkout-summary />
         </div>
     </div>
 
@@ -193,11 +178,16 @@ input[type=number] { -moz-appearance: textfield; }
                                     <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                                     Have a coupon?
                                 </h3>
-                                <form @submit.prevent="applyCoupon($el)" class="flex gap-2">
+                                <form @submit.prevent="applyCoupon($el)" action="{{ route('coupon.apply') }}" class="flex gap-2">
                                     @csrf
                                     <input type="text" name="code" placeholder="Enter coupon code"
-                                           class="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none uppercase tracking-wider">
-                                    <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm shrink-0">Apply</button>
+                                           :disabled="couponLoading"
+                                           class="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none uppercase tracking-wider disabled:opacity-60">
+                                    <button type="submit" :disabled="couponLoading"
+                                            class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm shrink-0 disabled:opacity-60 disabled:cursor-wait inline-flex items-center gap-2">
+                                        <svg x-show="couponLoading" x-cloak class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                                        <span x-text="couponLoading ? 'Applying…' : 'Apply'"></span>
+                                    </button>
                                 </form>
                             </div>
                         </template>
@@ -212,7 +202,10 @@ input[type=number] { -moz-appearance: textfield; }
                                         <p class="text-xs text-gray-500">Code: <strong class="text-emerald-600" x-text="couponCode"></strong> &mdash; Saved <strong x-text="'{{ getCurrencySymbol() }}' + Number(couponDiscount).toFixed(2)"></strong></p>
                                     </div>
                                 </div>
-                                <button @click="removeCoupon" class="text-xs text-red-500 hover:text-red-600 transition px-3 py-1.5 rounded-lg hover:bg-red-50 border border-red-100">Remove</button>
+                                <button @click="removeCoupon" :disabled="couponRemoving" class="text-xs text-red-500 hover:text-red-600 transition px-3 py-1.5 rounded-lg hover:bg-red-50 border border-red-100 disabled:opacity-50 disabled:cursor-wait inline-flex items-center gap-1.5">
+                                    <svg x-show="couponRemoving" x-cloak class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                                    <span x-text="couponRemoving ? 'Removing…' : 'Remove'"></span>
+                                </button>
                             </div>
                         </template>
                     </div>
@@ -236,21 +229,18 @@ input[type=number] { -moz-appearance: textfield; }
                 </div>
 
                 <div class="lg:col-span-1">
-                    <x-cart-summary :subtotal="$subtotal ?? 0" :count="$count ?? 0" :shipping-charge="$shippingCharge ?? 0" :discount="$discount ?? 0" :grand-total="$grandTotal ?? 0" :tax="0" />
+                    <x-cart-summary :subtotal="$subtotal ?? 0" :count="$count ?? 0" :shipping-charge="$shippingCharge ?? 0" :discount="$discount ?? 0" :grand-total="$grandTotal ?? 0" :tax="$tax ?? 0" />
                 </div>
             </div>
         </div>
 
         <div x-show="cartCount === 0" x-cloak>
             {{-- Empty Cart --}}
-            <div class="text-center py-16 sm:py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
-                <div class="inline-flex items-center justify-center w-28 h-28 rounded-full bg-gradient-to-br from-indigo-50 to-purple-50 mb-6">
-                    <svg class="w-14 h-14 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-2 font-serif">Your cart is empty</h3>
-                <p class="text-gray-400 text-sm mb-8 max-w-sm mx-auto">Looks like you haven't added any items to your cart yet. Start browsing our collection and find something you love!</p>
+            <x-empty-state
+                icon="cart"
+                title="Your cart is empty"
+                message="Looks like you haven't added any items to your cart yet. Start browsing our collection and find something you love!"
+            >
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="{{ route('products.index') }}"
                        class="inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm hover:shadow-md">
@@ -262,7 +252,7 @@ input[type=number] { -moz-appearance: textfield; }
                         View Wishlist
                     </a>
                 </div>
-            </div>
+            </x-empty-state>
         </div>
     </div>
 </div>

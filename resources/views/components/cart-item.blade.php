@@ -23,10 +23,14 @@
             if (!res.ok) throw new Error();
             const data = await res.json();
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-        } catch(e) { this.qty -= change; }
+        } catch(e) {
+            this.qty -= change;
+            window.Fashion.error('Could not update the quantity. Please try again.');
+        }
         finally { this.updating = false; }
     },
     async removeItem() {
+        if (this.removing) return;
         this.removing = true;
         try {
             const form = new FormData();
@@ -37,7 +41,10 @@
             const data = await res.json();
             this.$el.remove();
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-        } catch(e) { this.removing = false; }
+        } catch(e) {
+            this.removing = false;
+            window.Fashion.error('Could not remove this item. Please try again.');
+        }
     }
 }" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md group">
     <div x-show="removing" x-cloak class="absolute inset-0 bg-white/80 rounded-2xl flex items-center justify-center z-10">
@@ -46,7 +53,9 @@
     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 sm:p-6 relative">
         <a href="{{ route('products.show', $item['slug']) }}" class="shrink-0 w-[100px] h-[100px] sm:w-[110px] sm:h-[110px] bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden border border-gray-100">
             @if(!empty($item['image']))
-                <img src="{{ asset('storage/' . $item['image']) }}" alt="{{ $item['name'] }}" class="w-full h-full object-cover" loading="lazy">
+                <div class="w-full h-full skeleton-sm">
+                    <img src="{{ asset('storage/' . $item['image']) }}" alt="{{ $item['name'] }}" class="w-full h-full object-cover fade-img relative" loading="lazy">
+                </div>
             @else
                 <div class="w-full h-full flex items-center justify-center text-4xl select-none">
                     @switch($item['category_slug'] ?? '')

@@ -39,6 +39,19 @@ input[type=number] { -moz-appearance: textfield; }
 
                 {{-- Purchase Section --}}
                 <div class="mt-6 pt-6 border-t border-gray-100" x-data="productCart()">
+                    @if($product->stock <= 0)
+                        <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                            <span class="w-3 h-3 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+                            <div>
+                                <p class="text-sm font-semibold text-red-700">Out of Stock</p>
+                                <p class="text-xs text-red-500 mt-0.5">This product is currently unavailable.</p>
+                            </div>
+                        </div>
+                        <div class="w-full mt-4 h-[48px] px-6 bg-gray-100 text-gray-400 text-sm font-semibold rounded-xl flex items-center justify-center gap-2 cursor-not-allowed">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                            Out of Stock
+                        </div>
+                    @else
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-medium text-gray-700">Quantity</span>
                         <div class="flex items-center gap-2">
@@ -84,6 +97,7 @@ input[type=number] { -moz-appearance: textfield; }
                         <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <span x-text="addedMsg"></span>
                     </div>
+                    @endif
                 </div>
 
                 {{-- Trust Badges --}}
@@ -184,7 +198,7 @@ input[type=number] { -moz-appearance: textfield; }
                     @if(!$userReview)
                         <div class="bg-gray-50 rounded-xl p-5 mb-8">
                             <h3 class="font-bold text-gray-900 mb-4 text-sm">Write a Review</h3>
-                            <form action="{{ route('reviews.store', $product) }}" method="POST" class="space-y-4">
+                            <form action="{{ route('reviews.store', $product) }}" method="POST" class="space-y-4" data-ajax x-data="{ submitting: false }" @submit="submitting = true">
                                 @csrf
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
@@ -200,7 +214,10 @@ input[type=number] { -moz-appearance: textfield; }
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Comment</label>
                                     <textarea name="comment" rows="3" class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none resize-none" placeholder="Share your experience with this product..."></textarea>
                                 </div>
-                                <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm">Submit Review</button>
+                                <button type="submit" :disabled="submitting" class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm disabled:opacity-60 disabled:cursor-wait inline-flex items-center gap-2">
+                                    <svg x-show="submitting" x-cloak class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                                    <span x-text="submitting ? 'Submitting…' : 'Submit Review'"></span>
+                                </button>
                             </form>
                         </div>
                     @endif
@@ -219,7 +236,7 @@ input[type=number] { -moz-appearance: textfield; }
                                     </div>
                                 </div>
                                 @if($review->user_id === auth()->id())
-                                    <form action="{{ route('reviews.destroy', $review) }}" method="POST" onsubmit="return confirm('Delete your review?')">
+                                    <form action="{{ route('reviews.destroy', $review) }}" method="POST" onsubmit="return confirm('Delete your review?')" data-ajax>
                                         @csrf @method('DELETE')
                                         <button type="submit" class="text-xs text-red-400 hover:text-red-600 transition px-2 py-1 rounded-lg hover:bg-red-50">Delete</button>
                                     </form>
@@ -266,7 +283,7 @@ input[type=number] { -moz-appearance: textfield; }
     @endif
 
     {{-- Recently Viewed --}}
-    <section class="mt-12 sm:mt-16 scroll-fade-in" x-data="recentlyViewed()" x-show="items.length > 0" x-cloak>
+    <section class="mt-12 sm:mt-16 scroll-fade-in" x-data="recentlyViewed()">
         <div class="flex items-center justify-between mb-6 sm:mb-8">
             <div>
                 <span class="text-xs uppercase tracking-[0.15em] text-indigo-500 font-medium">Recently Viewed</span>
@@ -274,7 +291,23 @@ input[type=number] { -moz-appearance: textfield; }
             </div>
             <a href="{{ route('products.index') }}" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap">View All</a>
         </div>
-        <div class="flex gap-4 sm:gap-5 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0">
+
+        {{-- Loading Skeleton --}}
+        <div x-show="loading" x-cloak class="flex gap-4 sm:gap-5 overflow-hidden">
+            @for($i = 0; $i < 4; $i++)
+                <div class="shrink-0 w-[180px] sm:w-[220px] lg:w-[240px]">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+                        <div class="aspect-square bg-gray-100"></div>
+                        <div class="p-4 space-y-2.5">
+                            <div class="h-4 w-3/4 bg-gray-100 rounded"></div>
+                            <div class="h-5 w-16 bg-gray-100 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            @endfor
+        </div>
+
+        <div x-show="items.length > 0" x-cloak class="flex gap-4 sm:gap-5 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0">
             <template x-for="item in items" :key="item.id">
                 <div class="snap-start shrink-0 w-[180px] sm:w-[220px] lg:w-[240px]">
                     <div class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
@@ -303,16 +336,20 @@ input[type=number] { -moz-appearance: textfield; }
 document.addEventListener('alpine:init', () => {
     Alpine.data('recentlyViewed', () => ({
         items: [],
+        loading: true,
         init() {
             const current = {{ $product->id }};
             const stored = localStorage.getItem('recentlyViewed');
             const parsed = stored ? JSON.parse(stored) : [];
             const ids = parsed.filter(id => id !== current).slice(0, 4);
-            if (ids.length === 0) return;
+            if (ids.length === 0) {
+                this.loading = false;
+                return;
+            }
             fetch(`/api/products/recent?ids=${ids.join(',')}`)
                 .then(r => r.json())
-                .then(data => { this.items = data; })
-                .catch(() => {});
+                .then(data => { this.items = data; this.loading = false; })
+                .catch(() => { this.loading = false; });
         }
     }));
 
@@ -336,12 +373,12 @@ document.addEventListener('alpine:init', () => {
                 const form = new FormData();
                 form.append('_token', '{{ csrf_token() }}');
                 form.append('quantity', this.qty);
-                const res = await fetch('/cart/add/' + productId, { method: 'POST', body: form });
+                const res = await fetch('/cart/add/' + productId, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
                 if (!res.ok) throw new Error('Failed');
                 const data = await res.json();
                 this.added = true;
                 this.addedMsg = data.message || 'Added to cart!';
-                window.dispatchEvent(new CustomEvent('cart-updated'));
+                window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
             } catch(e) {
                 this.added = true;
                 this.addedMsg = 'Please login to add items to cart.';
@@ -355,7 +392,7 @@ document.addEventListener('alpine:init', () => {
                 const form = new FormData();
                 form.append('_token', '{{ csrf_token() }}');
                 form.append('quantity', this.qty);
-                const res = await fetch('/cart/add/' + productId, { method: 'POST', body: form });
+                const res = await fetch('/cart/add/' + productId, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
                 if (!res.ok) throw new Error('Failed');
                 await res.json();
                 window.location.href = '{{ route("checkout.create") }}';

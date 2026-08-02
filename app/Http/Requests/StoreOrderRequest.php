@@ -29,6 +29,7 @@ class StoreOrderRequest extends FormRequest
             'billing_same_as_shipping' => 'nullable|boolean',
             'save_address' => 'nullable|boolean',
             'notes' => 'nullable|string|max:2000',
+            'checkout_token' => 'nullable|string|max:64',
         ];
     }
 
