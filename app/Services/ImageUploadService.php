@@ -9,11 +9,13 @@ class ImageUploadService
 {
     public function upload(UploadedFile $file, ?string $existing = null, string $path = 'products'): string
     {
-        if ($existing) {
+        $newPath = $file->store($path, 'public');
+
+        if ($existing && $newPath) {
             $this->delete($existing);
         }
 
-        return $file->store($path, 'public');
+        return $newPath;
     }
 
     public function delete(?string $path): void

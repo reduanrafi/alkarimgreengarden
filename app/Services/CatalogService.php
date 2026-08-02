@@ -140,4 +140,11 @@ class CatalogService
             Cache::forget('catalog.facets.' . $facet);
         }
     }
+
+    public static function flushHomeProducts(): void
+    {
+        foreach (self::HOME_KEYS as $key) {
+            Cache::forget($key);
+        }
+    }
 }

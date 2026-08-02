@@ -212,6 +212,8 @@ class Product extends Model
     protected static function booted(): void
     {
         static::saved(function ($product) {
+            CatalogService::flushHomeProducts();
+
             if ($product->wasRecentlyCreated
                 || $product->wasChanged('brand')
                 || $product->wasChanged('fabric')
@@ -220,6 +222,9 @@ class Product extends Model
             }
         });
 
-        static::deleted(fn () => CatalogService::flushFacets());
+        static::deleted(function () {
+            CatalogService::flushHomeProducts();
+            CatalogService::flushFacets();
+        });
     }
 }

@@ -1,6 +1,6 @@
 @props(['product'])
 
-<div class="group relative bg-white rounded-xl shadow-sm hover:shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
+<div class="group relative flex flex-col h-full bg-white rounded-xl shadow-sm hover:shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
      data-id="{{ $product->id }}"
      data-name="{{ $product->name }}"
      data-price="{{ number_format($product->price, 2) }}"
@@ -86,9 +86,9 @@
         </div>
     </div>
 
-    <div class="p-3.5 sm:p-4">
-        <div class="space-y-2">
-            <div class="flex items-center gap-1.5">
+    <div class="p-3.5 sm:p-4 flex flex-col flex-1">
+        <div class="space-y-2 flex-1">
+            <div class="flex items-center gap-1.5 min-h-4">
                 @if($product->category)
                     <span class="text-[10px] uppercase tracking-wider text-indigo-500 font-semibold">{{ $product->category->name }}</span>
                 @endif
@@ -99,11 +99,11 @@
             </div>
 
             <a href="{{ route('products.show', $product->slug) }}">
-                <h3 class="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 hover:text-indigo-600 transition-colors">{{ $product->name }}</h3>
+                <h3 class="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 h-10 hover:text-indigo-600 transition-colors">{{ $product->name }}</h3>
             </a>
 
-            @if($product->avg_rating > 0)
-                <div class="flex items-center gap-1">
+            <div class="flex items-center gap-1 min-h-4">
+                @if($product->avg_rating > 0)
                     <div class="flex text-amber-400">
                         @for($i = 1; $i <= 5; $i++)
                             <svg class="w-3 h-3 {{ $i <= round($product->avg_rating) ? 'text-amber-400' : 'text-gray-200' }}" fill="currentColor" viewBox="0 0 20 20">
@@ -112,8 +112,8 @@
                         @endfor
                     </div>
                     <span class="text-[10px] text-gray-400">({{ $product->reviews_count }})</span>
-                </div>
-            @endif
+                @endif
+            </div>
 
             <div class="flex flex-wrap items-center justify-between gap-x-1.5 gap-y-1 pt-1">
                 <div class="flex items-center gap-1.5 min-w-0">
