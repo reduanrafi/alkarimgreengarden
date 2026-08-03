@@ -1,23 +1,39 @@
 @props(['order'])
 
-<a href="{{ route('orders.show', $order) }}" class="block bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#66D9F1]/10 to-[#4CC9F0]/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <svg class="w-6 h-6 text-[#4CC9F0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+<a href="{{ route('orders.show', $order) }}" class="gg-panel gg-order-card group">
+    <div class="flex items-center justify-between gap-3 mb-4">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="gg-order-card-icon">
+                📦
             </div>
-            <div>
-                <p class="text-xs text-gray-400 font-mono">#{{ $order->id }}</p>
-                <p class="font-semibold text-gray-900">{{ $order->customer_name }}</p>
-                <p class="text-sm text-gray-500">{{ $order->ordered_at ? $order->ordered_at->format('d M Y, h:i A') : $order->created_at->format('d M Y, h:i A') }}</p>
+            <div class="min-w-0">
+                <p class="font-mono font-bold text-[#173d2b] truncate">#{{ $order->invoice_no ?? str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</p>
+                <p class="text-xs text-[#5b6259]">{{ $order->ordered_at ? $order->ordered_at->format('d M Y, h:i A') : $order->created_at->format('d M Y, h:i A') }}</p>
             </div>
         </div>
-        <div class="flex items-center gap-4 sm:text-right">
-            <div>
-                <p class="font-bold text-indigo-600">{{ formatPrice($order->grand_total) }}</p>
-                <p class="text-xs text-gray-500">{{ $order->items_count ?? $order->items->count() }} item(s)</p>
-            </div>
-            <x-order-status :status="$order->status" />
+        <x-order-status :status="$order->status" />
+    </div>
+
+    <div class="flex items-center justify-between gap-3">
+        <div class="flex -space-x-2">
+            @foreach($order->items->take(4) as $item)
+                <div class="w-9 h-9 rounded-full border-2 border-white bg-[#e4efe4] flex items-center justify-center text-sm overflow-hidden">
+                    @if($item->product && $item->product->image)
+                        <img src="{{ asset('storage/' . $item->product->image) }}" alt="" class="w-full h-full object-cover" loading="lazy">
+                    @else
+                        <span>{{ categoryEmoji($item->product->category->slug ?? null) }}</span>
+                    @endif
+                </div>
+            @endforeach
+            @if($order->items->count() > 4)
+                <div class="w-9 h-9 rounded-full border-2 border-white bg-[#173d2b] text-white text-[10px] font-bold flex items-center justify-center">
+                    +{{ $order->items->count() - 4 }}
+                </div>
+            @endif
+        </div>
+        <div class="text-right">
+            <p class="font-bold text-[#173d2b]">{{ formatPrice($order->grand_total) }}</p>
+            <p class="text-xs text-[#5b6259]">{{ $order->items_count ?? $order->items->count() }} item(s)</p>
         </div>
     </div>
 </a>

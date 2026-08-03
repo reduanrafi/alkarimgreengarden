@@ -146,6 +146,15 @@ class CheckoutController extends Controller
                 Coupon::where('code', $couponCode)->increment('used_count');
             }
 
+            if ($request->boolean('save_address') && auth()->check()) {
+                auth()->user()->update(array_filter([
+                    'phone' => $request->phone,
+                    'address' => $request->address,
+                    'city' => $request->city ?: null,
+                    'postal_code' => $request->postal_code ?: null,
+                ]));
+            }
+
             DB::commit();
         } catch (\Throwable $e) {
             if (DB::transactionLevel() > 0) {

@@ -40,3 +40,44 @@ if (!function_exists('formatPrice')) {
         return $currency->symbol . ' ' . number_format($converted, $decimals);
     }
 }
+
+if (!function_exists('categoryEmoji')) {
+    function categoryEmoji(?string $slug, ?string $name = null): string
+    {
+        $slug = strtolower((string) $slug);
+        $name = strtolower((string) $name);
+
+        if (str_contains($slug, 'mens') || str_contains($name, 'men')) {
+            return '👕';
+        }
+        if (str_contains($slug, 'womens') || str_contains($name, 'women')) {
+            return '👚';
+        }
+        if (str_contains($slug, 'bag') || str_contains($name, 'bag')) {
+            return '👜';
+        }
+        if (str_contains($slug, 'indoor') || str_contains($name, 'indoor')) {
+            return '🪴';
+        }
+        if (str_contains($slug, 'outdoor') || str_contains($name, 'outdoor')) {
+            return '🌳';
+        }
+        if (str_contains($slug, 'succulent') || str_contains($slug, 'cact')) {
+            return '🌵';
+        }
+        if (str_contains($slug, 'flower') || str_contains($name, 'flower')) {
+            return '🌸';
+        }
+        if (str_contains($slug, 'planter') || str_contains($slug, 'pot')) {
+            return '🏺';
+        }
+        if (str_contains($slug, 'gift')) {
+            return '🎁';
+        }
+        if (str_contains($slug, 'others') || str_contains($slug, 'other')) {
+            return '🌿';
+        }
+
+        return '🌿';
+    }
+}

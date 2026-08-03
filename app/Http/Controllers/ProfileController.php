@@ -38,6 +38,42 @@ class ProfileController extends Controller
     }
 
     /**
+     * Upload the user's profile photo.
+     */
+    public function avatar(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        if ($user->photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->photo);
+        }
+
+        $path = $request->file('photo')->store('avatars', 'public');
+        $user->update(['photo' => $path]);
+
+        return back()->with('status', 'avatar-updated');
+    }
+
+    /**
+     * Remove the user's profile photo.
+     */
+    public function removeAvatar(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user->photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->photo);
+            $user->update(['photo' => null]);
+        }
+
+        return back()->with('status', 'avatar-removed');
+    }
+
+    /**
      * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse

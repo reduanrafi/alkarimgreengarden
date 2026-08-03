@@ -15,17 +15,20 @@
         'mens-t-shirt' => '👕',
         'womens-t-shirt' => '👚',
         'bags' => '👜',
-        default => '✨',
+        'others' => '🪴',
+        default => '🌿',
     };
 @endphp
 
 <div x-data="productGallery()" class="sticky top-[88px] lg:top-[100px]">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden image-zoom relative cursor-crosshair group"
+    <div class="gg-pdp-stage image-zoom relative group select-none"
          x-on:mousemove="zoomIn = true; zoomPos = { x: (($event.offsetX) / $el.offsetWidth) * 100, y: (($event.offsetY) / $el.offsetHeight) * 100 }"
          x-on:mouseleave="zoomIn = false"
-         x-on:click="openLightbox()">
-        <div class="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden rounded-[1px] relative">
-            @if($product->image)
+         x-on:click="openLightbox()"
+         x-on:touchstart.passive="onTouchStart($event)"
+         x-on:touchend.passive="onTouchEnd($event)">
+        <div class="aspect-square flex items-center justify-center overflow-hidden">
+            @if(count($imageUrls) > 0)
                 <template x-if="imageLoaded">
                     <img :src="activeImage"
                          alt="{{ $product->name }}"
@@ -34,10 +37,8 @@
                          :style="zoomIn ? `transform-origin: ${zoomPos.x}% ${zoomPos.y}%` : ''">
                 </template>
 
-                <div x-show="!imageLoaded" class="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center" x-cloak>
-                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
+                <div x-show="!imageLoaded" class="absolute inset-0 animate-pulse bg-gradient-to-br from-[#e4efe4] to-[#fbfcf8] flex items-center justify-center" x-cloak>
+                    <span class="fallback-emoji select-none">{{ $fallbackEmoji }}</span>
                 </div>
 
                 <img :src="activeImage"
@@ -45,12 +46,12 @@
                      x-on:load="imageLoaded = true"
                      x-on:error="imageLoaded = false">
             @else
-                <div class="text-8xl sm:text-9xl select-none">{{ $fallbackEmoji }}</div>
+                <div class="fallback-emoji select-none">{{ $fallbackEmoji }}</div>
             @endif
         </div>
 
-        <div class="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2.5 py-1.5 rounded-full flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity" x-show="imageLoaded" x-cloak>
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        <div class="zoom-hint" x-show="imageLoaded" x-cloak>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
             Click to zoom
         </div>
     </div>
@@ -59,9 +60,9 @@
         <div class="flex gap-2.5 mt-4 overflow-x-auto pb-2 scrollbar-hide" x-on:mouseleave="zoomIn = false">
             @foreach($imageUrls as $idx => $url)
                 <button @click.stop="setActive({{ $idx }})"
-                        class="shrink-0 w-[68px] h-[68px] sm:w-[76px] sm:h-[76px] rounded-xl border-2 overflow-hidden transition-all duration-200"
-                        :class="activeIndex === {{ $idx }} ? 'border-indigo-500 ring-2 ring-indigo-200 shadow-md' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'">
-                    <img src="{{ $url }}" alt="" class="w-full h-full object-cover" loading="lazy">
+                        class="gg-pdp-thumb"
+                        :class="activeIndex === {{ $idx }} ? 'active' : 'hover:border-green-300'">
+                    <img src="{{ $url }}" alt="" loading="lazy">
                 </button>
             @endforeach
         </div>
@@ -113,6 +114,7 @@ document.addEventListener('alpine:init', () => {
         zoomPos: { x: 50, y: 50 },
         imageLoaded: false,
         lightboxOpen: false,
+        touchstartX: null,
 
         get activeImage() {
             return this.images[this.activeIndex] || '';
@@ -120,13 +122,25 @@ document.addEventListener('alpine:init', () => {
         get lightboxImage() {
             return this.images[this.activeIndex] || '';
         },
-        init() {
-            this.imageLoaded = false;
-        },
         setActive(index) {
             this.activeIndex = index;
             this.zoomIn = false;
             this.imageLoaded = false;
+        },
+        onTouchStart(e) {
+            this.touchstartX = e.touches[0].clientX;
+        },
+        onTouchEnd(e) {
+            if (this.touchstartX === null) return;
+            const dx = e.changedTouches[0].clientX - this.touchstartX;
+            if (Math.abs(dx) > 40) {
+                if (dx < 0) {
+                    if (this.activeIndex < this.images.length - 1) this.setActive(this.activeIndex + 1);
+                } else {
+                    if (this.activeIndex > 0) this.setActive(this.activeIndex - 1);
+                }
+            }
+            this.touchstartX = null;
         },
         openLightbox() {
             if (!this.images.length) return;

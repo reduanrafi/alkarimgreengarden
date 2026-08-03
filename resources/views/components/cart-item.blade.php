@@ -25,7 +25,7 @@
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
         } catch(e) {
             this.qty -= change;
-            window.Fashion.error('Could not update the quantity. Please try again.');
+            window.Fashion?.error ? window.Fashion.error('Could not update the quantity. Please try again.') : null;
         }
         finally { this.updating = false; }
     },
@@ -43,15 +43,15 @@
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
         } catch(e) {
             this.removing = false;
-            window.Fashion.error('Could not remove this item. Please try again.');
+            window.Fashion?.error ? window.Fashion.error('Could not remove this item. Please try again.') : null;
         }
     }
-}" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md group">
-    <div x-show="removing" x-cloak class="absolute inset-0 bg-white/80 rounded-2xl flex items-center justify-center z-10">
-        <svg class="animate-spin w-8 h-8 text-indigo-600" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+}" class="bg-white rounded-2xl border border-line shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md group relative">
+    <div x-show="removing" x-cloak class="absolute inset-0 bg-white/85 rounded-2xl flex items-center justify-center z-10">
+        <svg class="animate-spin w-8 h-8 text-brand-700" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
     </div>
-    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 sm:p-6 relative">
-        <a href="{{ route('products.show', $item['slug']) }}" class="shrink-0 w-[100px] h-[100px] sm:w-[110px] sm:h-[110px] bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden border border-gray-100">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 sm:p-5">
+        <a href="{{ route('products.show', $item['slug']) }}" class="shrink-0 w-[100px] h-[100px] sm:w-[110px] sm:h-[110px] bg-cream rounded-xl overflow-hidden border border-line">
             @if(!empty($item['image']))
                 <div class="w-full h-full skeleton-sm">
                     <img src="{{ asset('storage/' . $item['image']) }}" alt="{{ $item['name'] }}" class="w-full h-full object-cover fade-img relative" loading="lazy">
@@ -62,7 +62,8 @@
                         @case('mens-t-shirt') 👕 @break
                         @case('womens-t-shirt') 👚 @break
                         @case('bags') 👜 @break
-                        @default ✨
+                        @case('others') 🪴 @break
+                        @default 🌿
                     @endswitch
                 </div>
             @endif
@@ -71,28 +72,25 @@
         <div class="flex-1 min-w-0 w-full">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0 flex-1">
-                    <a href="{{ route('products.show', $item['slug']) }}" class="font-semibold text-gray-900 hover:text-indigo-600 transition text-sm sm:text-base leading-snug line-clamp-2">{{ $item['name'] }}</a>
+                    <a href="{{ route('products.show', $item['slug']) }}" class="font-semibold text-ink hover:text-brand-700 transition text-sm sm:text-base leading-snug line-clamp-2">{{ $item['name'] }}</a>
                     <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
-                        @if(!empty($item['brand']))
-                            <span class="text-xs text-gray-500 flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                {{ $item['brand'] }}
-                            </span>
+                        @if(!empty($item['category_name']))
+                            <span class="text-xs text-ink-soft">{{ $item['category_name'] }}</span>
                         @endif
-                        <span class="text-xs text-gray-400 font-mono">SKU: {{ $item['sku'] ?? 'FSN-'.str_pad($item['id'], 5, '0', STR_PAD_LEFT) }}</span>
+                        <span class="text-xs text-ink-soft/70 font-mono">SKU: {{ $item['sku'] ?? 'FSN-'.str_pad($item['id'], 5, '0', STR_PAD_LEFT) }}</span>
                     </div>
                     <div class="flex items-center gap-2 mt-2">
                         @if(!empty($item['discount_price']))
-                            <span class="text-lg font-bold text-indigo-600">{{ formatPrice($item['final_price'] ?? $item['discount_price']) }}</span>
-                            <span class="text-sm text-gray-400 line-through">{{ formatPrice($item['price']) }}</span>
+                            <span class="text-lg font-bold text-brand-700">{{ formatPrice($item['final_price'] ?? $item['discount_price']) }}</span>
+                            <span class="text-sm text-ink-soft line-through">{{ formatPrice($item['price']) }}</span>
                             @php
                                 $discountPct = $item['discount_type'] === 'percentage'
                                     ? round($item['discount_price'])
                                     : round((1 - $item['discount_price'] / $item['price']) * 100);
                             @endphp
-                            <span class="text-[10px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded-full">-{{ $discountPct }}%</span>
+                            <span class="text-[10px] font-bold text-white bg-[#c1521f] px-1.5 py-0.5 rounded-full">-{{ $discountPct }}%</span>
                         @else
-                            <span class="text-lg font-bold text-gray-900">{{ formatPrice($item['price']) }}</span>
+                            <span class="text-lg font-bold text-brand-700">{{ formatPrice($item['price']) }}</span>
                         @endif
                     </div>
                     @if($item['stock_status'] === 'low_stock')
@@ -101,33 +99,33 @@
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center justify-between gap-3 mt-3 pt-3 border-t border-gray-50">
+            <div class="flex flex-wrap items-center justify-between gap-3 mt-3 pt-3 border-t border-line">
                 <div class="flex items-center gap-2" :class="updating ? 'opacity-50 pointer-events-none' : ''">
                     <button type="button" @click="updateQty(-1)" :disabled="qty <= 1"
-                            class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed">
+                            class="gg-step-btn" aria-label="Decrease quantity">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
                     </button>
-                    <span class="w-12 h-8 flex items-center justify-center border border-gray-200 rounded-lg text-sm font-semibold text-gray-900 bg-white" x-text="qty"></span>
+                    <span class="w-12 h-8 flex items-center justify-center border border-line rounded-lg text-sm font-semibold text-ink bg-white" x-text="qty"></span>
                     <button type="button" @click="updateQty(1)" :disabled="qty >= max"
-                            class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed">
+                            class="gg-step-btn" aria-label="Increase quantity">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     </button>
                     <div x-show="updating" x-cloak>
-                        <svg class="animate-spin w-4 h-4 text-indigo-500" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                        <svg class="animate-spin w-4 h-4 text-brand-700" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <span class="text-base font-bold text-gray-900" x-text="sym + Number(itemTotal).toFixed(2)"></span>
-                    <span class="text-xs text-gray-400 hidden sm:inline" x-text="qty + ' \u00d7 ' + sym + Number(price).toFixed(2)"></span>
+                    <span class="text-base font-bold text-ink" x-text="sym + Number(itemTotal).toFixed(2)"></span>
+                    <span class="text-xs text-ink-soft hidden sm:inline" x-text="qty + ' \u00d7 ' + sym + Number(price).toFixed(2)"></span>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4 mt-2 pt-2 border-t border-gray-50">
+            <div class="flex items-center gap-4 mt-2 pt-2 border-t border-line">
                 @auth
                     <form action="{{ route('wishlist.toggle', $item['id']) }}" method="POST" class="inline">
                         @csrf
-                        <button type="submit" class="text-xs text-gray-400 hover:text-red-500 transition flex items-center gap-1">
+                        <button type="submit" class="text-xs text-ink-soft hover:text-red-500 transition flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                             Move to Wishlist
                         </button>

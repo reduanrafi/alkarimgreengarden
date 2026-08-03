@@ -129,6 +129,7 @@ class ProductController extends Controller
                 'category',
                 'productAttributeValues.attribute',
                 'productAttributeValues.attributeValue',
+                'reviews' => fn ($q) => $q->where('status', true)->with('user')->latest(),
             ])
             ->withCount(['reviews' => fn ($q) => $q->where('status', true)])
             ->withAvg(['reviews' => fn ($q) => $q->where('status', true)], 'rating')

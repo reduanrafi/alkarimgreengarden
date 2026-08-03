@@ -30,6 +30,7 @@ class StoreOrderRequest extends FormRequest
             'save_address' => 'nullable|boolean',
             'notes' => 'nullable|string|max:2000',
             'checkout_token' => 'nullable|string|max:64',
+            'terms' => ['accepted'],
         ];
     }
 
@@ -45,6 +46,7 @@ class StoreOrderRequest extends FormRequest
             'address.required' => 'Please enter your delivery address.',
             'payment_method.required' => 'Please select a payment method.',
             'payment_method.in' => 'Please select a valid payment method.',
+            'terms.accepted' => 'You must agree to the Terms & Conditions to place your order.',
         ];
     }
 }

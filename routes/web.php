@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Admin\BannerController as AdminBannerController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
@@ -20,6 +22,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -35,6 +38,7 @@ Route::get('/products/{slug}', [ProductController::class, 'show'])->name('produc
 Route::get('/category/{slug}', [ProductController::class, 'category'])->name('products.category');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::get('/cart/items', [CartController::class, 'items'])->name('cart.items');
 Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
 Route::patch('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
@@ -47,16 +51,9 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
-Route::get('/dashboard', function () {
-    $user = auth()->user();
-    if ($user?->isAdmin()) {
-        return redirect()->intended(route('admin.dashboard'));
-    }
-    if ($user?->isSeller()) {
-        return redirect()->intended(route('seller.dashboard'));
-    }
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::post('/newsletter', [NewsletterController::class, 'store'])->name('newsletter.store');
+
+Route::get('/dashboard', [AccountController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -71,9 +68,22 @@ Route::middleware('auth')->group(function () {
         // Orders (blocked users cannot place new orders)
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
         Route::get('/order/success/{order}', [OrderController::class, 'success'])->name('orders.success');
         Route::get('/order/failed', [OrderController::class, 'failed'])->name('orders.failed');
     });
+
+    // Address book
+    Route::get('/account/addresses', [AddressController::class, 'index'])->name('account.addresses.index');
+    Route::get('/account/addresses/create', [AddressController::class, 'create'])->name('account.addresses.create');
+    Route::post('/account/addresses', [AddressController::class, 'store'])->name('account.addresses.store');
+    Route::get('/account/addresses/{address}/edit', [AddressController::class, 'edit'])->name('account.addresses.edit');
+    Route::put('/account/addresses/{address}', [AddressController::class, 'update'])->name('account.addresses.update');
+    Route::delete('/account/addresses/{address}', [AddressController::class, 'destroy'])->name('account.addresses.destroy');
+
+    // Profile photo
+    Route::post('/profile/avatar', [ProfileController::class, 'avatar'])->name('profile.avatar.update');
+    Route::delete('/profile/avatar', [ProfileController::class, 'removeAvatar'])->name('profile.avatar.remove');
 
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');

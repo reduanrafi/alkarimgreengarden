@@ -1,5 +1,10 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import Swiper from 'swiper';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 window.Alpine = Alpine;
 
@@ -391,6 +396,66 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }, true);
 });
+
+function initProductCarousels(scope = document) {
+    scope.querySelectorAll('.product-swiper').forEach((el) => {
+        if (el._productSwiper) return;
+
+        el._productSwiper = new Swiper(el, {
+            slidesPerView: 1.3,
+            spaceBetween: 14,
+            navigation: {
+                nextEl: el.querySelector('.swiper-button-next'),
+                prevEl: el.querySelector('.swiper-button-prev'),
+            },
+            breakpoints: {
+                0:    { slidesPerView: 1.3, spaceBetween: 14 },
+                560:  { slidesPerView: 2.2, spaceBetween: 16 },
+                860:  { slidesPerView: 3.2, spaceBetween: 18 },
+                1100: { slidesPerView: 4,   spaceBetween: 20 },
+                1300: { slidesPerView: 5,   spaceBetween: 20 },
+            },
+        });
+    });
+}
+
+window.initProductCarousels = initProductCarousels;
+
+document.addEventListener('DOMContentLoaded', () => initProductCarousels());
+
+function initHomepageSliders(scope = document) {
+    scope.querySelectorAll('.hero-slider.swiper').forEach((el) => {
+        if (el._heroSwiper) return;
+
+        el._heroSwiper = new Swiper(el, {
+            loop: true,
+            speed: 700,
+            autoplay: { delay: 6000, disableOnInteraction: false },
+            pagination: {
+                el: el.querySelector('.swiper-pagination'),
+                clickable: true,
+            },
+            navigation: {
+                nextEl: el.querySelector('.swiper-button-next'),
+                prevEl: el.querySelector('.swiper-button-prev'),
+            },
+        });
+    });
+
+    scope.querySelectorAll('.promo-slider.swiper').forEach((el) => {
+        if (el._promoSwiper) return;
+
+        el._promoSwiper = new Swiper(el, {
+            loop: true,
+            speed: 700,
+            autoplay: { delay: 5000, disableOnInteraction: false },
+        });
+    });
+}
+
+window.initHomepageSliders = initHomepageSliders;
+
+document.addEventListener('DOMContentLoaded', () => initHomepageSliders());
 
 Alpine.start();
 

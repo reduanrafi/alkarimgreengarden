@@ -46,6 +46,11 @@ class CartController extends Controller
         ]));
     }
 
+    public function items()
+    {
+        return response()->json($this->cartResponse());
+    }
+
     public function add(Request $request, $id)
     {
         $request->validate([

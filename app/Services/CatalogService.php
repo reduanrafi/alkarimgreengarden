@@ -21,12 +21,26 @@ class CatalogService
         'featured' => 'catalog.home.featured',
         'latest' => 'catalog.home.latest',
         'best_sellers' => 'catalog.home.best_sellers',
+        'category_sections' => 'catalog.home.category_sections',
+        'top_categories' => 'catalog.home.top_categories',
     ];
 
     public static function categories(): Collection
     {
         return Cache::remember(self::CATEGORIES_KEY, self::TTL, function () {
             return Category::active()->orderBy('name')->get();
+        });
+    }
+
+    public static function topCategories(int $limit = 6): Collection
+    {
+        return Cache::remember(self::HOME_KEYS['top_categories'], self::HOME_TTL, function () use ($limit) {
+            return Category::active()
+                ->withCount(['products' => fn ($q) => $q->where('status', true)])
+                ->orderByDesc('products_count')
+                ->orderBy('name')
+                ->limit($limit)
+                ->get();
         });
     }
 
@@ -82,7 +96,7 @@ class CatalogService
     public static function featuredProducts(): Collection
     {
         return Cache::remember(self::HOME_KEYS['featured'], self::HOME_TTL, function () {
-            return self::withRatingAggregates(Product::query())
+            return self::withUserContext(self::withRatingAggregates(Product::query()))
                 ->active()
                 ->featured()
                 ->latest()
@@ -94,7 +108,7 @@ class CatalogService
     public static function latestProducts(): Collection
     {
         return Cache::remember(self::HOME_KEYS['latest'], self::HOME_TTL, function () {
-            return self::withRatingAggregates(Product::query())
+            return self::withUserContext(self::withRatingAggregates(Product::query()))
                 ->active()
                 ->latest()
                 ->limit(8)
@@ -105,13 +119,45 @@ class CatalogService
     public static function bestSellers(): Collection
     {
         return Cache::remember(self::HOME_KEYS['best_sellers'], self::HOME_TTL, function () {
-            return self::withRatingAggregates(Product::query())
-                ->active()
+            $query = self::withUserContext(self::withRatingAggregates(Product::query()))
+                ->active();
+
+            $bestSellers = (clone $query)
                 ->withCount('orderItems')
                 ->having('order_items_count', '>', 0)
                 ->orderByDesc('order_items_count')
                 ->limit(8)
                 ->get();
+
+            if ($bestSellers->isNotEmpty()) {
+                return $bestSellers;
+            }
+
+            return $query->orderByDesc('reviews_avg_rating')
+                ->orderByDesc('id')
+                ->limit(8)
+                ->get();
+        });
+    }
+
+    public static function categorySections(): SupportCollection
+    {
+        return Cache::remember(self::HOME_KEYS['category_sections'], self::HOME_TTL, function () {
+            $categories = Category::active()->orderBy('name')->get();
+
+            return $categories
+                ->filter(function (Category $category) {
+                    $products = self::withUserContext(self::withRatingAggregates($category->products()->getQuery()))
+                        ->active()
+                        ->latest()
+                        ->limit(8)
+                        ->get();
+
+                    $category->setRelation('products', $products);
+
+                    return $products->isNotEmpty();
+                })
+                ->values();
         });
     }
 
@@ -120,6 +166,13 @@ class CatalogService
         return $query->with('category')
             ->withCount(['reviews' => fn ($q) => $q->where('status', true)])
             ->withAvg(['reviews' => fn ($q) => $q->where('status', true)], 'rating');
+    }
+
+    private static function withUserContext($query)
+    {
+        return $query->when(auth()->check(), fn ($q) => $q->with([
+            'wishlists' => fn ($w) => $w->where('user_id', auth()->id()),
+        ]));
     }
 
     public static function flushCategories(): void

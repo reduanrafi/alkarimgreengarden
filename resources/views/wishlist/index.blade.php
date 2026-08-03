@@ -1,67 +1,54 @@
-@extends('layouts.app')
+@extends('layouts.account')
 
 @section('title', 'My Wishlist - ' . config('app.name'))
 
-@section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="{ loaded: false, init() { setTimeout(() => this.loaded = true, 300); } }">
-    <div class="mb-8">
-        <a href="{{ route('home') }}" class="text-sm text-indigo-600 hover:text-indigo-700 transition inline-flex items-center gap-1.5 mb-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-            Home
-        </a>
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 font-serif">My Wishlist</h1>
-    </div>
-
-    {{-- Skeleton Loading --}}
-    <div x-show="!loaded" x-cloak class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-        <x-skeletons.product-card :count="8" />
+@section('account-content')
+    <div class="gg-account-head">
+        <p class="gg-eyebrow">Saved Items</p>
+        <h1 class="gg-title">My Wishlist ❤️</h1>
+        <p class="gg-sub">Your favorite picks, saved for later.</p>
     </div>
 
     @if(session('success'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-5 py-3.5 text-sm mb-8 flex items-center gap-2 animate-slide-up" x-show="loaded">
-            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            {{ session('success') }}
-        </div>
+        <div class="gg-alert gg-alert-success mb-6">{{ session('success') }}</div>
     @endif
 
-    <div x-show="loaded">
     @if($wishlists->count() > 0)
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div class="gg-wish-grid">
             @foreach($wishlists as $wishlist)
                 @php $p = $wishlist->product @endphp
-                <div class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-                     x-data="{ adding: false, removing: false }">
-                    <a href="{{ route('products.show', $p->slug) }}" class="image-zoom block aspect-square bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 skeleton-sm">
+                <div class="gg-product-card group" x-data="{ adding: false, removing: false }">
+                    <a href="{{ route('products.show', $p->slug) }}" class="gg-product-media block aspect-square bg-[#e4efe4] flex items-center justify-center p-4 overflow-hidden">
                         @if($p->image)
-                            <img src="{{ asset('storage/' . $p->image) }}" alt="{{ $p->name }}" class="w-full h-full object-contain fade-img relative" loading="lazy">
+                            <img src="{{ asset('storage/' . $p->image) }}" alt="{{ $p->name }}" class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy">
                         @else
-                            <span class="text-5xl">@switch($p->category->slug ?? '') @case('mens-t-shirt') 👕 @break @case('womens-t-shirt') 👚 @break @case('bags') 👜 @break @default ✨ @endswitch</span>
+                            <span class="text-5xl">{{ categoryEmoji($p->category->slug ?? null, $p->category->name ?? null) }}</span>
                         @endif
+                        <form action="{{ route('wishlist.destroy', $p) }}" method="POST" @submit="removing = true"
+                              class="absolute top-2.5 right-2.5">
+                            @csrf @method('DELETE')
+                            <button type="submit" :disabled="removing" title="Remove from wishlist"
+                                    class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-[#b91c1c] hover:bg-[#fef2f2] transition disabled:opacity-50">
+                                <span x-show="removing" x-cloak class="w-4 h-4 animate-spin rounded-full border-2 border-[#b91c1c] border-t-transparent"></span>
+                                <svg x-show="!removing" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            </button>
+                        </form>
                     </a>
                     <div class="p-3 sm:p-4">
-                        <h3 class="font-semibold text-gray-900 text-sm line-clamp-2">{{ $p->name }}</h3>
+                        <h3 class="font-bold text-[#173d2b] text-sm line-clamp-2">{{ $p->name }}</h3>
                         <div class="flex items-center gap-2 mt-1.5">
+                            <p class="font-bold text-[#173d2b] text-sm">{{ formatPrice($p->final_price) }}</p>
                             @if($p->discount_price)
-                                <p class="text-indigo-600 font-bold text-sm">{{ formatPrice($p->discount_price) }}</p>
-                                <p class="text-xs text-gray-400 line-through">{{ formatPrice($p->price) }}</p>
-                            @else
-                                <p class="text-indigo-600 font-bold text-sm">{{ formatPrice($p->final_price) }}</p>
+                                <p class="text-xs text-[#8a938a] line-through">{{ formatPrice($p->price) }}</p>
                             @endif
                         </div>
-                        <div class="flex gap-2 mt-3">
-                            <form action="{{ route('wishlist.moveToCart', $p) }}" method="POST" class="flex-1" @submit="adding = true">
+                        <div class="mt-3">
+                            <form action="{{ route('wishlist.moveToCart', $p) }}" method="POST" @submit="adding = true">
                                 @csrf
                                 <button type="submit" :disabled="adding"
-                                        class="w-full py-2 text-xs font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-sm disabled:opacity-60 disabled:cursor-wait inline-flex items-center justify-center gap-1.5">
-                                    <svg x-show="adding" x-cloak class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                                        class="gg-btn w-full !py-2 !px-3 text-xs disabled:opacity-60 disabled:cursor-wait">
+                                    <span x-show="adding" x-cloak class="mr-1.5 inline-block w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
                                     <span x-text="adding ? 'Adding…' : 'Add to Cart'"></span>
-                                </button>
-                            </form>
-                            <form action="{{ route('wishlist.destroy', $p) }}" method="POST" @submit="removing = true">
-                                @csrf @method('DELETE')
-                                <button type="submit" :disabled="removing" class="p-2 text-gray-400 hover:text-red-500 transition rounded-xl hover:bg-red-50 disabled:opacity-50 disabled:cursor-wait" onclick="return confirm('Remove from wishlist?')">
-                                    <svg x-show="!removing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                    <svg x-show="removing" x-cloak class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
                                 </button>
                             </form>
                         </div>
@@ -80,6 +67,4 @@
             actionIcon="plus"
         />
     @endif
-    </div>
-</div>
 @endsection

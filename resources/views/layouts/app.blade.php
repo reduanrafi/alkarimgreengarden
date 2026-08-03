@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="@yield('meta_description', config('app.name') . ' - Your destination for quality fashion and lifestyle products.')">
-    <meta name="keywords" content="fashion, clothing, accessories, style, shop online">
+    <meta name="description" content="@yield('meta_description', config('app.name') . ' - Plants, planters and garden essentials for every space.')">
+    <meta name="keywords" content="plants, planters, gardening, garden, shop online">
     <meta property="og:title" content="@yield('title', config('app.name'))">
-    <meta property="og:description" content="@yield('meta_description', config('app.name') . ' - Your destination for quality fashion.')">
+    <meta property="og:description" content="@yield('meta_description', config('app.name') . ' - Plants, planters and garden essentials.')">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:site_name" content="{{ config('app.name') }}">
@@ -16,17 +16,19 @@
     <meta name="twitter:description" content="@yield('meta_description', config('app.name') . ' - Your destination for quality fashion.')">
     <link rel="canonical" href="{{ url()->current() }}">
 
-    <title>@yield('title', config('app.name', 'Art Crafts & Fashion'))</title>
+    <title>@yield('title', config('app.name', 'Green Garden'))</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link href="https://fonts.bunny.net/css?family=playfair-display:400,500,600,700,800,900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=fraunces:400,500,600,700&display=swap" rel="stylesheet" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div class="min-h-screen bg-cream">
         @include('layouts.navigation')
 
         @if (session('status'))
