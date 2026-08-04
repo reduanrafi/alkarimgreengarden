@@ -239,8 +239,14 @@
     }
     .gg-card:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
     .gg-media { position: relative; aspect-ratio: 1/1; overflow: hidden; background: var(--green-100); }
-    .gg-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
-    .gg-card:hover .gg-media img { transform: scale(1.06); }
+    .gg-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
+    .gg-card:hover .gg-media img { animation: product-card-zoom-once 2.5s ease-out 1 forwards; }
+    .product-image-zoom-once { transform: scale(1); }
+    .group:hover .product-image-zoom-once { animation: product-card-zoom-once 2.5s ease-out 1 forwards; }
+    @keyframes product-card-zoom-once {
+        from { transform: scale(1); }
+        to { transform: scale(1.06); }
+    }
     .gg-tag {
         position: absolute; top: 12px; left: 12px; z-index: 2;
         background: var(--green-700); color: #fff;
@@ -265,6 +271,7 @@
     .gg-price small { font-weight: 600; font-size: 12.5px; color: var(--ink-soft); text-decoration: line-through; margin-left: 6px; }
     .gg-add-cart {
         width: 38px; height: 38px; border-radius: 50%; background: var(--green-700); color: #fff;
+        position: relative; z-index: 3; pointer-events: auto;
         display: flex; align-items: center; justify-content: center; font-size: 18px; line-height: 1;
         transition: background .2s;
     }

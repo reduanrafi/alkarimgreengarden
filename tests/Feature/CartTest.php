@@ -49,6 +49,21 @@ class CartTest extends TestCase
         $this->assertEquals(3, $cart[$this->product->id]['quantity']);
     }
 
+    public function test_ajax_quantity_update_returns_recalculated_totals(): void
+    {
+        $this->post('/cart/add/'.$this->product->id, ['quantity' => 1]);
+
+        $response = $this->withHeader('X-Requested-With', 'XMLHttpRequest')
+            ->patch('/cart/update/'.$this->product->id, ['quantity' => 3]);
+
+        $response->assertOk()
+            ->assertJsonPath('count', 3)
+            ->assertJsonPath('subtotal', 89.97)
+            ->assertJsonPath('shipping_charge', 9.99)
+            ->assertJsonPath('tax', 4.5)
+            ->assertJsonPath('grand_total', 104.46);
+    }
+
     public function test_remove_from_cart(): void
     {
         $this->post('/cart/add/'.$this->product->id, ['quantity' => 1]);
@@ -57,6 +72,20 @@ class CartTest extends TestCase
         $response->assertRedirect();
 
         $this->assertArrayNotHasKey($this->product->id, session('cart', []));
+    }
+
+    public function test_ajax_removal_returns_zeroed_totals(): void
+    {
+        $this->post('/cart/add/'.$this->product->id, ['quantity' => 1]);
+
+        $response = $this->withHeader('X-Requested-With', 'XMLHttpRequest')
+            ->delete('/cart/remove/'.$this->product->id);
+
+        $response->assertOk()
+            ->assertJsonPath('count', 0)
+            ->assertJsonPath('subtotal', 0)
+            ->assertJsonPath('tax', 0)
+            ->assertJsonPath('grand_total', 0);
     }
 
     public function test_clear_cart(): void

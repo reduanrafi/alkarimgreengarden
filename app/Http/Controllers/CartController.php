@@ -20,7 +20,7 @@ class CartController extends Controller
         $items = $this->cart->getCart();
         $subtotal = $this->cart->getSubtotal();
         $count = $this->cart->getCount();
-        $shippingCharge = $subtotal >= 100 ? 0 : 9.99;
+        $shippingCharge = $count === 0 || $subtotal >= 100 ? 0 : 9.99;
         $discount = session('coupon.discount', 0);
         $tax = round($subtotal * 0.05, 2);
 
@@ -122,9 +122,11 @@ class CartController extends Controller
                 'success' => true,
                 'message' => 'Cart cleared.',
                 'count' => 0,
+                'items' => [],
                 'subtotal' => 0,
                 'shipping_charge' => 0,
                 'discount' => 0,
+                'tax' => 0,
                 'grand_total' => 0,
             ]);
         }

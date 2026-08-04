@@ -32,7 +32,7 @@
             </div>
             <div>
                 <span class="text-sm font-semibold text-ink">SSLCommerz</span>
-                <p class="text-xs text-amber-600 font-medium">Coming Soon â€” gateway not configured</p>
+                <p class="text-xs text-amber-600 font-medium">Will be available soon.</p>
             </div>
         </div>
     </label>
@@ -45,7 +45,33 @@
             </div>
             <div>
                 <span class="text-sm font-semibold text-ink">Card Payment</span>
-                <p class="text-xs text-amber-600 font-medium">Coming Soon â€” gateway not configured</p>
+                <p class="text-xs text-amber-600 font-medium">Will be available soon.</p>
+            </div>
+        </div>
+    </label>
+
+    <label class="gg-radio-card gg-radio-disabled">
+        <input type="radio" name="payment_method" value="stripe" disabled>
+        <div class="flex items-center gap-3 flex-1">
+            <div class="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-violet-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            </div>
+            <div>
+                <span class="text-sm font-semibold text-ink">Stripe</span>
+                <p class="text-xs text-amber-600 font-medium">Will be available soon.</p>
+            </div>
+        </div>
+    </label>
+
+    <label class="gg-radio-card gg-radio-disabled">
+        <input type="radio" name="payment_method" value="paypal" disabled>
+        <div class="flex items-center gap-3 flex-1">
+            <div class="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            </div>
+            <div>
+                <span class="text-sm font-semibold text-ink">PayPal</span>
+                <p class="text-xs text-amber-600 font-medium">Will be available soon.</p>
             </div>
         </div>
     </label>

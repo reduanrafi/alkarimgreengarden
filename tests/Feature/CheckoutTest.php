@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,6 +43,22 @@ class CheckoutTest extends TestCase
         $response->assertSessionHas('error');
     }
 
+    public function test_checkout_only_offers_cash_on_delivery(): void
+    {
+        $this->actingAs($this->user);
+        $this->post('/cart/add/'.$this->product->id, ['quantity' => 1]);
+
+        $response = $this->get('/checkout');
+
+        $response->assertOk()
+            ->assertSee('Cash on Delivery')
+            ->assertSee('SSLCommerz')
+            ->assertSee('Stripe')
+            ->assertSee('PayPal')
+            ->assertSee('Will be available soon.', false)
+            ->assertSee('disabled', false);
+    }
+
     public function test_checkout_store_creates_order(): void
     {
         $this->actingAs($this->user);
@@ -58,9 +75,41 @@ class CheckoutTest extends TestCase
             'terms' => '1',
         ]);
 
+        $order = Order::firstOrFail();
+
+        $response->assertRedirect(route('orders.success', $order));
         $this->assertDatabaseHas('orders', [
             'customer_name' => 'John Doe',
             'grand_total' => 72.97,
         ]);
+        $this->assertDatabaseHas('order_items', [
+            'order_id' => $order->id,
+            'product_id' => $this->product->id,
+            'price' => 29.99,
+            'quantity' => 2,
+        ]);
+        $this->assertSame(8, $this->product->fresh()->stock);
+        $this->assertEmpty(session('cart', []));
+    }
+
+    public function test_checkout_rejects_payment_methods_other_than_cash_on_delivery(): void
+    {
+        $this->actingAs($this->user);
+        $this->post('/cart/add/'.$this->product->id, ['quantity' => 1]);
+
+        $response = $this->from('/checkout')->post('/checkout', [
+            'customer_name' => 'John Doe',
+            'phone' => '0123456789',
+            'email' => 'john@example.com',
+            'division' => 'Dhaka',
+            'district' => 'Dhaka',
+            'address' => '123 Street',
+            'payment_method' => 'sslcommerz',
+            'terms' => '1',
+        ]);
+
+        $response->assertRedirect('/checkout')
+            ->assertSessionHasErrors('payment_method');
+        $this->assertDatabaseCount('orders', 0);
     }
 }

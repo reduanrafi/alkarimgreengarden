@@ -24,7 +24,7 @@
         <a href="{{ route('products.show', $product->slug) }}" class="block w-full h-full">
             @if($product->image)
                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
-                     class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                     class="product-image-zoom-once w-full h-full object-contain transition-transform duration-300"
                      loading="lazy"
                       onerror="this.onerror=null; this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-5xl select-none\'>🌿</div>';">
             @else

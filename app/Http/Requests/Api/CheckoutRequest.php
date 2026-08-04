@@ -22,7 +22,7 @@ class CheckoutRequest extends FormRequest
             'upazila' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:20',
             'address' => 'required|string|max:1000',
-            'payment_method' => 'required|string|in:cash_on_delivery,sslcommerz,card,mobile_banking',
+            'payment_method' => 'required|string|in:cash_on_delivery',
             'notes' => 'nullable|string|max:2000',
         ];
     }

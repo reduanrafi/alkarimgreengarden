@@ -22,7 +22,7 @@ class CartController extends Controller
         $cartItems = $this->cart->getCart();
         $total = $this->cart->getTotal();
         $count = $this->cart->getCount();
-        $shippingCharge = $total >= 100 ? 0 : 9.99;
+        $shippingCharge = $count === 0 || $total >= 100 ? 0 : 9.99;
         $discount = $this->cart->getCoupon()['discount'] ?? 0;
         $tax = round($total * 0.05, 2);
 

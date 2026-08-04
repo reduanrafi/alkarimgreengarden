@@ -9,40 +9,61 @@
     get csrf() { return document.querySelector('meta[name=csrf-token]')?.content || ''; },
     get itemTotal() { return this.price * this.qty; },
     get sym() { return '{{ getCurrencySymbol() }}'; },
+    notifyOptimisticChange(quantityChange) {
+        window.dispatchEvent(new CustomEvent('cart-updating', {
+            detail: {
+                countDelta: quantityChange,
+                subtotalDelta: this.price * quantityChange,
+            },
+        }));
+    },
     async updateQty(change) {
         const newQty = this.qty + change;
         if (newQty < 1 || newQty > this.max) return;
+
+        const previousQty = this.qty;
         this.qty = newQty;
+        this.notifyOptimisticChange(change);
         this.updating = true;
         try {
             const form = new FormData();
             form.append('_token', this.csrf);
             form.append('quantity', this.qty);
             form.append('_method', 'PATCH');
-            const res = await fetch('/cart/update/{{ $item['id'] }}', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
+            const res = await fetch(@js(route('cart.update', ['id' => $item['id']])), { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
             if (!res.ok) throw new Error();
             const data = await res.json();
+            const updatedItem = data.items?.find(item => Number(item.id) === Number({{ $item['id'] }}));
+            if (updatedItem) {
+                this.qty = Number(updatedItem.quantity);
+                this.max = Number(updatedItem.stock);
+                this.price = Number(updatedItem.final_price ?? updatedItem.price);
+            }
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
         } catch(e) {
-            this.qty -= change;
+            this.qty = previousQty;
+            this.notifyOptimisticChange(-change);
             window.GG?.error ? window.GG.error('Could not update the quantity. Please try again.') : null;
         }
         finally { this.updating = false; }
     },
     async removeItem() {
         if (this.removing) return;
+        const quantity = this.qty;
         this.removing = true;
+        this.notifyOptimisticChange(-quantity);
         try {
             const form = new FormData();
             form.append('_token', this.csrf);
             form.append('_method', 'DELETE');
-            const res = await fetch('/cart/remove/{{ $item['id'] }}', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
+            const res = await fetch(@js(route('cart.remove', ['id' => $item['id']])), { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
             if (!res.ok) throw new Error();
             const data = await res.json();
             this.$el.remove();
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
         } catch(e) {
             this.removing = false;
+            this.notifyOptimisticChange(quantity);
             window.GG?.error ? window.GG.error('Could not remove this item. Please try again.') : null;
         }
     }

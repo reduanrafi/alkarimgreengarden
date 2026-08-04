@@ -32,14 +32,14 @@
                 <label class="gg-field-label" for="customer_name">Full Name <span class="text-red-500">*</span></label>
                 <input id="customer_name" type="text" name="customer_name" value="{{ old('customer_name', auth()->user()->name ?? '') }}"
                        class="gg-input @error('customer_name') border-red-400 bg-red-50 @enderror"
-                       placeholder="John Doe">
+                       placeholder="John Doe" required>
                 @error('customer_name') <p class="text-red-600 text-xs mt-1.5">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="gg-field-label" for="phone">Phone <span class="text-red-500">*</span></label>
                 <input id="phone" type="tel" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}"
                        class="gg-input @error('phone') border-red-400 bg-red-50 @enderror"
-                       placeholder="01XXXXXXXXX">
+                       placeholder="01XXXXXXXXX" required>
                 @error('phone') <p class="text-red-600 text-xs mt-1.5">{{ $message }}</p> @enderror
             </div>
         </div>
@@ -48,7 +48,7 @@
             <label class="gg-field-label" for="email">Email <span class="text-red-500">*</span></label>
             <input id="email" type="email" name="email" value="{{ old('email', auth()->user()->email ?? '') }}"
                    class="gg-input @error('email') border-red-400 bg-red-50 @enderror"
-                   placeholder="john@example.com">
+                   placeholder="john@example.com" required>
             @error('email') <p class="text-red-600 text-xs mt-1.5">{{ $message }}</p> @enderror
         </div>
 
@@ -56,7 +56,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                     <label class="gg-field-label" for="division">Division <span class="text-red-500">*</span></label>
-                    <select id="division" name="division" class="gg-input @error('division') border-red-400 bg-red-50 @enderror">
+                    <select id="division" name="division" class="gg-input @error('division') border-red-400 bg-red-50 @enderror" required>
                         <option value="">Select Division</option>
                         @foreach(['Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh'] as $div)
                             <option value="{{ $div }}" {{ old('division') == $div ? 'selected' : '' }}>{{ $div }}</option>
@@ -68,7 +68,7 @@
                     <label class="gg-field-label" for="district">District <span class="text-red-500">*</span></label>
                     <input id="district" type="text" name="district" value="{{ old('district') }}"
                            class="gg-input @error('district') border-red-400 bg-red-50 @enderror"
-                           placeholder="Dhaka">
+                           placeholder="Dhaka" required>
                     @error('district') <p class="text-red-600 text-xs mt-1.5">{{ $message }}</p> @enderror
                 </div>
                 <div>
@@ -104,7 +104,7 @@
                 <label class="gg-field-label" for="address">Address <span class="text-red-500">*</span></label>
                 <textarea id="address" name="address" rows="2"
                           class="gg-input resize-none @error('address') border-red-400 bg-red-50 @enderror"
-                          placeholder="House #, Road #, Area">{{ old('address', auth()->user()->address ?? '') }}</textarea>
+                          placeholder="House #, Road #, Area" required>{{ old('address', auth()->user()->address ?? '') }}</textarea>
                 @error('address') <p class="text-red-600 text-xs mt-1.5">{{ $message }}</p> @enderror
             </div>
 
@@ -174,7 +174,7 @@
         @error('shipping_method') <p class="text-red-600 text-xs">{{ $message }}</p> @enderror
 
         <label class="gg-radio-card">
-            <input type="radio" name="shipping_method" value="standard" x-model="shippingMethod">
+            <input type="radio" name="shipping_method" value="standard" x-model="shippingMethod" checked>
             <div class="flex items-center gap-3 flex-1">
                 <div class="w-10 h-10 rounded-lg bg-brand-100 flex items-center justify-center">
                     <svg class="w-5 h-5 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>

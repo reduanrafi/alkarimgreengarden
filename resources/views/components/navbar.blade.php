@@ -11,7 +11,14 @@
 <nav x-data="{ open: false, searchOpen: false, accountOpen: false, announcementVisible: true, cartCount: {{ $cartCount }}, scrolled: false }"
      x-init="scrolled = window.scrollY > 8"
      @scroll.window.passive="scrolled = window.scrollY > 8"
-      x-on:cart-updated.window="cartCount = $event.detail.count || 0">
+      x-on:cart-updated.window="cartCount = Number($event.detail.count || 0)"
+      x-on:cart-updating.window="
+        if ($event.detail.count !== undefined) {
+            cartCount = Number($event.detail.count);
+        } else if ($event.detail.countDelta !== undefined) {
+            cartCount = Math.max(0, cartCount + Number($event.detail.countDelta));
+        }
+      ">
 
     {{-- Announcement Bar --}}
     <div x-show="announcementVisible" x-cloak class="topbar">

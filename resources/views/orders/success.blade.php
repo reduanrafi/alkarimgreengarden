@@ -44,7 +44,7 @@
         <div class="px-8 sm:px-12 py-8 sm:py-10">
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-cream rounded-2xl p-5 border border-line">
-                    <p class="text-xs text-ink-soft uppercase tracking-wider mb-1">Order Number</p>
+                    <p class="text-xs text-ink-soft uppercase tracking-wider mb-1">Order ID</p>
                     <p class="text-lg font-bold text-ink">#{{ $order->invoice_no ?? $order->id }}</p>
                 </div>
                 <div class="bg-cream rounded-2xl p-5 border border-line">

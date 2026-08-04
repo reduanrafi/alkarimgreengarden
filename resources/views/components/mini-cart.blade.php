@@ -2,62 +2,170 @@
 
 <div x-data="{
     open: false,
-    items: @json($items),
+    items: @js($items),
     subtotal: {{ $subtotal }},
     count: {{ array_sum(array_column($items, 'quantity')) }},
+    shipping: {{ empty($items) || $subtotal >= 100 ? 0 : 9.99 }},
+    discount: {{ (float) session('coupon.discount', 0) }},
+    tax: {{ round($subtotal * 0.05, 2) }},
     loading: false,
     busy: false,
+    bodyOverflow: '',
+    rootOverflow: '',
+    bodyPaddingRight: '',
     get csrf() { return document.querySelector('meta[name=csrf-token]')?.content || ''; },
     get sym() { return '{{ getCurrencySymbol() }}'; },
+    get total() { return Math.max(0, this.subtotal + this.shipping + this.tax - this.discount); },
     fmt(n) { return this.sym + Number(n).toFixed(2); },
     emojiFor(item) {
         return '🌿';
     },
+    init() {
+        this.$watch('open', value => value ? this.lockPageScroll() : this.unlockPageScroll());
+    },
+    recalculateTotals() {
+        this.shipping = this.count === 0 || this.subtotal >= 100 ? 0 : 9.99;
+        this.tax = Math.round(this.subtotal * 0.05 * 100) / 100;
+    },
+    dispatchCartUpdating() {
+        window.dispatchEvent(new CustomEvent('cart-updating', {
+            detail: {
+                count: this.count,
+                subtotal: this.subtotal,
+                shipping_charge: this.shipping,
+                discount: this.discount,
+                tax: this.tax,
+                grand_total: this.total,
+            },
+        }));
+    },
+    openCart() {
+        this.open = true;
+        this.refresh();
+    },
+    closeCart() {
+        this.open = false;
+    },
+    lockPageScroll() {
+        const root = document.documentElement;
+        const body = document.body;
+        this.rootOverflow = root.style.overflow;
+        this.bodyOverflow = body.style.overflow;
+        this.bodyPaddingRight = body.style.paddingRight;
+        const scrollbarWidth = window.innerWidth - root.clientWidth;
+
+        root.style.overflow = 'hidden';
+        body.style.overflow = 'hidden';
+        if (scrollbarWidth > 0) body.style.paddingRight = `${scrollbarWidth}px`;
+    },
+    unlockPageScroll() {
+        document.documentElement.style.overflow = this.rootOverflow;
+        document.body.style.overflow = this.bodyOverflow;
+        document.body.style.paddingRight = this.bodyPaddingRight;
+    },
+    applyCart(data) {
+        if (!data) return;
+
+        if (Array.isArray(data.items)) {
+            this.items = data.items;
+        } else if (Number(data.count) === 0) {
+            this.items = [];
+        } else {
+            this.refresh();
+        }
+
+        if (data.subtotal !== undefined) this.subtotal = Number(data.subtotal);
+        if (data.count !== undefined) this.count = Number(data.count);
+        if (data.shipping_charge !== undefined) this.shipping = Number(data.shipping_charge);
+        if (data.discount !== undefined) this.discount = Number(data.discount);
+        if (data.tax !== undefined) this.tax = Number(data.tax);
+        if (data.shipping_charge === undefined || data.tax === undefined) this.recalculateTotals();
+    },
+    updateEndpoint(id) {
+        return '{{ route('cart.update', ['id' => '__cart_item__']) }}'.replace('__cart_item__', encodeURIComponent(id));
+    },
+    removeEndpoint(id) {
+        return '{{ route('cart.remove', ['id' => '__cart_item__']) }}'.replace('__cart_item__', encodeURIComponent(id));
+    },
     async refresh() {
+        this.loading = true;
         try {
             const res = await fetch('{{ route('cart.items') }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
             if (!res.ok) return;
             const data = await res.json();
-            this.items = data.items || [];
-            this.subtotal = data.subtotal || 0;
-            this.count = data.count || 0;
+            this.applyCart(data);
         } catch(e) {}
+        finally { this.loading = false; }
     },
     async updateQty(id, qty) {
-        const item = this.items.find(i => i.id === id);
-        if (!item || qty < 1 || qty > item.stock || this.busy) return;
+        const item = this.items.find(i => Number(i.id) === Number(id));
+        const nextQty = Number(qty);
+        if (!item || nextQty < 1 || nextQty > Number(item.stock) || this.busy) return;
+
+        const previousQty = Number(item.quantity);
+        const price = Number(item.final_price ?? item.price);
+        item.quantity = nextQty;
+        this.count += nextQty - previousQty;
+        this.subtotal += price * (nextQty - previousQty);
+        this.recalculateTotals();
+        this.dispatchCartUpdating();
         this.busy = true;
         try {
             const form = new FormData();
             form.append('_token', this.csrf);
-            form.append('quantity', qty);
+            form.append('quantity', nextQty);
             form.append('_method', 'PATCH');
-            const res = await fetch('/cart/update/' + id, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
+            const res = await fetch(this.updateEndpoint(id), { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
             if (!res.ok) throw new Error();
             const data = await res.json();
+            this.applyCart(data);
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-            await this.refresh();
-        } catch(e) {}
+        } catch(e) {
+            item.quantity = previousQty;
+            this.count -= nextQty - previousQty;
+            this.subtotal -= price * (nextQty - previousQty);
+            this.recalculateTotals();
+            this.dispatchCartUpdating();
+            window.GG?.error?.('Could not update the quantity. Please try again.');
+        }
         finally { this.busy = false; }
     },
     async removeItem(id) {
         if (this.busy) return;
+        const index = this.items.findIndex(i => Number(i.id) === Number(id));
+        if (index === -1) return;
+
+        const item = this.items[index];
+        const removedSubtotal = Number(item.final_price ?? item.price) * Number(item.quantity);
+        this.items.splice(index, 1);
+        this.count -= Number(item.quantity);
+        this.subtotal -= removedSubtotal;
+        this.recalculateTotals();
+        this.dispatchCartUpdating();
         this.busy = true;
         try {
             const form = new FormData();
             form.append('_token', this.csrf);
             form.append('_method', 'DELETE');
-            const res = await fetch('/cart/remove/' + id, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
+            const res = await fetch(this.removeEndpoint(id), { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
             if (!res.ok) throw new Error();
             const data = await res.json();
+            this.applyCart(data);
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-            await this.refresh();
-        } catch(e) {}
+        } catch(e) {
+            this.items.splice(index, 0, item);
+            this.count += Number(item.quantity);
+            this.subtotal += removedSubtotal;
+            this.recalculateTotals();
+            this.dispatchCartUpdating();
+            window.GG?.error?.('Could not remove this item. Please try again.');
+        }
         finally { this.busy = false; }
     }
 }"
-     x-on:open-mini-cart.window="open = true; refresh();"
-     x-on:cart-updated.window="refresh()">
+     x-on:open-mini-cart.window="openCart()"
+     x-on:cart-updated.window="applyCart($event.detail)"
+     x-on:keydown.escape.window="closeCart()">
 
     {{-- Overlay --}}
     <div x-show="open" x-cloak
@@ -67,8 +175,8 @@
          x-transition:leave="transition-opacity ease-in duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         @click="open = false"
-         class="fixed inset-0 bg-ink/40 backdrop-blur-[2px] z-[70]"></div>
+         @click="closeCart()"
+         class="fixed inset-0 bg-ink/40 backdrop-blur-[2px] z-[200]"></div>
 
     {{-- Panel --}}
     <aside x-show="open" x-cloak
@@ -78,7 +186,8 @@
            x-transition:leave="transition ease-in duration-200"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="translate-x-full"
-           class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[80] shadow-2xl flex flex-col">
+           role="dialog" aria-modal="true" aria-label="Shopping cart"
+           class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[210] shadow-2xl flex flex-col">
 
         {{-- Header --}}
         <div class="flex items-center justify-between px-5 py-4 border-b border-line bg-cream/60">
@@ -86,7 +195,7 @@
                 Your Cart
                 <span class="text-xs font-normal text-ink-soft bg-white border border-line px-2 py-0.5 rounded-full" x-text="count + ' item' + (count !== 1 ? 's' : '')"></span>
             </h3>
-            <button @click="open = false" class="p-2 rounded-lg text-ink-soft hover:text-ink hover:bg-line/60 transition" aria-label="Close cart">
+            <button @click="closeCart()" class="p-2 rounded-lg text-ink-soft hover:text-ink hover:bg-line/60 transition" aria-label="Close cart">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
@@ -102,7 +211,7 @@
                     <div class="w-16 h-16 mx-auto rounded-full bg-brand-100 flex items-center justify-center text-3xl select-none">🛒</div>
                     <p class="font-display text-lg font-semibold text-ink mt-4">Your cart is empty</p>
                     <p class="text-sm text-ink-soft mt-1">Add a few plants or goods to get started.</p>
-                    <button @click="open = false; window.location.href = '{{ route('products.index') }}'"
+                    <button @click="closeCart(); window.location.href = '{{ route('products.index') }}'"
                             class="gg-btn mt-5 px-6 py-2.5 text-sm">Start Shopping</button>
                 </div>
             </template>
@@ -144,15 +253,19 @@
                 <span class="text-ink-soft">Subtotal</span>
                 <span class="font-bold text-ink" x-text="fmt(subtotal)"></span>
             </div>
+            <div class="flex items-center justify-between border-t border-line pt-3">
+                <span class="font-semibold text-ink">Total</span>
+                <span class="font-display text-lg font-semibold text-brand-700" x-text="fmt(total)"></span>
+            </div>
             <p class="text-xs text-ink-soft" x-show="subtotal < 100" x-cloak>
                 Add <strong class="text-brand-700" x-text="fmt(100 - subtotal)"></strong> more for <strong>Free Shipping</strong>.
             </p>
             <p class="text-xs text-brand-700 font-medium" x-show="subtotal >= 100" x-cloak>✓ Free Shipping unlocked!</p>
             <div class="grid grid-cols-1 gap-2">
-                <button @click="open = false; window.location.href = '{{ route('cart.index') }}'"
+                <button @click="closeCart(); window.location.href = '{{ route('cart.index') }}'"
                         class="gg-btn-outline w-full py-3 text-sm">View Cart</button>
-                <button @click="open = false; window.location.href = '{{ route('checkout.create') }}'"
-                        class="gg-btn w-full py-3 text-sm">Checkout →</button>
+                <button @click="closeCart(); window.location.href = '{{ route('checkout.create') }}'"
+                        class="gg-btn w-full py-3 text-sm">Proceed to Checkout →</button>
             </div>
         </div>
     </aside>
