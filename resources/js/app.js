@@ -70,18 +70,19 @@ document.addEventListener('alpine:init', () => {
                 this.loading = false;
                 if (data.success) {
                     const badge = document.getElementById('cartCount');
-                    if (badge) badge.textContent = data.count;
-                    if (data.message) {
-                        const toast = document.createElement('div');
-                        toast.className = 'toast toast-success';
-                        toast.textContent = data.message;
-                        document.body.appendChild(toast);
-                        setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(40px)'; toast.style.transition = 'all 0.3s ease-out'; setTimeout(() => toast.remove(), 300); }, 3000);
+                    if (badge) {
+                        badge.textContent = data.count;
+                        badge.classList.remove('cart-count-pop');
+                        requestAnimationFrame(() => badge.classList.add('cart-count-pop'));
                     }
+                    window.GG.success(data.message || 'Added to your cart.');
                     window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
                 }
             })
-            .catch(() => { this.loading = false; });
+            .catch(() => {
+                this.loading = false;
+                window.GG.error('Could not add this item to your cart. Please try again.');
+            });
         }
     }));
 
@@ -98,20 +99,24 @@ document.addEventListener('alpine:init', () => {
             .then(r => r.json())
             .then(data => {
                 this.loading = false;
+                const icon = btn.querySelector('svg');
                 if (data.in_wishlist) {
-                    btn.querySelector('svg').classList.add('text-red-500', 'fill-red-500');
+                    icon?.classList.add('text-red-500', 'fill-red-500');
+                    btn.title = 'Remove from wishlist';
+                    btn.setAttribute('aria-label', 'Remove from wishlist');
                 } else {
-                    btn.querySelector('svg').classList.remove('text-red-500', 'fill-red-500');
+                    icon?.classList.remove('text-red-500', 'fill-red-500');
+                    btn.title = 'Add to wishlist';
+                    btn.setAttribute('aria-label', 'Add to wishlist');
                 }
-                if (data.message) {
-                    const toast = document.createElement('div');
-                    toast.className = 'toast toast-success';
-                    toast.textContent = data.message;
-                    document.body.appendChild(toast);
-                    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(40px)'; toast.style.transition = 'all 0.3s ease-out'; setTimeout(() => toast.remove(), 300); }, 3000);
-                }
+                btn.classList.remove('wishlist-pop');
+                requestAnimationFrame(() => btn.classList.add('wishlist-pop'));
+                window.GG.success(data.message || 'Wishlist updated.');
             })
-            .catch(() => { this.loading = false; });
+            .catch(() => {
+                this.loading = false;
+                window.GG.error('Could not update your wishlist. Please try again.');
+            });
         }
     }));
 
@@ -307,9 +312,25 @@ window.GG = {
         return document.querySelector('meta[name="csrf-token"]')?.content || '';
     },
     showToast(message, type = 'success') {
+        document.getElementById('gg-toast-region')?.remove();
+
         const toast = document.createElement('div');
+        toast.id = 'gg-toast-region';
         toast.className = type === 'error' ? 'toast toast-error' : 'toast toast-success';
-        toast.textContent = message;
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+
+        const text = document.createElement('span');
+        text.textContent = message;
+        toast.appendChild(text);
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'toast-close';
+        close.setAttribute('aria-label', 'Dismiss notification');
+        close.textContent = '×';
+        close.addEventListener('click', () => toast.remove());
+        toast.appendChild(close);
         document.body.appendChild(toast);
         setTimeout(() => {
             toast.style.opacity = '0';
@@ -395,6 +416,19 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => { if (document.body.contains(btn)) btn.disabled = false; }, 2500);
         }
     }, true);
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.scroll-fade-in').forEach(el => observer.observe(el));
+
+    document.querySelectorAll('[data-toast]').forEach(el => {
+        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(40px)'; el.style.transition = 'all 0.3s ease-out'; setTimeout(() => el.remove(), 300); }, 4000);
+    });
 });
 
 function initProductCarousels(scope = document) {
@@ -420,8 +454,6 @@ function initProductCarousels(scope = document) {
 }
 
 window.initProductCarousels = initProductCarousels;
-
-document.addEventListener('DOMContentLoaded', () => initProductCarousels());
 
 function initHomepageSliders(scope = document) {
     scope.querySelectorAll('.hero-slider.swiper').forEach((el) => {
@@ -455,21 +487,10 @@ function initHomepageSliders(scope = document) {
 
 window.initHomepageSliders = initHomepageSliders;
 
-document.addEventListener('DOMContentLoaded', () => initHomepageSliders());
+document.addEventListener('DOMContentLoaded', () => {
+    initProductCarousels();
+    initHomepageSliders();
+});
 
 Alpine.start();
 
-document.addEventListener('DOMContentLoaded', function () {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.scroll-fade-in').forEach(el => observer.observe(el));
-
-    document.querySelectorAll('[data-toast]').forEach(el => {
-        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(40px)'; el.style.transition = 'all 0.3s ease-out'; setTimeout(() => el.remove(), 300); }, 4000);
-    });
-});

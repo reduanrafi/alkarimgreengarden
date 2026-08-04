@@ -26,17 +26,9 @@
                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
                      class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                      loading="lazy"
-                     onerror="this.onerror=null; var emoji=this.dataset.fallback||'âœ¨'; this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-5xl select-none\'>'+emoji+'</div>';"
-                     data-fallback="@switch($product->category->slug ?? '')@case('mens-t-shirt')ðŸ‘•@break@case('womens-t-shirt')ðŸ‘š@break@case('bags')ðŸ‘œ@break@defaultâœ¨@endswitch">
+                      onerror="this.onerror=null; this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-5xl select-none\'>🌿</div>';">
             @else
-                <div class="w-full h-full flex items-center justify-center text-5xl select-none">
-                    @switch($product->category->slug ?? '')
-                        @case('mens-t-shirt') ðŸ‘• @break
-                        @case('womens-t-shirt') ðŸ‘š @break
-                        @case('bags') ðŸ‘œ @break
-                        @default âœ¨
-                    @endswitch
-                </div>
+                <div class="w-full h-full flex items-center justify-center text-5xl select-none">🌿</div>
             @endif
         </a>
 
@@ -62,7 +54,7 @@
 
         {{-- Hover actions --}}
         <div class="absolute top-2.5 right-2.5 flex flex-col gap-1.5 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-10">
-            <button type="button"
+            <button type="button" aria-label="Quick view {{ $product->name }}"
                     onclick="if (window.showPreview) { event.stopPropagation(); showPreview(this.closest('[data-slug]')); }"
                     class="w-9 h-9 rounded-full bg-white shadow-md hover:shadow-lg flex items-center justify-center transition-all hover:scale-110"
                     title="Quick view">
@@ -72,10 +64,11 @@
                 </svg>
             </button>
             @auth
-                <form action="{{ route('wishlist.toggle', $product) }}" method="POST" onclick="event.stopPropagation()">
+                <form action="{{ route('wishlist.toggle', $product) }}" method="POST" x-data="wishlistToggle" @submit.prevent="toggle($event.target, $refs.btn)" onclick="event.stopPropagation()">
                     @csrf
                     <button type="submit"
                             class="w-9 h-9 rounded-full bg-white shadow-md hover:shadow-lg flex items-center justify-center transition-all hover:scale-110"
+                            x-ref="btn" aria-label="{{ $product->isInWishlist(auth()->id()) ? 'Remove from wishlist' : 'Add to wishlist' }}"
                             title="{{ $product->isInWishlist(auth()->id()) ? 'Remove from wishlist' : 'Add to wishlist' }}">
                         <svg class="w-4 h-4 {{ $product->isInWishlist(auth()->id()) ? 'text-red-500 fill-red-500' : 'text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -138,11 +131,14 @@
         </div>
 
         @if($product->stock_status !== 'out_of_stock')
-            <form action="{{ route('cart.add', $product->id) }}" method="POST" class="mt-3">
+            <form action="{{ route('cart.add', $product->id) }}" method="POST" class="mt-3" x-data="addToCart" @submit.prevent="submit($event.target)">
                 @csrf
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit"
-                        class="w-full py-2.5 bg-[#1f5c3f] hover:bg-[#173d2b] text-white text-xs font-semibold rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                        :disabled="loading"
+                        class="w-full py-2.5 bg-[#1f5c3f] hover:bg-[#173d2b] text-white text-xs font-semibold rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70"
+                        :class="{ 'btn-loading': loading }"
+                        aria-label="Add {{ $product->name }} to cart">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
                     Add to Cart
                 </button>

@@ -295,10 +295,11 @@
          x-transition:leave="transition-all duration-200 ease-in"
          x-transition:leave-start="translate-x-0"
          x-transition:leave-end="translate-x-full"
-         class="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm bg-white shadow-2xl lg:hidden overflow-y-auto">
+         class="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm bg-white shadow-2xl lg:hidden overflow-y-auto"
+         role="dialog" aria-modal="true" aria-label="Product filters">
         <div class="sticky top-0 bg-white border-b border-gray-100 px-4 py-3.5 flex items-center justify-between z-10">
             <h2 class="text-base font-semibold text-gray-900">Filters</h2>
-            <button type="button" x-on:click="mobileFiltersOpen = false"
+            <button type="button" x-on:click="mobileFiltersOpen = false" aria-label="Close filters"
                     class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>

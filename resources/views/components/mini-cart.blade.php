@@ -11,13 +11,7 @@
     get sym() { return '{{ getCurrencySymbol() }}'; },
     fmt(n) { return this.sym + Number(n).toFixed(2); },
     emojiFor(item) {
-        switch (item.category_slug) {
-            case 'mens-t-shirt': return '👕';
-            case 'womens-t-shirt': return '👚';
-            case 'bags': return '👜';
-            case 'others': return '🪴';
-            default: return '🌿';
-        }
+        return '🌿';
     },
     async refresh() {
         try {

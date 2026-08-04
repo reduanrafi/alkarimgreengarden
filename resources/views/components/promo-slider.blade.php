@@ -8,8 +8,14 @@
     <div class="swiper promo-slider">
         <div class="swiper-wrapper">
             @foreach($carouselBanners as $banner)
-                <div class="swiper-slide promo-slide"
-                     @if($banner->image) style="background-image:url('{{ asset('storage/' . $banner->image) }}')" @endif>
+                <div class="swiper-slide promo-slide">
+                    @if($banner->image)
+                        <img src="{{ asset('storage/' . $banner->image) }}"
+                             alt="{{ $banner->title }}"
+                             class="promo-slide-img"
+                             loading="lazy">
+                    @endif
+                    <div class="promo-overlay"></div>
                     <div class="promo-inner">
                         <span class="eyebrow">Green Garden</span>
                         <h3>{{ $banner->title }}</h3>
@@ -28,7 +34,8 @@
 @else
     {{-- Fallback promo card when no carousel banners are configured --}}
     <div class="promo-slider">
-        <div class="promo-slide" style="background: linear-gradient(150deg, var(--green-700) 0%, var(--green-900) 100%);">
+        <div class="promo-slide">
+            <div class="promo-overlay" style="background: linear-gradient(150deg, var(--green-700) 0%, var(--green-900) 100%);"></div>
             <div class="promo-inner">
                 <span class="eyebrow">New This Week</span>
                 <h3>Fresh stock of our favourite products.</h3>

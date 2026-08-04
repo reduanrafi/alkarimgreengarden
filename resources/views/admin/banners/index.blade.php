@@ -32,8 +32,10 @@
                     <tr class="hover:bg-white/[0.02] transition">
                         <td class="px-4 py-3 text-gray-500 font-medium">#{{ $banner->id }}</td>
                         <td class="px-4 py-3">
-                            <img src="{{ asset('storage/' . $banner->image) }}" alt="{{ $banner->title }}"
-                                 class="w-20 h-12 rounded-lg object-cover border border-gray-700/50">
+                            <div class="relative w-20 h-12 rounded-lg overflow-hidden border border-gray-700/50">
+                                <img src="{{ asset('storage/' . $banner->image) }}" alt="{{ $banner->title }}"
+                                     class="w-full h-full object-cover">
+                            </div>
                         </td>
                         <td class="px-4 py-3">
                             <span class="font-medium text-gray-300">{{ $banner->title }}</span>

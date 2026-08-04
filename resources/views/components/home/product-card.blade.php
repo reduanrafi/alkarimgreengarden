@@ -44,13 +44,7 @@
 
         <a href="{{ route('products.show', $product->slug) }}" class="block w-full h-full">
             @php
-                $emoji = match ($product->category->slug ?? '') {
-                    'mens-t-shirt' => '👕',
-                    'womens-t-shirt' => '👚',
-                    'bags' => '👜',
-                    'others' => '🪴',
-                    default => '🌿',
-                };
+                $emoji = '🌿';
             @endphp
             @if($product->image)
                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
@@ -68,6 +62,7 @@
                   onclick="event.stopPropagation()">
                 @csrf
                 <button type="submit" x-ref="btn" class="gg-wishlist-btn"
+                        aria-label="{{ $product->isInWishlist(auth()->id()) ? 'Remove from wishlist' : 'Add to wishlist' }}"
                         title="{{ $product->isInWishlist(auth()->id()) ? 'Remove from wishlist' : 'Add to wishlist' }}">
                     <svg class="w-4 h-4 {{ $product->isInWishlist(auth()->id()) ? 'text-red-500 fill-red-500' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -106,7 +101,7 @@
                       x-data="addToCart" @submit.prevent="submit($event.target)">
                     @csrf
                     <input type="hidden" name="quantity" value="1">
-                    <button type="submit" class="gg-add-cart" title="Add to cart">＋</button>
+                    <button type="submit" class="gg-add-cart" title="Add to cart" aria-label="Add {{ $product->name }} to cart">＋</button>
                 </form>
             @endif
         </div>

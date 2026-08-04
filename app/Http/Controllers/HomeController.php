@@ -9,7 +9,7 @@ class HomeController extends Controller
     public function index()
     {
         $categories = CatalogService::categories();
-        $topCategories = CatalogService::topCategories();
+        $topCategories = CatalogService::topCategories(10);
         $featuredProducts = CatalogService::featuredProducts();
         $latestProducts = CatalogService::latestProducts();
         $bestSellers = CatalogService::bestSellers();

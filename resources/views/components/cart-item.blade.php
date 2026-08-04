@@ -57,15 +57,7 @@
                     <img src="{{ asset('storage/' . $item['image']) }}" alt="{{ $item['name'] }}" class="w-full h-full object-cover fade-img relative" loading="lazy">
                 </div>
             @else
-                <div class="w-full h-full flex items-center justify-center text-4xl select-none">
-                    @switch($item['category_slug'] ?? '')
-                        @case('mens-t-shirt') 👕 @break
-                        @case('womens-t-shirt') 👚 @break
-                        @case('bags') 👜 @break
-                        @case('others') 🪴 @break
-                        @default 🌿
-                    @endswitch
-                </div>
+                <div class="w-full h-full flex items-center justify-center text-4xl select-none">🌿</div>
             @endif
         </a>
 
@@ -123,9 +115,10 @@
 
             <div class="flex items-center gap-4 mt-2 pt-2 border-t border-line">
                 @auth
-                    <form action="{{ route('wishlist.toggle', $item['id']) }}" method="POST" class="inline">
+                    <form action="{{ route('wishlist.toggle', $item['id']) }}" method="POST" class="inline"
+                          x-data="wishlistToggle" @submit.prevent="toggle($event.target, $refs.btn)">
                         @csrf
-                        <button type="submit" class="text-xs text-ink-soft hover:text-red-500 transition flex items-center gap-1">
+                        <button type="submit" x-ref="btn" class="text-xs text-ink-soft hover:text-red-500 transition flex items-center gap-1" aria-label="Move to wishlist">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                             Move to Wishlist
                         </button>
