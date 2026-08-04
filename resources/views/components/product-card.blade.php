@@ -1,4 +1,4 @@
-@props(['product'])
+﻿@props(['product'])
 
 <div class="group relative flex flex-col h-full bg-white rounded-xl shadow-sm hover:shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
      data-id="{{ $product->id }}"
@@ -26,15 +26,15 @@
                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
                      class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                      loading="lazy"
-                     onerror="this.onerror=null; var emoji=this.dataset.fallback||'✨'; this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-5xl select-none\'>'+emoji+'</div>';"
-                     data-fallback="@switch($product->category->slug ?? '')@case('mens-t-shirt')👕@break@case('womens-t-shirt')👚@break@case('bags')👜@break@default✨@endswitch">
+                     onerror="this.onerror=null; var emoji=this.dataset.fallback||'âœ¨'; this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-5xl select-none\'>'+emoji+'</div>';"
+                     data-fallback="@switch($product->category->slug ?? '')@case('mens-t-shirt')ðŸ‘•@break@case('womens-t-shirt')ðŸ‘š@break@case('bags')ðŸ‘œ@break@defaultâœ¨@endswitch">
             @else
                 <div class="w-full h-full flex items-center justify-center text-5xl select-none">
                     @switch($product->category->slug ?? '')
-                        @case('mens-t-shirt') 👕 @break
-                        @case('womens-t-shirt') 👚 @break
-                        @case('bags') 👜 @break
-                        @default ✨
+                        @case('mens-t-shirt') ðŸ‘• @break
+                        @case('womens-t-shirt') ðŸ‘š @break
+                        @case('bags') ðŸ‘œ @break
+                        @default âœ¨
                     @endswitch
                 </div>
             @endif
@@ -90,7 +90,7 @@
         <div class="space-y-2 flex-1">
             <div class="flex items-center gap-1.5 min-h-4">
                 @if($product->category)
-                    <span class="text-[10px] uppercase tracking-wider text-indigo-500 font-semibold">{{ $product->category->name }}</span>
+                    <span class="text-[10px] uppercase tracking-wider text-[#1f5c3f] font-semibold">{{ $product->category->name }}</span>
                 @endif
                 @if($product->brand)
                     <span class="w-0.5 h-0.5 rounded-full bg-gray-300"></span>
@@ -99,7 +99,7 @@
             </div>
 
             <a href="{{ route('products.show', $product->slug) }}">
-                <h3 class="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 h-10 hover:text-indigo-600 transition-colors">{{ $product->name }}</h3>
+                <h3 class="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 h-10 hover:text-[#1f5c3f] transition-colors">{{ $product->name }}</h3>
             </a>
 
             <div class="flex items-center gap-1 min-h-4">
@@ -142,7 +142,7 @@
                 @csrf
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit"
-                        class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                        class="w-full py-2.5 bg-[#1f5c3f] hover:bg-[#173d2b] text-white text-xs font-semibold rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
                     Add to Cart
                 </button>

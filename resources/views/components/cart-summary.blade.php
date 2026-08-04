@@ -38,7 +38,7 @@
                 this.couponMsg = data.message;
                 window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
                 setTimeout(() => this.couponMsg = '', 4000);
-            } catch(e) { this.couponError = window.Fashion?.friendlyError ? window.Fashion.friendlyError(e) : 'Could not apply this coupon.'; }
+            } catch(e) { this.couponError = window.GG?.friendlyError ? window.GG.friendlyError(e) : 'Could not apply this coupon.'; }
             finally { this.couponLoading = false; }
         },
         async removeCoupon() {

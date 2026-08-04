@@ -842,3 +842,119 @@
     .gg-product-media { position: relative; }
 }
 
+/* ---------- Green Garden CMS pages (Prompt-10) ---------- */
+@layer components {
+    .gg-page-hero {
+        background: linear-gradient(120deg, var(--green-900) 0%, var(--green-700) 55%, var(--green-500) 100%);
+        padding: 64px 0 72px; color: #fff; position: relative; overflow: hidden;
+    }
+    .gg-page-hero::after {
+        content: ""; position: absolute; inset: 0;
+        background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+        background-size: 26px 26px; opacity: .5;
+    }
+    .gg-page-hero .gg-container { position: relative; z-index: 2; }
+    .gg-page-hero .eyebrow { color: var(--green-300); }
+    .gg-page-hero h1 {
+        font-family: 'Fraunces', serif; font-size: clamp(30px, 4.5vw, 44px);
+        color: #fff; margin: 10px 0 12px; line-height: 1.15; letter-spacing: -0.01em;
+    }
+    .gg-page-hero p { color: rgba(255,255,255,0.82); font-size: 15.5px; max-width: 620px; line-height: 1.7; }
+
+    .gg-crumb { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 12.5px; color: rgba(255,255,255,0.7); }
+    .gg-crumb a { color: var(--green-300); font-weight: 600; transition: color .2s; }
+    .gg-crumb a:hover { color: #fff; }
+
+    .gg-faq-wrap { max-width: 860px; margin: 0 auto; }
+    .gg-faq-filters { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 34px; }
+    .gg-faq-chip {
+        padding: 9px 18px; border-radius: 100px; background: #fff;
+        border: 1px solid var(--line); font-size: 13px; font-weight: 700; color: var(--ink);
+        transition: background .2s, color .2s, border-color .2s; cursor: pointer;
+    }
+    .gg-faq-chip:hover { border-color: var(--green-300); color: var(--green-700); }
+    .gg-faq-chip.active { background: var(--green-700); color: #fff; border-color: var(--green-700); }
+
+    .gg-faq-item {
+        background: #fff; border: 1px solid var(--line); border-radius: 16px;
+        margin-bottom: 12px; overflow: hidden; transition: border-color .2s, box-shadow .2s;
+    }
+    .gg-faq-item.open { border-color: var(--green-300); box-shadow: 0 6px 20px rgba(23, 61, 43, 0.08); }
+    .gg-faq-q {
+        width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        padding: 18px 22px; text-align: left; font-weight: 700; font-size: 15px; color: var(--ink); cursor: pointer;
+    }
+    .gg-faq-q .faq-emoji { font-size: 18px; flex-shrink: 0; }
+    .gg-faq-q .faq-text { flex: 1; }
+    .gg-faq-chevron { width: 28px; height: 28px; border-radius: 50%; background: var(--green-100); color: var(--green-700); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform .25s; }
+    .gg-faq-item.open .gg-faq-chevron { transform: rotate(180deg); }
+    .gg-faq-a { display: none; padding: 0 22px 20px; color: var(--ink-soft); font-size: 14.5px; line-height: 1.75; }
+    .gg-faq-item.open .gg-faq-a { display: block; }
+    .gg-faq-a p + p { margin-top: 10px; }
+
+    .gg-care-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    @media (max-width: 980px) { .gg-care-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 620px) { .gg-care-grid { grid-template-columns: 1fr; } }
+    .gg-care-card {
+        background: #fff; border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
+        display: flex; flex-direction: column; transition: transform .25s, box-shadow .25s, border-color .25s;
+    }
+    .gg-care-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(23, 61, 43, 0.10); border-color: var(--green-300); }
+    .gg-care-media { position: relative; aspect-ratio: 16/10; background: var(--green-100); overflow: hidden; }
+    .gg-care-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+    .gg-care-card:hover .gg-care-media img { transform: scale(1.05); }
+    .gg-care-cat {
+        position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.92);
+        color: var(--green-700); font-size: 11px; font-weight: 700; letter-spacing: .04em;
+        padding: 5px 12px; border-radius: 100px; text-transform: uppercase;
+    }
+    .gg-care-body { padding: 20px; display: flex; flex-direction: column; flex: 1; }
+    .gg-care-body h3 { font-family: 'Fraunces', serif; font-size: 19px; color: var(--green-900); line-height: 1.25; margin-bottom: 8px; }
+    .gg-care-body p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.65; flex: 1; }
+    .gg-care-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+
+    .gg-contact-card { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 24px; height: 100%; transition: transform .2s, box-shadow .2s, border-color .2s; }
+    .gg-contact-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(23, 61, 43, 0.08); border-color: var(--green-300); }
+    .gg-contact-ico { width: 46px; height: 46px; border-radius: 14px; background: var(--green-100); color: var(--green-700); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 14px; }
+    .gg-contact-card h3 { font-family: 'Fraunces', serif; font-size: 17px; color: var(--green-900); margin-bottom: 6px; }
+    .gg-contact-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; word-break: break-word; }
+
+    .gg-map-frame { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; line-height: 0; }
+    .gg-map-frame iframe { width: 100%; height: 320px; border: 0; }
+
+    .gg-about-story p { color: var(--ink-soft); font-size: 15px; line-height: 1.8; }
+    .gg-about-story p + p { margin-top: 14px; }
+
+    .gg-value-card { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 28px 24px; height: 100%; transition: transform .2s, box-shadow .2s, border-color .2s; }
+    .gg-value-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(23, 61, 43, 0.08); border-color: var(--green-300); }
+    .gg-value-card .gg-contact-ico { margin-bottom: 14px; }
+    .gg-value-card h3 { font-family: 'Fraunces', serif; font-size: 17px; color: var(--green-900); margin-bottom: 8px; }
+    .gg-value-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.7; }
+
+    .gg-stat-card { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 24px; text-align: center; height: 100%; }
+    .gg-stat-value { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 800; color: var(--green-700); line-height: 1.1; }
+    .gg-stat-label { font-size: 12.5px; color: var(--ink-soft); font-weight: 700; margin-top: 6px; letter-spacing: .02em; }
+
+    .gg-care-content { color: var(--ink-soft); font-size: 15px; line-height: 1.8; }
+    .gg-care-content h1, .gg-care-content h2, .gg-care-content h3, .gg-care-content h4 {
+        font-family: 'Fraunces', serif; color: var(--green-900); line-height: 1.3; margin: 26px 0 12px; letter-spacing: -0.01em;
+    }
+    .gg-care-content h2 { font-size: 24px; }
+    .gg-care-content h3 { font-size: 19px; }
+    .gg-care-content p { margin-bottom: 14px; }
+    .gg-care-content ul, .gg-care-content ol { margin: 0 0 16px 20px; }
+    .gg-care-content ul { list-style: disc; }
+    .gg-care-content ol { list-style: decimal; }
+    .gg-care-content li { margin-bottom: 6px; }
+    .gg-care-content a { color: var(--green-700); font-weight: 600; text-decoration: underline; }
+    .gg-care-content strong { color: var(--ink); }
+    .gg-care-content blockquote { border-left: 3px solid var(--green-300); padding-left: 16px; margin: 18px 0; color: var(--ink); font-style: italic; }
+    .gg-care-content img { border-radius: 14px; margin: 18px 0; max-width: 100%; height: auto; }
+    .gg-care-content hr { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
+    .gg-care-content table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+    .gg-care-content th, .gg-care-content td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; }
+    .gg-care-content th { background: var(--green-100); color: var(--green-900); font-weight: 700; }
+    .gg-care-content code { background: var(--green-100); color: var(--green-900); padding: 2px 6px; border-radius: 6px; font-size: 13px; }
+    .gg-care-content .gg-alert { margin: 18px 0; }
+}
+

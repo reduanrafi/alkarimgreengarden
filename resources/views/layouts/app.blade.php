@@ -1,22 +1,60 @@
+@php
+    $ggSiteName = setting('website_name', config('app.name'));
+    $ggOgImage = setting('og_image');
+    $ggFavicon = setting('favicon');
+    $ggSocials = array_values(array_filter([
+        setting('facebook_url'),
+        setting('instagram_url'),
+        setting('twitter_url'),
+        setting('youtube_url'),
+        setting('linkedin_url'),
+    ]));
+    $ggOrganization = [
+        '@context' => 'https://schema.org',
+        '@type' => 'Organization',
+        'name' => $ggSiteName,
+        'url' => url('/'),
+        'email' => setting('website_email'),
+        'telephone' => setting('website_phone'),
+        'logo' => setting('logo') ? asset('storage/' . setting('logo')) : null,
+        'image' => setting('logo') ? asset('storage/' . setting('logo')) : null,
+        'sameAs' => $ggSocials,
+    ];
+    $ggOrganization = array_filter($ggOrganization, fn ($v) => ! is_null($v) && $v !== '');
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="@yield('meta_description', config('app.name') . ' - Plants, planters and garden essentials for every space.')">
-    <meta name="keywords" content="plants, planters, gardening, garden, shop online">
-    <meta property="og:title" content="@yield('title', config('app.name'))">
-    <meta property="og:description" content="@yield('meta_description', config('app.name') . ' - Plants, planters and garden essentials.')">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:site_name" content="{{ config('app.name') }}">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="@yield('title', config('app.name'))">
-    <meta name="twitter:description" content="@yield('meta_description', config('app.name') . ' - Your destination for quality fashion.')">
-    <link rel="canonical" href="{{ url()->current() }}">
+    <meta name="description" content="@yield('meta_description', setting('meta_description', config('app.name') . ' - Plants, planters and garden essentials for every space.'))">
+    <meta name="keywords" content="@yield('meta_keywords', setting('meta_keywords', 'plants, planters, gardening, garden, shop online'))">
+    <meta name="robots" content="@yield('meta_robots', 'index, follow')">
+    @yield('meta')
 
-    <title>@yield('title', config('app.name', 'Green Garden'))</title>
+    <meta property="og:title" content="@yield('title', $ggSiteName)">
+    <meta property="og:description" content="@yield('meta_description', setting('meta_description', config('app.name') . ' - Plants, planters and garden essentials.'))">
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:site_name" content="{{ $ggSiteName }}">
+    @if ($ggOgImage)
+        <meta property="og:image" content="{{ asset('storage/' . $ggOgImage) }}">
+    @endif
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', $ggSiteName)">
+    <meta name="twitter:description" content="@yield('meta_description', setting('meta_description', config('app.name') . ' - Plants, planters and garden essentials.'))">
+    @if ($ggOgImage)
+        <meta name="twitter:image" content="{{ asset('storage/' . $ggOgImage) }}">
+    @endif
+    <link rel="canonical" href="@yield('canonical_url', url()->current())">
+    @if ($ggFavicon)
+        <link rel="icon" type="image/png" href="{{ asset('storage/' . $ggFavicon) }}">
+    @else
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    @endif
+
+    <title>@yield('title', $ggSiteName)</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -26,6 +64,24 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
+
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "{{ $ggSiteName }}",
+        "url": "{{ url('/') }}",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "{{ route('products.index') }}?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {!! json_encode($ggOrganization, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
+    @stack('structured_data')
 </head>
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-cream">
@@ -66,7 +122,7 @@
             @yield('content')
         </main>
 
-        @include('partials.footer')
+        <x-footer />
     </div>
 
     @stack('scripts')

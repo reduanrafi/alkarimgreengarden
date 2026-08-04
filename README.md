@@ -1,12 +1,12 @@
 # Green Garden Website
 
-A full-featured platform built with Laravel 12, Blade, Tailwind CSS, and MySQL.
+A full-featured plant & gardening e-commerce platform built with Laravel 12, Blade, Tailwind CSS, and MySQL.
 
 ## Features
 
 ### Customer Features
 - **Homepage** – Hero banner, category showcase, featured products
-- **Product Browsing** – Category filtering, advanced search (name, category, fabric, color, price range)
+- **Product Browsing** – Category filtering, advanced search (name, category, light needs, color, price range)
 - **Product Details** – Image gallery, stock status, related products
 - **Shopping Cart** – Session-based cart with CRUD operations
 - **Wishlist** – Add/remove products, move to cart
@@ -19,7 +19,7 @@ A full-featured platform built with Laravel 12, Blade, Tailwind CSS, and MySQL.
 ### Admin Panel
 - **Dashboard** – Stats cards (products, categories, orders, customers, revenue, low stock), recent orders, latest customers, low stock alerts
 - **Category Management** – CRUD with soft delete/restore, image upload, search
-- **Product Management** – CRUD with advanced fields (fabric, color, print, sizes, discount price, stock, featured, gallery images)
+- **Product Management** – CRUD with advanced fields (light needs, color, pot size, discount price, stock, featured, gallery images)
 - **Order Management** – View/update status and payment status, print invoice, search/filter
 - **Coupon Management** – CRUD with code, type (fixed/percentage), usage limits, expiry
 - **Customer Management** – View customers with order history and total spent
@@ -46,8 +46,8 @@ A full-featured platform built with Laravel 12, Blade, Tailwind CSS, and MySQL.
 
 ### 1. Clone the repository
 ```bash
-git clone <repository-url> fashion
-cd fashion
+git clone <repository-url> greengarden
+cd greengarden
 ```
 
 ### 2. Install PHP dependencies
@@ -69,7 +69,7 @@ Edit `.env` and configure:
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=fashion
+DB_DATABASE=greengarden
 DB_USERNAME=root
 DB_PASSWORD=
 
@@ -89,7 +89,7 @@ php artisan key:generate
 ```
 
 ### 6. Create database
-Create a MySQL database named `fashion` (or your configured name).
+Create a MySQL database named `greengarden` (or your configured name).
 
 ### 7. Run migrations and seeders
 ```bash
@@ -115,7 +115,7 @@ Visit `http://127.0.0.1:8000` in your browser.
 ## Default Accounts
 
 ### Admin Login
-- **Email:** admin@fashion.test
+- **Email:** admin@greengarden.test
 - **Password:** password
 
 ### Customer Registration
@@ -167,7 +167,7 @@ MAIL_FROM_ADDRESS=your@email.com
 ## Folder Structure
 
 ```
-fashion/
+greengarden/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
@@ -250,7 +250,7 @@ php artisan optimize
 - [ ] Checkout: shipping form, coupon apply, place order
 - [ ] Wishlist: add/remove, move to cart
 - [ ] Reviews: submit, view on product page, delete
-- [ ] Search: by name, category, fabric, color, price range
+- [ ] Search: by name, category, light needs, color, price range
 - [ ] Contact form submit
 - [ ] About page renders
 - [ ] User registration, login, profile update

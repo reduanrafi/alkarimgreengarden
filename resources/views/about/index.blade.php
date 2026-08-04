@@ -1,51 +1,126 @@
 @extends('layouts.app')
 
 @section('title', 'About Us - ' . config('app.name'))
+@section('meta_description', 'Discover the story, mission and values behind ' . config('app.name') . ' — a garden shop built on quality plants and honest care.')
+
+@php
+    $story = setting('about_story', "Founded with a love for everything green, we started as a small plant stall and grew into a curated garden shop. Today we help hundreds of homes grow healthier, happier plants.\n\nEvery plant we sell is grown and inspected with care. We pick varieties that thrive in real homes, and we stand behind them long after they leave our shelves — with honest advice on watering, light and repotting whenever you need it.");
+    $storyParagraphs = collect(preg_split('/\r\n|\r|\n/', trim($story)))->filter(fn ($p) => trim($p) !== '')->values();
+    $mission = setting('about_mission', 'To make beautiful, healthy plants accessible to everyone — and to give you the knowledge to keep them thriving.');
+    $vision = setting('about_vision', 'To become the most trusted plant destination in the region, known for quality stock, honest advice and a community of growing gardeners.');
+    $values = json_decode(setting('about_values', '[]'), true) ?: [];
+    $stats = json_decode(setting('about_stats', '[]'), true) ?: [];
+    $achievements = json_decode(setting('about_achievements', '[]'), true) ?: [];
+    $cover = setting('about_cover');
+@endphp
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="text-center mb-12">
-        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">About Us</h1>
-        <p class="text-gray-500 mt-2 max-w-2xl mx-auto">Discover our story, mission, and what drives us forward.</p>
+<section class="gg-page-hero">
+    <div class="gg-container">
+        <div class="gg-crumb">
+            <a href="{{ route('home') }}">Home</a>
+            <span aria-hidden="true">/</span>
+            <span>About Us</span>
+        </div>
+        <span class="eyebrow mt-4 block">Our Story</span>
+        <h1>About {{ setting('website_name', config('app.name')) }}</h1>
+        <p>Discover who we are, what drives us, and why our plants leave the greenhouse with a little extra love.</p>
     </div>
+</section>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
-        <div>
-            <div class="aspect-video bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center text-6xl">👗</div>
+<section class="py-14">
+    <div class="gg-container">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-16">
+            <div>
+                @if ($cover)
+                    <img src="{{ asset('storage/' . $cover) }}" alt="About {{ setting('website_name', config('app.name')) }}" class="rounded-2xl border border-line w-full object-cover">
+                @else
+                    <div class="rounded-2xl border border-line bg-gradient-to-br from-green-100 to-cream aspect-[4/3] flex items-center justify-center text-7xl">🌿</div>
+                @endif
+            </div>
+            <div class="gg-about-story">
+                <span class="gg-eyebrow mb-3">Our Story</span>
+                <h2 class="gg-title !text-3xl mb-4">From seed to your shelf</h2>
+                @foreach ($storyParagraphs as $paragraph)
+                    <p>{!! nl2br(e($paragraph)) !!}</p>
+                @endforeach
+            </div>
         </div>
-        <div>
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">Our Story</h2>
-            <p class="text-gray-600 leading-relaxed mb-4">Founded with a passion for quality fashion, we set out to create a brand that combines style, comfort, and affordability. What started as a small collection has grown into a curated marketplace offering everything from casual wear to premium accessories.</p>
-            <p class="text-gray-600 leading-relaxed">Every piece in our collection is thoughtfully selected to ensure our customers look and feel their best. We believe fashion is a form of self-expression, and we're here to help you tell your story.</p>
-        </div>
-    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-            <div class="text-4xl mb-4">🎯</div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">Our Mission</h3>
-            <p class="text-gray-500 text-sm leading-relaxed">To provide high-quality, fashionable clothing that empowers individuals to express their unique style without breaking the bank.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+            <div class="gg-value-card">
+                <div class="gg-contact-ico">🎯</div>
+                <h3>Our Mission</h3>
+                <p>{{ $mission }}</p>
+            </div>
+            <div class="gg-value-card">
+                <div class="gg-contact-ico">👁️</div>
+                <h3>Our Vision</h3>
+                <p>{{ $vision }}</p>
+            </div>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-            <div class="text-4xl mb-4">👁️</div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">Our Vision</h3>
-            <p class="text-gray-500 text-sm leading-relaxed">To become the most trusted and loved fashion destination, known for exceptional quality, outstanding service, and a seamless shopping experience.</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-            <div class="text-4xl mb-4">🤝</div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">Our Values</h3>
-            <p class="text-gray-500 text-sm leading-relaxed">Quality, integrity, customer satisfaction, and sustainability guide everything we do. We believe in doing business the right way.</p>
-        </div>
-    </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 sm:p-12 text-center">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Why Shop With Us?</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-            <div><div class="text-3xl mb-2">🚚</div><p class="font-semibold text-gray-900">Fast Shipping</p><p class="text-sm text-gray-500">Free delivery on orders over $100</p></div>
-            <div><div class="text-3xl mb-2">🛡️</div><p class="font-semibold text-gray-900">Secure Payments</p><p class="text-sm text-gray-500">Safe and encrypted transactions</p></div>
-            <div><div class="text-3xl mb-2">↩️</div><p class="font-semibold text-gray-900">Easy Returns</p><p class="text-sm text-gray-500">30-day return policy</p></div>
-            <div><div class="text-3xl mb-2">💬</div><p class="font-semibold text-gray-900">24/7 Support</p><p class="text-sm text-gray-500">We're here to help anytime</p></div>
+        @if ($values)
+            <div class="mb-16">
+                <div class="gg-section-head">
+                    <div>
+                        <span class="gg-eyebrow">What We Believe</span>
+                        <h2>Our Values</h2>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    @foreach ($values as $value)
+                        <div class="gg-value-card">
+                            <div class="gg-contact-ico">{{ $value['emoji'] ?? '🌿' }}</div>
+                            <h3>{{ $value['title'] ?? '' }}</h3>
+                            <p>{{ $value['text'] ?? '' }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        @if ($stats)
+            <div class="mb-16">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    @foreach ($stats as $stat)
+                        <div class="gg-stat-card">
+                            <div class="gg-stat-value">{{ $stat['value'] ?? $stat['emoji'] ?? '' }}</div>
+                            <div class="gg-stat-label">{{ $stat['label'] ?? $stat['title'] ?? '' }}</div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        @if ($achievements)
+            <div class="mb-16">
+                <div class="gg-section-head">
+                    <div>
+                        <span class="gg-eyebrow">Milestones</span>
+                        <h2>What We've Achieved</h2>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    @foreach ($achievements as $achievement)
+                        <div class="gg-value-card">
+                            <div class="gg-contact-ico">{{ $achievement['emoji'] ?? '🏆' }}</div>
+                            <h3>{{ $achievement['title'] ?? '' }}</h3>
+                            <p>{{ $achievement['text'] ?? '' }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <div class="gg-panel text-center p-10">
+            <h2 class="gg-title !text-2xl mb-2">Ready to grow with us?</h2>
+            <p class="text-ink-soft text-sm mb-6">Browse the shop or ask us anything — we love talking plants.</p>
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="{{ route('products.index') }}" class="gg-btn">Shop the Collection</a>
+                <a href="{{ route('contact') }}" class="gg-btn-outline">Get in Touch</a>
+            </div>
         </div>
     </div>
-</div>
+</section>
 @endsection

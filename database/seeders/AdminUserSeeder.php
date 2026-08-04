@@ -10,15 +10,15 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate(
-            ['email' => 'admin@fashion.test'],
+            ['email' => 'admin@greengarden.test'],
             [
                 'name' => 'Admin',
-                'email' => 'admin@fashion.test',
+                'email' => 'admin@greengarden.test',
                 'password' => bcrypt('password'),
                 'is_admin' => true,
             ]
         );
 
-        $this->command->info('Admin user created: admin@fashion.test / password');
+        $this->command->info('Admin user created: admin@greengarden.test / password');
     }
 }

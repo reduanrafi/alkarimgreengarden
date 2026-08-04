@@ -25,7 +25,7 @@
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
         } catch(e) {
             this.qty -= change;
-            window.Fashion?.error ? window.Fashion.error('Could not update the quantity. Please try again.') : null;
+            window.GG?.error ? window.GG.error('Could not update the quantity. Please try again.') : null;
         }
         finally { this.updating = false; }
     },
@@ -43,7 +43,7 @@
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
         } catch(e) {
             this.removing = false;
-            window.Fashion?.error ? window.Fashion.error('Could not remove this item. Please try again.') : null;
+            window.GG?.error ? window.GG.error('Could not remove this item. Please try again.') : null;
         }
     }
 }" class="bg-white rounded-2xl border border-line shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md group relative">

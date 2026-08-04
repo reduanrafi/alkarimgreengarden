@@ -268,11 +268,11 @@ document.addEventListener('alpine:init', () => {
             const max = Number(this.filters.max_price);
             if ((this.filters.min_price !== '' && (isNaN(min) || min < 0)) ||
                 (this.filters.max_price !== '' && (isNaN(max) || max < 0))) {
-                window.Fashion.error('Please enter a valid price range.');
+                window.GG.error('Please enter a valid price range.');
                 return;
             }
             if (this.filters.min_price !== '' && this.filters.max_price !== '' && min > max) {
-                window.Fashion.error('Minimum price cannot be greater than maximum price.');
+                window.GG.error('Minimum price cannot be greater than maximum price.');
                 return;
             }
             this.page = 1;
@@ -302,7 +302,7 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
-window.Fashion = {
+window.GG = {
     csrf() {
         return document.querySelector('meta[name="csrf-token"]')?.content || '';
     },

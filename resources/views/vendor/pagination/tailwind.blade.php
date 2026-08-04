@@ -1,4 +1,4 @@
-@if ($paginator->hasPages())
+﻿@if ($paginator->hasPages())
     <nav role="navigation" aria-label="{{ __('Pagination Navigation') }}" class="flex flex-col sm:flex-row items-center justify-between gap-4">
         {{-- Mobile --}}
         <div class="flex items-center gap-2 sm:hidden w-full justify-between">
@@ -66,7 +66,7 @@
                     @if (is_array($element))
                         @foreach ($element as $page => $url)
                             @if ($page == $paginator->currentPage())
-                                <span aria-current="page" class="inline-flex items-center justify-center w-10 h-10 text-sm font-bold text-white bg-indigo-600 rounded-xl shadow-sm">
+                                <span aria-current="page" class="inline-flex items-center justify-center w-10 h-10 text-sm font-bold text-white bg-[#1f5c3f] rounded-xl shadow-sm">
                                     {{ $page }}
                                 </span>
                             @else

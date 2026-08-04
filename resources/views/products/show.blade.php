@@ -10,9 +10,9 @@
     foreach ($eavSpecs as $attrName => $items) {
         $specRows->push([$attrName, $items->pluck('attributeValue.value')->implode(', ')]);
     }
-    if ($product->fabric) $specRows->push(['Fabric', $product->fabric]);
+    if ($product->fabric) $specRows->push(['Light', $product->fabric]);
     if ($product->color) $specRows->push(['Color', $product->color]);
-    if ($product->print) $specRows->push(['Print', $product->print]);
+    if ($product->print) $specRows->push(['Type', $product->print]);
     if ($product->size) $specRows->push(['Size', $product->size]);
 
     $reviews = $product->reviews;

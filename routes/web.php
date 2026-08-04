@@ -13,17 +13,23 @@ use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLogControll
 use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\PlantCareController as AdminPlantCareController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\AttributeController as AdminAttributeController;
 use App\Http\Controllers\Admin\AttributeValueController as AdminAttributeValueController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Admin\FaqController as AdminFaqController;
+use App\Http\Controllers\Admin\NewsletterController as AdminNewsletterController;
+use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PlantCareController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
@@ -48,10 +54,16 @@ Route::get('/about', [AboutController::class, 'index'])->name('about');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
+Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
+
+Route::get('/care-guides', [PlantCareController::class, 'index'])->name('care.index');
+Route::get('/care-guides/{slug}', [PlantCareController::class, 'show'])->name('care.show');
+
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
 Route::post('/newsletter', [NewsletterController::class, 'store'])->name('newsletter.store');
+Route::match(['get', 'post'], '/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 Route::get('/dashboard', [AccountController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -186,6 +198,31 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/coupons/{coupon}/edit', [AdminCouponController::class, 'edit'])->name('coupons.edit');
     Route::put('/coupons/{coupon}', [AdminCouponController::class, 'update'])->name('coupons.update');
     Route::delete('/coupons/{coupon}', [AdminCouponController::class, 'destroy'])->name('coupons.destroy');
+
+    Route::get('/faqs', [AdminFaqController::class, 'index'])->name('faqs.index');
+    Route::get('/faqs/create', [AdminFaqController::class, 'create'])->name('faqs.create');
+    Route::post('/faqs', [AdminFaqController::class, 'store'])->name('faqs.store');
+    Route::get('/faqs/{faq}/edit', [AdminFaqController::class, 'edit'])->name('faqs.edit');
+    Route::put('/faqs/{faq}', [AdminFaqController::class, 'update'])->name('faqs.update');
+    Route::delete('/faqs/{faq}', [AdminFaqController::class, 'destroy'])->name('faqs.destroy');
+    Route::post('/faqs/{faq}/toggle', [AdminFaqController::class, 'toggle'])->name('faqs.toggle');
+
+    Route::get('/plant-care', [AdminPlantCareController::class, 'index'])->name('plant-care.index');
+    Route::get('/plant-care/create', [AdminPlantCareController::class, 'create'])->name('plant-care.create');
+    Route::post('/plant-care', [AdminPlantCareController::class, 'store'])->name('plant-care.store');
+    Route::get('/plant-care/{guide}/edit', [AdminPlantCareController::class, 'edit'])->name('plant-care.edit');
+    Route::put('/plant-care/{guide}', [AdminPlantCareController::class, 'update'])->name('plant-care.update');
+    Route::delete('/plant-care/{guide}', [AdminPlantCareController::class, 'destroy'])->name('plant-care.destroy');
+    Route::post('/plant-care/{guide}/toggle', [AdminPlantCareController::class, 'toggle'])->name('plant-care.toggle');
+
+    Route::get('/newsletter-subscribers', [AdminNewsletterController::class, 'index'])->name('newsletter.index');
+    Route::get('/newsletter-subscribers/export', [AdminNewsletterController::class, 'export'])->name('newsletter.export');
+    Route::post('/newsletter-subscribers/{subscriber}/toggle', [AdminNewsletterController::class, 'toggle'])->name('newsletter.toggle');
+    Route::delete('/newsletter-subscribers/{subscriber}', [AdminNewsletterController::class, 'destroy'])->name('newsletter.destroy');
+
+    Route::get('/contact-messages', [AdminContactMessageController::class, 'index'])->name('contact-messages.index');
+    Route::get('/contact-messages/{message}', [AdminContactMessageController::class, 'show'])->name('contact-messages.show');
+    Route::delete('/contact-messages/{message}', [AdminContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
 
     Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/sales', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('reports.sales');

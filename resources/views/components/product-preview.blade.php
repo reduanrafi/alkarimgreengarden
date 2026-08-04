@@ -34,9 +34,9 @@
             </div>
 
             <div id="previewDetails" class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                <div><span class="text-gray-400">Fabric:</span> <span id="previewFabric" class="text-gray-700 font-medium"></span></div>
+                <div><span class="text-gray-400">Light:</span> <span id="previewFabric" class="text-gray-700 font-medium"></span></div>
                 <div><span class="text-gray-400">Color:</span> <span id="previewColor" class="text-gray-700 font-medium"></span></div>
-                <div><span class="text-gray-400">Print:</span> <span id="previewPrint" class="text-gray-700 font-medium"></span></div>
+                <div><span class="text-gray-400">Type:</span> <span id="previewPrint" class="text-gray-700 font-medium"></span></div>
                 <div><span class="text-gray-400">Size:</span> <span id="previewSize" class="text-gray-700 font-medium"></span></div>
             </div>
 

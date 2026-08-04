@@ -35,7 +35,7 @@ input[type=number] { -moz-appearance: textfield; }
                 const data = await res.json();
                 if (!res.ok) throw new Error();
                 window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-            } catch(e) { window.Fashion?.error ? window.Fashion.error('Could not clear the cart. Please try again.') : null; }
+            } catch(e) { window.GG?.error ? window.GG.error('Could not clear the cart. Please try again.') : null; }
             finally { this.clearing = false; }
         }
      }"

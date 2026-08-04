@@ -71,7 +71,7 @@
         <div class="grid grid-cols-2 gap-3 text-sm">
             @if($product->fabric)
                 <div class="gg-pdp-spec px-4 py-3">
-                    <span class="k block">Fabric</span>
+                    <span class="k block">Light</span>
                     <p class="v mt-1">{{ $product->fabric }}</p>
                 </div>
             @endif
@@ -88,7 +88,7 @@
             @endif
             @if($product->print)
                 <div class="gg-pdp-spec px-4 py-3">
-                    <span class="k block">Print</span>
+                    <span class="k block">Type</span>
                     <p class="v mt-1">{{ $product->print }}</p>
                 </div>
             @endif
