@@ -11,7 +11,7 @@
     <section class="split-section">
         <div class="gg-container split-grid">
             <x-category-sidebar :categories="$categories" />
-            <x-promo-slider :carouselBanners="$carouselBanners" />
+            <x-promo-slider :carouselBanners="$carouselBanners" :fixedBanner="$fixedBanner" />
         </div>
     </section>
 

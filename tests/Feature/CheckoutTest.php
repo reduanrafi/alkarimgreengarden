@@ -55,11 +55,12 @@ class CheckoutTest extends TestCase
             'district' => 'Dhaka',
             'address' => '123 Street',
             'payment_method' => 'cash_on_delivery',
+            'terms' => '1',
         ]);
 
         $this->assertDatabaseHas('orders', [
             'customer_name' => 'John Doe',
-            'grand_total' => 69.97,
+            'grand_total' => 72.97,
         ]);
     }
 }

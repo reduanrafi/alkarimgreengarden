@@ -1,7 +1,7 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import Swiper from 'swiper';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import { Navigation, Pagination, Autoplay, Keyboard } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -460,12 +460,18 @@ function initHomepageSliders(scope = document) {
         if (el._heroSwiper) return;
 
         el._heroSwiper = new Swiper(el, {
+            modules: [Navigation, Pagination, Autoplay, Keyboard],
             loop: true,
-            speed: 700,
-            autoplay: { delay: 6000, disableOnInteraction: false },
+            speed: 500,
+            autoplay: { delay: 2000, disableOnInteraction: false, pauseOnMouseEnter: true },
+            keyboard: { enabled: true, onlyInViewport: true },
+            allowTouchMove: true,
             pagination: {
                 el: el.querySelector('.swiper-pagination'),
                 clickable: true,
+                renderBullet(index, className) {
+                    return `<button type="button" class="${className}" aria-label="Go to banner ${index + 1}"></button>`;
+                },
             },
             navigation: {
                 nextEl: el.querySelector('.swiper-button-next'),
@@ -474,13 +480,22 @@ function initHomepageSliders(scope = document) {
         });
     });
 
-    scope.querySelectorAll('.promo-slider.swiper').forEach((el) => {
+    scope.querySelectorAll('.homepage-carousel-banner.swiper').forEach((el) => {
         if (el._promoSwiper) return;
 
         el._promoSwiper = new Swiper(el, {
+            modules: [Navigation, Pagination, Autoplay],
             loop: true,
             speed: 700,
-            autoplay: { delay: 5000, disableOnInteraction: false },
+            autoplay: { delay: 2000, disableOnInteraction: false },
+            pagination: {
+                el: el.querySelector('.swiper-pagination'),
+                clickable: true,
+            },
+            navigation: {
+                nextEl: el.querySelector('.swiper-button-next'),
+                prevEl: el.querySelector('.swiper-button-prev'),
+            },
         });
     });
 }
@@ -493,4 +508,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 Alpine.start();
-

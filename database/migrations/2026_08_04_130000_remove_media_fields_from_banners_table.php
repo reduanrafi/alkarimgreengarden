@@ -9,7 +9,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('banners', function (Blueprint $table) {
-            $table->dropColumn(['media_type', 'video_path']);
+            $columns = [];
+            if (Schema::hasColumn('banners', 'media_type')) {
+                $columns[] = 'media_type';
+            }
+            if (Schema::hasColumn('banners', 'video_path')) {
+                $columns[] = 'video_path';
+            }
+            if (!empty($columns)) {
+                $table->dropColumn($columns);
+            }
         });
     }
 

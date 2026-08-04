@@ -3,14 +3,26 @@
 @php
     $heroBanners = $heroBanners ?? collect();
     $brand = config('app.name', 'Green Garden');
+    $firstHeroImage = $heroBanners->first()?->image;
 @endphp
 
 @if($heroBanners->count() > 0)
-    <section class="swiper hero-slider">
-        <div class="swiper-wrapper">
+    @if($firstHeroImage)
+        @push('styles')
+            <link rel="preload" as="image" href="{{ asset('storage/' . $firstHeroImage) }}" fetchpriority="high">
+        @endpush
+    @endif
+
+    <section class="swiper hero-slider" role="region" aria-roledescription="carousel" aria-label="Featured promotions">
+        <div id="hero-carousel-track" class="swiper-wrapper" aria-live="off">
             @foreach($heroBanners as $banner)
-                <div class="swiper-slide hero-slide"
-                     @if($banner->image) style="background-image:url('{{ asset('storage/' . $banner->image) }}')" @endif>
+                <article class="swiper-slide hero-slide" role="group" aria-roledescription="slide" aria-label="{{ $loop->iteration }} of {{ $heroBanners->count() }}">
+                    @if($banner->image)
+                        <img src="{{ asset('storage/' . $banner->image) }}"
+                             alt=""
+                             class="hero-slide-img"
+                             @if($loop->first) loading="eager" fetchpriority="high" @else loading="lazy" @endif>
+                    @endif
                     <div class="hero-content">
                         <span class="eyebrow">{{ $brand }}</span>
                         <h1>{{ $banner->title }}</h1>
@@ -24,12 +36,12 @@
                             <a href="{{ route('products.index') }}" class="gg-btn-ghost">Explore Collection</a>
                         </div>
                     </div>
-                </div>
+                </article>
             @endforeach
         </div>
         <div class="swiper-pagination"></div>
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
+        <button type="button" class="swiper-button-prev" aria-label="Previous banner" aria-controls="hero-carousel-track"></button>
+        <button type="button" class="swiper-button-next" aria-label="Next banner" aria-controls="hero-carousel-track"></button>
     </section>
 @else
     {{-- Fallback hero when no banners are configured --}}
