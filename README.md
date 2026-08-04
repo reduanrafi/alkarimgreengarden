@@ -1,6 +1,6 @@
 # Green Garden Website
 
-A full-featured fashion e-commerce platform built with Laravel 12, Blade, Tailwind CSS, and MySQL.
+A full-featured platform built with Laravel 12, Blade, Tailwind CSS, and MySQL.
 
 ## Features
 
