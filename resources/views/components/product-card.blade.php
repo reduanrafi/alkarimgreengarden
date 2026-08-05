@@ -52,31 +52,24 @@
             @endif
         </div>
 
-        {{-- Hover actions --}}
-        <div class="absolute top-2.5 right-2.5 flex flex-col gap-1.5 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-10">
-            <button type="button" aria-label="Quick view {{ $product->name }}"
-                    onclick="if (window.showPreview) { event.stopPropagation(); showPreview(this.closest('[data-slug]')); }"
-                    class="w-9 h-9 rounded-full bg-white shadow-md hover:shadow-lg flex items-center justify-center transition-all hover:scale-110"
-                    title="Quick view">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-            </button>
-            @auth
-                <form action="{{ route('wishlist.toggle', $product) }}" method="POST" x-data="wishlistToggle" @submit.prevent="toggle($event.target, $refs.btn)" onclick="event.stopPropagation()">
+        @if($product->stock_status !== 'out_of_stock')
+            <div class="absolute inset-x-3 bottom-3 z-20 grid grid-cols-3 gap-1.5 translate-y-2 opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+                <a href="{{ route('products.show', $product->slug) }}" class="rounded-lg bg-white/95 px-1 py-2 text-center text-[10px] font-semibold text-ink shadow-md transition hover:bg-brand-700 hover:text-white">View Details</a>
+                @auth
+                    <form action="{{ route('wishlist.toggle', $product) }}" method="POST" x-data="wishlistToggle" @submit.prevent="toggle($event.target, $refs.btn)">
+                        @csrf
+                        <button type="submit" x-ref="btn" class="h-full w-full rounded-lg bg-white/95 px-1 py-2 text-[10px] font-semibold text-ink shadow-md transition hover:bg-brand-700 hover:text-white">Add to Wishlist</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="rounded-lg bg-white/95 px-1 py-2 text-center text-[10px] font-semibold text-ink shadow-md transition hover:bg-brand-700 hover:text-white">Add to Wishlist</a>
+                @endauth
+                <form action="{{ route('cart.add', $product->id) }}" method="POST" x-data="addToCart" @submit.prevent="submit($event.target)">
                     @csrf
-                    <button type="submit"
-                            class="w-9 h-9 rounded-full bg-white shadow-md hover:shadow-lg flex items-center justify-center transition-all hover:scale-110"
-                            x-ref="btn" aria-label="{{ $product->isInWishlist(auth()->id()) ? 'Remove from wishlist' : 'Add to wishlist' }}"
-                            title="{{ $product->isInWishlist(auth()->id()) ? 'Remove from wishlist' : 'Add to wishlist' }}">
-                        <svg class="w-4 h-4 {{ $product->isInWishlist(auth()->id()) ? 'text-red-500 fill-red-500' : 'text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                        </svg>
-                    </button>
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" :disabled="loading" class="h-full w-full rounded-lg bg-brand-700 px-1 py-2 text-[10px] font-semibold text-white shadow-md transition hover:bg-brand-900 disabled:opacity-70">Add to Cart</button>
                 </form>
-            @endauth
-        </div>
+            </div>
+        @endif
     </div>
 
     <div class="p-3.5 sm:p-4 flex flex-col flex-1">

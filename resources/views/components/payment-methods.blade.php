@@ -24,7 +24,7 @@
         </div>
     </label>
 
-    <label class="gg-radio-card gg-radio-disabled">
+    <label class="gg-radio-card gg-radio-disabled" @click.prevent="window.GG?.showToast('Will be available soon.')">
         <input type="radio" name="payment_method" value="sslcommerz" disabled>
         <div class="flex items-center gap-3 flex-1">
             <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -37,7 +37,7 @@
         </div>
     </label>
 
-    <label class="gg-radio-card gg-radio-disabled">
+    <label class="gg-radio-card gg-radio-disabled" @click.prevent="window.GG?.showToast('Will be available soon.')">
         <input type="radio" name="payment_method" value="card" disabled>
         <div class="flex items-center gap-3 flex-1">
             <div class="w-10 h-10 rounded-lg bg-[#d5e6d5] flex items-center justify-center">
@@ -50,7 +50,7 @@
         </div>
     </label>
 
-    <label class="gg-radio-card gg-radio-disabled">
+    <label class="gg-radio-card gg-radio-disabled" @click.prevent="window.GG?.showToast('Will be available soon.')">
         <input type="radio" name="payment_method" value="stripe" disabled>
         <div class="flex items-center gap-3 flex-1">
             <div class="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center">
@@ -63,7 +63,7 @@
         </div>
     </label>
 
-    <label class="gg-radio-card gg-radio-disabled">
+    <label class="gg-radio-card gg-radio-disabled" @click.prevent="window.GG?.showToast('Will be available soon.')">
         <input type="radio" name="payment_method" value="paypal" disabled>
         <div class="flex items-center gap-3 flex-1">
             <div class="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center">

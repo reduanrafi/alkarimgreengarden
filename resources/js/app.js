@@ -77,6 +77,7 @@ document.addEventListener('alpine:init', () => {
                     }
                     window.GG.success(data.message || 'Added to your cart.');
                     window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
+                    window.dispatchEvent(new CustomEvent('open-mini-cart', { detail: data }));
                 }
             })
             .catch(() => {
