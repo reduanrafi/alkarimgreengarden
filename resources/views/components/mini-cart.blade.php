@@ -5,6 +5,7 @@
         open: false,
         loading: false,
         updating: false,
+        removingId: null,
         items: @js($items),
         subtotal: Number({{ $subtotal }}),
         count: Number({{ array_sum(array_column($items, 'quantity')) }}),
@@ -32,6 +33,9 @@
         },
         updateUrl(id) {
             return '{{ route('cart.update', ['id' => '__cart_item__']) }}'.replace('__cart_item__', encodeURIComponent(id));
+        },
+        removeUrl(id) {
+            return '{{ route('cart.remove', ['id' => '__cart_item__']) }}'.replace('__cart_item__', encodeURIComponent(id));
         },
 
         init() {
@@ -132,6 +136,31 @@
                 this.updating = false;
             }
         },
+        async removeItem(item) {
+            if (this.removingId === item.id) return;
+
+            this.removingId = item.id;
+            try {
+                const form = new FormData();
+                form.append('_token', this.csrf);
+                form.append('_method', 'DELETE');
+
+                const response = await fetch(this.removeUrl(item.id), {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: form,
+                });
+                if (!response.ok) throw new Error('Unable to remove item');
+
+                const cart = await response.json();
+                this.applyCart(cart);
+                this.announceCart(cart);
+            } catch (error) {
+                window.GG?.error?.('Could not remove this item. Please try again.');
+            } finally {
+                this.removingId = null;
+            }
+        },
     }"
     x-on:open-mini-cart.window="openCart($event.detail)"
     x-on:cart-updated.window="applyCart($event.detail)"
@@ -193,7 +222,14 @@
                         </a>
 
                         <div class="min-w-0 flex-1">
-                            <a :href="'/products/' + item.slug" class="line-clamp-2 text-sm font-semibold leading-snug text-ink transition hover:text-brand-700" x-text="item.name"></a>
+                            <div class="flex items-start justify-between gap-2">
+                                <a :href="'/products/' + item.slug" class="line-clamp-2 text-sm font-semibold leading-snug text-ink transition hover:text-brand-700" x-text="item.name"></a>
+                                <button type="button" @click="removeItem(item)" :disabled="removingId === item.id"
+                                        class="shrink-0 rounded-md p-1 text-ink-soft transition hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                                        :aria-label="'Remove ' + item.name">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
                             <p class="mt-1 text-xs font-semibold text-brand-700">
                                 Unit price: <span x-text="format(unitPrice(item))"></span>
                             </p>

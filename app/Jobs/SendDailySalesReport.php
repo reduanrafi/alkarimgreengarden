@@ -31,7 +31,7 @@ class SendDailySalesReport implements ShouldQueue
 
     public function handle(): void
     {
-        $email = Setting::get('admin_email');
+        $email = config('mail.daily_sales_report_to') ?: Setting::get('admin_email');
 
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $email = User::query()
