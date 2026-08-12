@@ -1,4 +1,4 @@
-@extends('layouts.guest')
+﻿@extends('layouts.guest')
 
 @section('title', __('Confirm Password') . ' — ' . config('app.name'))
 
@@ -12,12 +12,12 @@
         <div class="space-y-1.5">
             <label for="password" class="block text-sm font-medium text-gray-600">Password</label>
             <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="Enter your password"
-                   class="w-full bg-white/60 border border-gray-200 rounded-xl py-3 px-4 text-gray-800 placeholder-gray-400 text-sm outline-none transition-all duration-200 focus:border-[#66D9F1] focus:ring-2 focus:ring-[#66D9F1]/20 @error('password') border-red-300 bg-red-50 @enderror">
+                   class="w-full bg-white/70 border border-[#e6e9e2] rounded-xl py-3 px-4 text-gray-800 placeholder-gray-400 text-sm outline-none transition-all duration-200 focus:border-[#3f8a5c] focus:ring-2 focus:ring-[#3f8a5c]/20 @error('password') border-red-300 bg-red-50 @enderror">
             <x-input-error :messages="$errors->get('password')" class="mt-1" />
         </div>
 
         <button type="submit" @click="loading = true" :disabled="loading"
-                class="w-full py-3 px-6 rounded-xl text-white font-semibold text-sm bg-gradient-to-r from-[#66D9F1] to-[#4CC9F0] shadow-lg shadow-[#66D9F1]/20 hover:shadow-xl hover:shadow-[#66D9F1]/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                class="w-full py-3 px-6 rounded-xl text-white font-semibold text-sm bg-gradient-to-r from-[#173d2b] to-[#3f8a5c] shadow-lg shadow-[#1f5c3f]/25 hover:shadow-xl hover:shadow-[#1f5c3f]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
             <template x-if="!loading">
                 <span>Confirm</span>
             </template>

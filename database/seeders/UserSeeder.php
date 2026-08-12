@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
     {
         // 1. Admin User
         User::updateOrCreate(
-            ['email' => 'admin@example.com'],
+            ['email' => 'admin@garden.com'],
             [
                 'name' => 'Admin User',
                 'password' => Hash::make('password'),
@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
                 'status' => 'active',
             ]
         );
-        $this->command->info('Admin user verified/created: admin@example.com / password');
+        $this->command->info('Admin user verified/created: admin@garden.com / password');
 
         // 2. Customer User
         User::updateOrCreate(

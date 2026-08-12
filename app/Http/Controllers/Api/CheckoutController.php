@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\CheckoutRequest;
-use App\Mail\OrderPlaced;
+use App\Jobs\SendOrderConfirmationEmail;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\ApiCartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
@@ -85,9 +85,15 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            try {
-                Mail::to($order->email)->send(new OrderPlaced($order));
-            } catch (\Exception $e) {
+            if (filled($order->email)) {
+                try {
+                    SendOrderConfirmationEmail::dispatch($order->id);
+                } catch (\Throwable $e) {
+                    Log::warning('Order confirmation email could not be queued.', [
+                        'order_id' => $order->id,
+                        'exception' => $e->getMessage(),
+                    ]);
+                }
             }
 
             $this->cart->clear();

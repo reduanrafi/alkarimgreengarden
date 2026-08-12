@@ -23,7 +23,7 @@ class ReportController extends Controller
         $totalCustomers = User::where('is_admin', false)->count();
 
         $revenueByMonth = Order::whereIn('status', ['delivered', 'completed'])
-            ->selectRaw("DATE_FORMAT(ordered_at, '%Y-%m') as month, SUM(grand_total) as total")
+            ->selectRaw($this->formatDateSql('ordered_at', '%Y-%m') . " as month, SUM(grand_total) as total")
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month');
@@ -67,20 +67,20 @@ class ReportController extends Controller
 
         if ($period === 'daily') {
             $salesData = (clone $query)
-                ->selectRaw("DATE_FORMAT(ordered_at, '%Y-%m-%d') as label, SUM(grand_total) as total, COUNT(*) as count")
+                ->selectRaw($this->formatDateSql('ordered_at', '%Y-%m-%d') . " as label, SUM(grand_total) as total, COUNT(*) as count")
                 ->where('ordered_at', '>=', now()->subDays(30))
                 ->groupBy('label')
                 ->orderBy('label')
                 ->get();
         } elseif ($period === 'yearly') {
             $salesData = (clone $query)
-                ->selectRaw("DATE_FORMAT(ordered_at, '%Y') as label, SUM(grand_total) as total, COUNT(*) as count")
+                ->selectRaw($this->formatDateSql('ordered_at', '%Y') . " as label, SUM(grand_total) as total, COUNT(*) as count")
                 ->groupBy('label')
                 ->orderBy('label')
                 ->get();
         } else {
             $salesData = (clone $query)
-                ->selectRaw("DATE_FORMAT(ordered_at, '%Y-%m') as label, SUM(grand_total) as total, COUNT(*) as count")
+                ->selectRaw($this->formatDateSql('ordered_at', '%Y-%m') . " as label, SUM(grand_total) as total, COUNT(*) as count")
                 ->where('ordered_at', '>=', now()->subMonths(12))
                 ->groupBy('label')
                 ->orderBy('label')
@@ -184,16 +184,16 @@ class ReportController extends Controller
 
         if ($period === 'daily') {
             $registrations = (clone $query)
-                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d') as label, COUNT(*) as count")
+                ->selectRaw($this->formatDateSql('created_at', '%Y-%m-%d') . " as label, COUNT(*) as count")
                 ->where('created_at', '>=', now()->subDays(30))
                 ->groupBy('label')->orderBy('label')->get();
         } elseif ($period === 'yearly') {
             $registrations = (clone $query)
-                ->selectRaw("DATE_FORMAT(created_at, '%Y') as label, COUNT(*) as count")
+                ->selectRaw($this->formatDateSql('created_at', '%Y') . " as label, COUNT(*) as count")
                 ->groupBy('label')->orderBy('label')->get();
         } else {
             $registrations = (clone $query)
-                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as label, COUNT(*) as count")
+                ->selectRaw($this->formatDateSql('created_at', '%Y-%m') . " as label, COUNT(*) as count")
                 ->where('created_at', '>=', now()->subMonths(12))
                 ->groupBy('label')->orderBy('label')->get();
         }
@@ -236,7 +236,7 @@ class ReportController extends Controller
             ->get();
 
         $monthly = Order::whereIn('status', ['delivered', 'completed'])
-            ->selectRaw("DATE_FORMAT(ordered_at, '%Y-%m') as label, SUM(grand_total) as total")
+            ->selectRaw($this->formatDateSql('ordered_at', '%Y-%m') . " as label, SUM(grand_total) as total")
             ->where('ordered_at', '>=', now()->subMonths(12))
             ->groupBy('label')->orderBy('label')->get();
 
@@ -258,11 +258,19 @@ class ReportController extends Controller
 
         $coupons = Coupon::orderByDesc('used_count')->get();
 
-        $monthly = Order::selectRaw("DATE_FORMAT(ordered_at, '%Y-%m') as label, SUM(discount) as total")
+        $monthly = Order::selectRaw($this->formatDateSql('ordered_at', '%Y-%m') . " as label, SUM(discount) as total")
             ->where('discount', '>', 0)
             ->where('ordered_at', '>=', now()->subMonths(12))
             ->groupBy('label')->orderBy('label')->get();
 
         return view('admin.reports.discounts', compact('totalDiscount', 'totalOrdersWithDiscount', 'avgDiscount', 'coupons', 'monthly'));
+    }
+
+    private function formatDateSql(string $column, string $format): string
+    {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return "strftime('{$format}', {$column})";
+        }
+        return "DATE_FORMAT({$column}, '{$format}')";
     }
 }

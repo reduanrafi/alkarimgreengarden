@@ -1,4 +1,4 @@
-@props(['product'])
+﻿@props(['product'])
 
 <div class="group relative flex flex-col h-full bg-white rounded-xl shadow-sm hover:shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
      data-id="{{ $product->id }}"
@@ -23,19 +23,11 @@
         <a href="{{ route('products.show', $product->slug) }}" class="block w-full h-full">
             @if($product->image)
                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
-                     class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                     class="product-image-zoom-once w-full h-full object-contain transition-transform duration-300"
                      loading="lazy"
-                     onerror="this.onerror=null; var emoji=this.dataset.fallback||'✨'; this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-5xl select-none\'>'+emoji+'</div>';"
-                     data-fallback="@switch($product->category->slug ?? '')@case('mens-t-shirt')👕@break@case('womens-t-shirt')👚@break@case('bags')👜@break@default✨@endswitch">
+                      onerror="this.onerror=null; this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-5xl select-none\'>🌿</div>';">
             @else
-                <div class="w-full h-full flex items-center justify-center text-5xl select-none">
-                    @switch($product->category->slug ?? '')
-                        @case('mens-t-shirt') 👕 @break
-                        @case('womens-t-shirt') 👚 @break
-                        @case('bags') 👜 @break
-                        @default ✨
-                    @endswitch
-                </div>
+                <div class="w-full h-full flex items-center justify-center text-5xl select-none">🌿</div>
             @endif
         </a>
 
@@ -59,37 +51,31 @@
             @endif
         </div>
 
-        {{-- Hover actions --}}
-        <div class="absolute top-2.5 right-2.5 flex flex-col gap-1.5 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-10">
-            <button type="button"
-                    onclick="if (window.showPreview) { event.stopPropagation(); showPreview(this.closest('[data-slug]')); }"
-                    class="w-9 h-9 rounded-full bg-white shadow-md hover:shadow-lg flex items-center justify-center transition-all hover:scale-110"
-                    title="Quick view">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-            </button>
-            @auth
-                <form action="{{ route('wishlist.toggle', $product) }}" method="POST" onclick="event.stopPropagation()">
+        @if($product->stock_status !== 'out_of_stock')
+            <div class="absolute inset-x-3 bottom-3 z-20 grid grid-cols-3 gap-1.5 translate-y-2 opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+                <a href="{{ route('products.show', $product->slug) }}" class="rounded-lg bg-white/95 px-1 py-2 text-center text-[10px] font-semibold text-ink shadow-md transition hover:bg-brand-700 hover:text-white">View Details</a>
+                @auth
+                    <form action="{{ route('wishlist.toggle', $product) }}" method="POST" x-data="wishlistToggle" @submit.prevent="toggle($event.target, $refs.btn)">
+                        @csrf
+                        <button type="submit" x-ref="btn" class="h-full w-full rounded-lg bg-white/95 px-1 py-2 text-[10px] font-semibold text-ink shadow-md transition hover:bg-brand-700 hover:text-white">Add to Wishlist</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="rounded-lg bg-white/95 px-1 py-2 text-center text-[10px] font-semibold text-ink shadow-md transition hover:bg-brand-700 hover:text-white">Add to Wishlist</a>
+                @endauth
+                <form action="{{ route('cart.add', $product->id) }}" method="POST" x-data="addToCart" @submit.prevent="submit($event.target)">
                     @csrf
-                    <button type="submit"
-                            class="w-9 h-9 rounded-full bg-white shadow-md hover:shadow-lg flex items-center justify-center transition-all hover:scale-110"
-                            title="{{ $product->isInWishlist(auth()->id()) ? 'Remove from wishlist' : 'Add to wishlist' }}">
-                        <svg class="w-4 h-4 {{ $product->isInWishlist(auth()->id()) ? 'text-red-500 fill-red-500' : 'text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                        </svg>
-                    </button>
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" :disabled="loading" class="h-full w-full rounded-lg bg-brand-700 px-1 py-2 text-[10px] font-semibold text-white shadow-md transition hover:bg-brand-900 disabled:opacity-70">Add to Cart</button>
                 </form>
-            @endauth
-        </div>
+            </div>
+        @endif
     </div>
 
     <div class="p-3.5 sm:p-4 flex flex-col flex-1">
         <div class="space-y-2 flex-1">
             <div class="flex items-center gap-1.5 min-h-4">
                 @if($product->category)
-                    <span class="text-[10px] uppercase tracking-wider text-indigo-500 font-semibold">{{ $product->category->name }}</span>
+                    <span class="text-[10px] uppercase tracking-wider text-[#1f5c3f] font-semibold">{{ $product->category->name }}</span>
                 @endif
                 @if($product->brand)
                     <span class="w-0.5 h-0.5 rounded-full bg-gray-300"></span>
@@ -98,7 +84,7 @@
             </div>
 
             <a href="{{ route('products.show', $product->slug) }}">
-                <h3 class="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 h-10 hover:text-indigo-600 transition-colors">{{ $product->name }}</h3>
+                <h3 class="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 h-10 hover:text-[#1f5c3f] transition-colors">{{ $product->name }}</h3>
             </a>
 
             <div class="flex items-center gap-1 min-h-4">
@@ -141,7 +127,10 @@
                 @csrf
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit"
-                        class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                        :disabled="loading"
+                        class="w-full py-2.5 bg-[#1f5c3f] hover:bg-[#173d2b] text-white text-xs font-semibold rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70"
+                        :class="{ 'btn-loading': loading }"
+                        aria-label="Add {{ $product->name }} to cart">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
                     Add to Cart
                 </button>

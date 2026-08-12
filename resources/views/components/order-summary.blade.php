@@ -32,13 +32,7 @@
                     @if(!empty($item['image']))
                         <img src="{{ asset('storage/' . $item['image']) }}" alt="{{ $item['name'] }}" class="w-full h-full object-cover fade-img relative" loading="lazy">
                     @else
-                        @switch($item['category_slug'] ?? '')
-                            @case('mens-t-shirt') 👕 @break
-                            @case('womens-t-shirt') 👚 @break
-                            @case('bags') 👜 @break
-                            @case('others') 🪴 @break
-                            @default 🌿
-                        @endswitch
+                        🌿
                     @endif
                 </div>
                 <div class="flex-1 min-w-0">

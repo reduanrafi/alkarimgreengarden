@@ -337,7 +337,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1.5">Meta Keywords</label>
-                    <input type="text" name="meta_keywords" value="{{ old('meta_keywords') }}" placeholder="fashion, clothing, style"
+                    <input type="text" name="meta_keywords" value="{{ old('meta_keywords') }}" placeholder="plants, planters, gardening"
                            class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
                     <p class="text-xs text-gray-600 mt-1">Comma-separated keywords</p>
                 </div>

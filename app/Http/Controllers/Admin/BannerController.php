@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class BannerController extends Controller
 {
@@ -34,10 +33,10 @@ class BannerController extends Controller
             'title' => 'required|string|max:255',
             'type' => 'required|in:hero_banner,homepage_carousel,homepage_fixed,especially_for_you',
             'display_order' => 'nullable|integer|min:0',
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp,gif|max:5120',
             'button_text' => 'nullable|string|max:255',
             'short_description' => 'nullable|string|max:500',
-            'redirect_url' => 'nullable|string|max:500',
+            'redirect_url' => 'nullable|url|max:500',
             'background_color' => 'nullable|string|max:20',
             'status' => 'boolean',
             'start_date' => 'nullable|date',
@@ -67,10 +66,10 @@ class BannerController extends Controller
             'title' => 'required|string|max:255',
             'type' => 'required|in:hero_banner,homepage_carousel,homepage_fixed,especially_for_you',
             'display_order' => 'nullable|integer|min:0',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:5120',
             'button_text' => 'nullable|string|max:255',
             'short_description' => 'nullable|string|max:500',
-            'redirect_url' => 'nullable|string|max:500',
+            'redirect_url' => 'nullable|url|max:500',
             'background_color' => 'nullable|string|max:20',
             'status' => 'boolean',
             'start_date' => 'nullable|date',

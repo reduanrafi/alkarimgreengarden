@@ -1,10 +1,10 @@
-@props(['categories' => [], 'banner' => null, 'heroBanners' => null])
+﻿@props(['categories' => [], 'banner' => null, 'heroBanners' => null])
 
 @php
     $heroBanners = $heroBanners ?? collect([$banner])->filter();
-    $heroTitle = $banner?->title ?? 'Discover Your Style';
-    $heroSubtitle = 'Premium fashion curated for those who dare to be different.';
-@endphp
+    $heroTitle = $banner?->title ?? 'Bring Life Into Your Space';
+    $heroSubtitle = 'Curated plants & garden essentials for every space.';
+
 
 <section class="relative bg-white overflow-hidden">
     @if($heroBanners->count() > 0)
@@ -54,15 +54,15 @@
                             <img :src="item.image" :alt="item.title" loading="lazy" x-init="$el.classList.add('fade-img'); $el.addEventListener('load', () => $el.classList.add('img-loaded'));" class="w-full h-full absolute inset-0 object-cover select-none pointer-events-none">
                         </template>
                         <template x-if="!item.image">
-                            <div class="w-full h-full absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-900"></div>
+                            <div class="w-full h-full absolute inset-0 bg-gradient-to-br from-[#173d2b] via-[#1f5c3f] to-[#0f2b1d]"></div>
                         </template>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 via-40% to-transparent"></div>
                         <div class="absolute inset-0 flex items-center">
                             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                                 <div class="max-w-xl">
-                                    <p class="text-indigo-300 text-sm sm:text-base font-medium tracking-wider uppercase mb-3" x-text="'New Collection ' + new Date().getFullYear()"></p>
+                                    <p class="text-[#6fae6e] text-sm sm:text-base font-medium tracking-wider uppercase mb-3" x-text="'New Collection ' + new Date().getFullYear()"></p>
                                     <h2 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4 font-serif" x-text="item.title"></h2>
-                                    <p class="text-base text-gray-200 mb-6 max-w-md leading-relaxed" x-text="item.subtitle || 'Discover premium fashion that speaks your style.'"></p>
+                                    <p class="text-base text-gray-200 mb-6 max-w-md leading-relaxed" x-text="item.subtitle || 'Discover greenery that brings your space to life.'"></p>
                                     <template x-if="item.button_text">
                                         <a :href="item.redirect_url || '{{ route('products.index') }}'"
                                            class="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-gray-900 font-semibold rounded-full shadow-xl hover:bg-gray-100 hover:shadow-2xl transition-all active:scale-95 text-sm sm:text-base">
@@ -102,12 +102,12 @@
         </div>
     @else
         {{-- Fallback Hero --}}
-        <div class="relative bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-900 overflow-hidden" style="min-height: 65vh;">
+        <div class="relative bg-gradient-to-br from-[#173d2b] via-[#1f5c3f] to-[#0f2b1d] overflow-hidden" style="min-height: 65vh;">
             <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 25% 25%, white 1px, transparent 1px); background-size: 30px 30px;"></div>
             <div class="absolute inset-0 flex items-center">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                     <div class="max-w-xl">
-                        <span class="inline-block px-4 py-1.5 bg-indigo-500/20 backdrop-blur-sm text-indigo-300 text-xs font-semibold rounded-full border border-indigo-400/20 mb-5">Premium Collection</span>
+                        <span class="inline-block px-4 py-1.5 bg-[#3f8a5c]/20 backdrop-blur-sm text-[#6fae6e] text-xs font-semibold rounded-full border border-[#3f8a5c]/20 mb-5">Premium Collection</span>
                         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4 font-serif">{{ $heroTitle }}</h1>
                         <p class="text-base text-gray-300 mb-8 max-w-md leading-relaxed">{{ $heroSubtitle }}</p>
                         <a href="{{ route('products.index') }}"
@@ -118,8 +118,8 @@
                     </div>
                 </div>
             </div>
-            <div class="absolute -bottom-16 -right-16 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl"></div>
-            <div class="absolute -top-16 -left-16 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-16 -right-16 w-72 h-72 bg-[#1f5c3f]/10 rounded-full blur-3xl"></div>
+            <div class="absolute -top-16 -left-16 w-96 h-96 bg-[#3f8a5c]/10 rounded-full blur-3xl"></div>
         </div>
     @endif
 </section>

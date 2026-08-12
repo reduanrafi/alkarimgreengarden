@@ -13,20 +13,50 @@ class NewsletterController extends Controller
             'email' => 'required|email|max:255',
         ]);
 
-        $exists = NewsletterSubscriber::where('email', $validated['email'])->exists();
+        $subscriber = NewsletterSubscriber::where('email', $validated['email'])->first();
 
-        if (! $exists) {
-            NewsletterSubscriber::create([
+        if (! $subscriber) {
+            $subscriber = NewsletterSubscriber::create([
                 'email' => $validated['email'],
+                'is_active' => true,
                 'subscribed_at' => now(),
             ]);
         }
 
+        if ($subscriber->is_active) {
+            return response()->json([
+                'success' => true,
+                'message' => $subscriber->wasRecentlyCreated
+                    ? 'Thanks for subscribing! Watch your inbox for a confirmation.'
+                    : 'You are already subscribed!',
+                'unsubscribe_url' => $subscriber->wasRecentlyCreated
+                    ? route('newsletter.unsubscribe', $subscriber->unsubscribe_token)
+                    : null,
+            ]);
+        }
+
+        $subscriber->update(['is_active' => true, 'subscribed_at' => now()]);
+
         return response()->json([
             'success' => true,
-            'message' => $exists
-                ? 'You are already subscribed!'
-                : 'Thanks for subscribing! Watch your inbox for a confirmation.',
+            'message' => 'Welcome back! Your subscription has been reactivated.',
         ]);
+    }
+
+    public function unsubscribe(Request $request, string $token)
+    {
+        $subscriber = NewsletterSubscriber::where('unsubscribe_token', $token)->first();
+
+        if (! $subscriber) {
+            abort(404);
+        }
+
+        if ($request->isMethod('POST')) {
+            $subscriber->update(['is_active' => false]);
+
+            return back()->with('status', 'You have been unsubscribed. We are sorry to see you go.');
+        }
+
+        return view('newsletter.unsubscribe', ['subscriber' => $subscriber]);
     }
 }

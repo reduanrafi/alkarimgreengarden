@@ -9,41 +9,62 @@
     get csrf() { return document.querySelector('meta[name=csrf-token]')?.content || ''; },
     get itemTotal() { return this.price * this.qty; },
     get sym() { return '{{ getCurrencySymbol() }}'; },
+    notifyOptimisticChange(quantityChange) {
+        window.dispatchEvent(new CustomEvent('cart-updating', {
+            detail: {
+                countDelta: quantityChange,
+                subtotalDelta: this.price * quantityChange,
+            },
+        }));
+    },
     async updateQty(change) {
         const newQty = this.qty + change;
         if (newQty < 1 || newQty > this.max) return;
+
+        const previousQty = this.qty;
         this.qty = newQty;
+        this.notifyOptimisticChange(change);
         this.updating = true;
         try {
             const form = new FormData();
             form.append('_token', this.csrf);
             form.append('quantity', this.qty);
             form.append('_method', 'PATCH');
-            const res = await fetch('/cart/update/{{ $item['id'] }}', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
+            const res = await fetch(@js(route('cart.update', ['id' => $item['id']])), { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
             if (!res.ok) throw new Error();
             const data = await res.json();
+            const updatedItem = data.items?.find(item => Number(item.id) === Number({{ $item['id'] }}));
+            if (updatedItem) {
+                this.qty = Number(updatedItem.quantity);
+                this.max = Number(updatedItem.stock);
+                this.price = Number(updatedItem.final_price ?? updatedItem.price);
+            }
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
         } catch(e) {
-            this.qty -= change;
-            window.Fashion?.error ? window.Fashion.error('Could not update the quantity. Please try again.') : null;
+            this.qty = previousQty;
+            this.notifyOptimisticChange(-change);
+            window.GG?.error ? window.GG.error('Could not update the quantity. Please try again.') : null;
         }
         finally { this.updating = false; }
     },
     async removeItem() {
         if (this.removing) return;
+        const quantity = this.qty;
         this.removing = true;
+        this.notifyOptimisticChange(-quantity);
         try {
             const form = new FormData();
             form.append('_token', this.csrf);
             form.append('_method', 'DELETE');
-            const res = await fetch('/cart/remove/{{ $item['id'] }}', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
+            const res = await fetch(@js(route('cart.remove', ['id' => $item['id']])), { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
             if (!res.ok) throw new Error();
             const data = await res.json();
             this.$el.remove();
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
         } catch(e) {
             this.removing = false;
-            window.Fashion?.error ? window.Fashion.error('Could not remove this item. Please try again.') : null;
+            this.notifyOptimisticChange(quantity);
+            window.GG?.error ? window.GG.error('Could not remove this item. Please try again.') : null;
         }
     }
 }" class="bg-white rounded-2xl border border-line shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md group relative">
@@ -57,15 +78,7 @@
                     <img src="{{ asset('storage/' . $item['image']) }}" alt="{{ $item['name'] }}" class="w-full h-full object-cover fade-img relative" loading="lazy">
                 </div>
             @else
-                <div class="w-full h-full flex items-center justify-center text-4xl select-none">
-                    @switch($item['category_slug'] ?? '')
-                        @case('mens-t-shirt') 👕 @break
-                        @case('womens-t-shirt') 👚 @break
-                        @case('bags') 👜 @break
-                        @case('others') 🪴 @break
-                        @default 🌿
-                    @endswitch
-                </div>
+                <div class="w-full h-full flex items-center justify-center text-4xl select-none">🌿</div>
             @endif
         </a>
 
@@ -123,9 +136,10 @@
 
             <div class="flex items-center gap-4 mt-2 pt-2 border-t border-line">
                 @auth
-                    <form action="{{ route('wishlist.toggle', $item['id']) }}" method="POST" class="inline">
+                    <form action="{{ route('wishlist.toggle', $item['id']) }}" method="POST" class="inline"
+                          x-data="wishlistToggle" @submit.prevent="toggle($event.target, $refs.btn)">
                         @csrf
-                        <button type="submit" class="text-xs text-ink-soft hover:text-red-500 transition flex items-center gap-1">
+                        <button type="submit" x-ref="btn" class="text-xs text-ink-soft hover:text-red-500 transition flex items-center gap-1" aria-label="Move to wishlist">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                             Move to Wishlist
                         </button>

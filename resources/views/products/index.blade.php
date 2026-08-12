@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', isset($category) ? $category->name . ' - ' . config('app.name') : 'Products - ' . config('app.name'))
 
@@ -33,11 +33,11 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             {{-- Breadcrumb --}}
             <nav class="flex items-center gap-2 text-sm text-gray-400 mb-4">
-                <a href="{{ route('home') }}" class="hover:text-indigo-600 transition-colors">
+                <a href="{{ route('home') }}" class="hover:text-[#1f5c3f] transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 </a>
                 <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                <a href="{{ route('products.index') }}" class="hover:text-indigo-600 transition-colors">Products</a>
+                <a href="{{ route('products.index') }}" class="hover:text-[#1f5c3f] transition-colors">Products</a>
                 @if(isset($category))
                     <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     <span class="text-gray-900 font-medium">{{ $category->name }}</span>
@@ -64,9 +64,9 @@
                                x-on:keydown.enter.prevent="q = $event.target.value; fetchProducts()"
                                x-on:input.debounce.500ms="q = $event.target.value; page = 1; fetchProducts()"
                                placeholder="Search products, brands, categories..."
-                               class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-all">
+                               class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#3f8a5c] focus:ring-2 focus:ring-[#d5e6d5] outline-none transition-all">
                     </div>
-                    <button type="submit" class="px-6 py-3 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-sm flex items-center gap-2">
+                    <button type="submit" class="px-6 py-3 bg-[#1f5c3f] text-white text-sm font-semibold rounded-xl hover:bg-[#173d2b] transition-all shadow-sm flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         <span class="hidden sm:inline">Search</span>
                     </button>
@@ -77,9 +77,9 @@
                     <span class="text-xs text-gray-400 font-medium">Filters:</span>
                     <template x-for="filter in activeFilters" :key="filter.key">
                         <button type="button" x-on:click="removeFilter(filter.key)"
-                                class="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full border border-indigo-100 hover:bg-indigo-100 transition-colors group">
+                                class="inline-flex items-center gap-1 px-2.5 py-1 bg-[#e4efe4] text-[#1f5c3f] text-xs font-medium rounded-full border border-[#d5e6d5] hover:bg-[#d5e6d5] transition-colors group">
                             <span x-text="filter.label"></span>
-                            <svg class="w-3 h-3 text-indigo-400 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                            <svg class="w-3 h-3 text-[#3f8a5c] group-hover:text-[#1f5c3f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </template>
                     <button type="button" x-on:click="clearFilters()"
@@ -101,7 +101,7 @@
                     <div class="flex items-center justify-between">
                         <h2 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Filters</h2>
                         <button type="button" x-on:click="clearFilters()"
-                                class="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+                                class="text-xs font-medium text-[#1f5c3f] hover:text-[#173d2b]">
                             Reset
                         </button>
                     </div>
@@ -114,8 +114,8 @@
                         <div class="px-4 py-2 space-y-0.5 max-h-60 overflow-y-auto">
                             <button type="button" x-on:click="setFilter('category', '')"
                                     class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all w-full text-left"
-                                    :class="!filters.category ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
-                                <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="!filters.category ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'">
+                                    :class="!filters.category ? 'bg-[#e4efe4] text-[#1f5c3f] font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
+                                <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="!filters.category ? 'border-[#1f5c3f] bg-[#1f5c3f]' : 'border-gray-300'">
                                     <svg x-show="!filters.category" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                 </span>
                                 All Categories
@@ -123,8 +123,8 @@
                             @foreach($categories ?? [] as $cat)
                                 <button type="button" x-on:click="setFilter('category', '{{ $cat->slug }}')"
                                         class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all w-full text-left"
-                                        :class="filters.category === '{{ $cat->slug }}' ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
-                                    <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.category === '{{ $cat->slug }}' ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'">
+                                        :class="filters.category === '{{ $cat->slug }}' ? 'bg-[#e4efe4] text-[#1f5c3f] font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
+                                    <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.category === '{{ $cat->slug }}' ? 'border-[#1f5c3f] bg-[#1f5c3f]' : 'border-gray-300'">
                                         <svg x-show="filters.category === '{{ $cat->slug }}'" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                     </span>
                                     {{ $cat->name }}
@@ -142,8 +142,8 @@
                             <div class="px-4 py-2 space-y-0.5 max-h-52 overflow-y-auto">
                                 <button type="button" x-on:click="setFilter('brand', '')"
                                         class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all w-full text-left"
-                                        :class="!filters.brand ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
-                                    <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="!filters.brand ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'">
+                                        :class="!filters.brand ? 'bg-[#e4efe4] text-[#1f5c3f] font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
+                                    <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="!filters.brand ? 'border-[#1f5c3f] bg-[#1f5c3f]' : 'border-gray-300'">
                                         <svg x-show="!filters.brand" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                     </span>
                                     All Brands
@@ -151,8 +151,8 @@
                                 @foreach($brands as $brand)
                                     <button type="button" x-on:click="setFilter('brand', '{{ $brand }}')"
                                             class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all w-full text-left"
-                                            :class="filters.brand === '{{ $brand }}' ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
-                                        <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.brand === '{{ $brand }}' ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'">
+                                            :class="filters.brand === '{{ $brand }}' ? 'bg-[#e4efe4] text-[#1f5c3f] font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
+                                        <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.brand === '{{ $brand }}' ? 'border-[#1f5c3f] bg-[#1f5c3f]' : 'border-gray-300'">
                                             <svg x-show="filters.brand === '{{ $brand }}'" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                         </span>
                                         {{ $brand }}
@@ -172,17 +172,17 @@
                                 <div class="relative flex-1">
                                     <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
                                     <input type="number" x-model.number="filters.min_price" placeholder="Min"
-                                           class="w-full pl-6 pr-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-all">
+                                           class="w-full pl-6 pr-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:border-[#3f8a5c] focus:ring-2 focus:ring-[#d5e6d5] outline-none transition-all">
                                 </div>
-                                <span class="text-gray-300 text-xs">—</span>
+                                <span class="text-gray-300 text-xs">â€”</span>
                                 <div class="relative flex-1">
                                     <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
                                     <input type="number" x-model.number="filters.max_price" placeholder="Max"
-                                           class="w-full pl-6 pr-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-all">
+                                           class="w-full pl-6 pr-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:border-[#3f8a5c] focus:ring-2 focus:ring-[#d5e6d5] outline-none transition-all">
                                 </div>
                             </div>
                             <button type="button" x-on:click="applyPrice()"
-                                    class="w-full mt-3 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm">
+                                    class="w-full mt-3 px-4 py-2 bg-[#1f5c3f] text-white text-sm font-semibold rounded-lg hover:bg-[#173d2b] transition-all shadow-sm">
                                 Apply
                             </button>
                         </div>
@@ -196,16 +196,16 @@
                         <div class="px-4 py-3 space-y-2">
                             <button type="button" x-on:click="toggleBool('in_stock')"
                                     class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all w-full text-left"
-                                    :class="filters.in_stock ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
-                                <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.in_stock ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'">
+                                    :class="filters.in_stock ? 'bg-[#e4efe4] text-[#1f5c3f] font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
+                                <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.in_stock ? 'border-[#1f5c3f] bg-[#1f5c3f]' : 'border-gray-300'">
                                     <svg x-show="filters.in_stock" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                 </span>
                                 In Stock Only
                             </button>
                             <button type="button" x-on:click="toggleBool('discounted')"
                                     class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all w-full text-left"
-                                    :class="filters.discounted ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
-                                <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.discounted ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'">
+                                    :class="filters.discounted ? 'bg-[#e4efe4] text-[#1f5c3f] font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
+                                <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.discounted ? 'border-[#1f5c3f] bg-[#1f5c3f]' : 'border-gray-300'">
                                     <svg x-show="filters.discounted" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                 </span>
                                 Discounted Only
@@ -224,7 +224,7 @@
                                 class="lg:hidden relative px-3.5 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                             Filters
-                            <span x-show="activeFilters.length > 0" x-cloak class="bg-indigo-600 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm" x-text="activeFilters.length"></span>
+                            <span x-show="activeFilters.length > 0" x-cloak class="bg-[#1f5c3f] text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm" x-text="activeFilters.length"></span>
                         </button>
                         <p class="text-sm text-gray-500">
                             <span class="font-semibold text-gray-900" x-text="total"></span>
@@ -234,7 +234,7 @@
                     <div class="flex items-center gap-2.5 ml-auto">
                         <label class="text-sm text-gray-400 hidden sm:inline">Sort:</label>
                         <select x-model="sort" x-on:change="page = 1; fetchProducts()"
-                                class="text-sm border border-gray-200 rounded-lg px-3 py-2 pr-7 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none bg-white transition-all appearance-none cursor-pointer"
+                                class="text-sm border border-gray-200 rounded-lg px-3 py-2 pr-7 focus:border-[#3f8a5c] focus:ring-2 focus:ring-[#d5e6d5] outline-none bg-white transition-all appearance-none cursor-pointer"
                                 style="background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239CA3AF' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\"); background-position: right 6px center; background-repeat: no-repeat; background-size: 16px;">
                             <option value="latest">Newest</option>
                             <option value="price_asc">Price: Low to High</option>
@@ -265,7 +265,7 @@
                     <h3 class="text-xl font-bold text-gray-900 mb-1.5">Something went wrong</h3>
                     <p class="text-gray-400 text-sm mb-6">We couldn't load the products. Please try again.</p>
                     <button type="button" x-on:click="fetchProducts()"
-                            class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm">
+                            class="inline-flex items-center gap-2 px-6 py-2.5 bg-[#1f5c3f] text-white text-sm font-semibold rounded-lg hover:bg-[#173d2b] transition-all shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         Retry
                     </button>
@@ -295,10 +295,11 @@
          x-transition:leave="transition-all duration-200 ease-in"
          x-transition:leave-start="translate-x-0"
          x-transition:leave-end="translate-x-full"
-         class="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm bg-white shadow-2xl lg:hidden overflow-y-auto">
+         class="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm bg-white shadow-2xl lg:hidden overflow-y-auto"
+         role="dialog" aria-modal="true" aria-label="Product filters">
         <div class="sticky top-0 bg-white border-b border-gray-100 px-4 py-3.5 flex items-center justify-between z-10">
             <h2 class="text-base font-semibold text-gray-900">Filters</h2>
-            <button type="button" x-on:click="mobileFiltersOpen = false"
+            <button type="button" x-on:click="mobileFiltersOpen = false" aria-label="Close filters"
                     class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -311,11 +312,11 @@
                 <div class="flex flex-wrap gap-2">
                     <button type="button" x-on:click="setFilter('category', '')"
                             class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
-                            :class="!filters.category ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">All</button>
+                            :class="!filters.category ? 'bg-[#1f5c3f] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">All</button>
                     @foreach($categories ?? [] as $cat)
                         <button type="button" x-on:click="setFilter('category', '{{ $cat->slug }}')"
                                 class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
-                                :class="filters.category === '{{ $cat->slug }}' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">{{ $cat->name }}</button>
+                                :class="filters.category === '{{ $cat->slug }}' ? 'bg-[#1f5c3f] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">{{ $cat->name }}</button>
                     @endforeach
                 </div>
             </div>
@@ -327,11 +328,11 @@
                     <div class="flex flex-wrap gap-2">
                         <button type="button" x-on:click="setFilter('brand', '')"
                                 class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
-                                :class="!filters.brand ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">All</button>
+                                :class="!filters.brand ? 'bg-[#1f5c3f] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">All</button>
                         @foreach($brands as $brand)
                             <button type="button" x-on:click="setFilter('brand', '{{ $brand }}')"
                                     class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
-                                    :class="filters.brand === '{{ $brand }}' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">{{ $brand }}</button>
+                                    :class="filters.brand === '{{ $brand }}' ? 'bg-[#1f5c3f] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">{{ $brand }}</button>
                         @endforeach
                     </div>
                 </div>
@@ -343,16 +344,16 @@
                 <div class="space-y-2">
                     <button type="button" x-on:click="toggleBool('in_stock')"
                             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all w-full text-left"
-                            :class="filters.in_stock ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
-                        <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.in_stock ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'">
+                            :class="filters.in_stock ? 'bg-[#e4efe4] text-[#1f5c3f] font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
+                        <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.in_stock ? 'border-[#1f5c3f] bg-[#1f5c3f]' : 'border-gray-300'">
                             <svg x-show="filters.in_stock" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                         </span>
                         In Stock Only
                     </button>
                     <button type="button" x-on:click="toggleBool('discounted')"
                             class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all w-full text-left"
-                            :class="filters.discounted ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
-                        <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.discounted ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'">
+                            :class="filters.discounted ? 'bg-[#e4efe4] text-[#1f5c3f] font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'">
+                        <span class="w-4 h-4 rounded border-2 flex items-center justify-center" :class="filters.discounted ? 'border-[#1f5c3f] bg-[#1f5c3f]' : 'border-gray-300'">
                             <svg x-show="filters.discounted" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                         </span>
                         Discounted Only
@@ -367,33 +368,33 @@
                     <div class="relative flex-1">
                         <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
                         <input type="number" x-model.number="filters.min_price" placeholder="Min"
-                               class="w-full pl-6 pr-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none">
+                               class="w-full pl-6 pr-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:border-[#3f8a5c] focus:ring-2 focus:ring-[#d5e6d5] outline-none">
                     </div>
-                    <span class="text-gray-300 text-xs">—</span>
+                    <span class="text-gray-300 text-xs">â€”</span>
                     <div class="relative flex-1">
                         <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
                         <input type="number" x-model.number="filters.max_price" placeholder="Max"
-                               class="w-full pl-6 pr-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none">
+                               class="w-full pl-6 pr-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:border-[#3f8a5c] focus:ring-2 focus:ring-[#d5e6d5] outline-none">
                     </div>
                 </div>
                 <button type="button" x-on:click="applyPrice()"
-                        class="w-full mt-3 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm">
+                        class="w-full mt-3 px-4 py-2 bg-[#1f5c3f] text-white text-sm font-semibold rounded-lg hover:bg-[#173d2b] transition-all shadow-sm">
                     Apply
                 </button>
             </div>
 
-            {{-- Fabric --}}
+            {{-- Light --}}
             @if(isset($fabrics) && $fabrics->count() > 0)
                 <div>
-                    <h4 class="text-sm font-semibold text-gray-900 mb-3">Fabric</h4>
+                    <h4 class="text-sm font-semibold text-gray-900 mb-3">Light</h4>
                     <div class="flex flex-wrap gap-2">
                         <button type="button" x-on:click="setFilter('fabric', '')"
                                 class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
-                                :class="!filters.fabric ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">All</button>
+                                :class="!filters.fabric ? 'bg-[#1f5c3f] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">All</button>
                         @foreach($fabrics as $fabric)
                             <button type="button" x-on:click="setFilter('fabric', '{{ $fabric }}')"
                                     class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
-                                    :class="filters.fabric === '{{ $fabric }}' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">{{ $fabric }}</button>
+                                    :class="filters.fabric === '{{ $fabric }}' ? 'bg-[#1f5c3f] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">{{ $fabric }}</button>
                         @endforeach
                     </div>
                 </div>
@@ -424,10 +425,10 @@
                         @foreach($colors as $color)
                             <button type="button" x-on:click="setFilter('color', '{{ $color }}')"
                                     class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-200"
-                                    :class="filters.color === '{{ $color }}' ? 'border-indigo-500 ring-2 ring-indigo-200 scale-110' : 'border-gray-200 hover:border-gray-300 hover:scale-105'"
+                                    :class="filters.color === '{{ $color }}' ? 'border-[#1f5c3f] ring-2 ring-[#d5e6d5] scale-110' : 'border-gray-200 hover:border-gray-300 hover:scale-105'"
                                     title="{{ $color }}"
                                     style="background-color: {{ $colorMap[$color] ?? '#e5e7eb' }};">
-                                <svg x-show="filters.color === '{{ $color }}'" class="w-3 h-3 {{ in_array($color, $isDarkColors) ? 'text-white' : 'text-indigo-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                <svg x-show="filters.color === '{{ $color }}'" class="w-3 h-3 {{ in_array($color, $isDarkColors) ? 'text-white' : 'text-[#1f5c3f]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                             </button>
                         @endforeach
                     </div>
@@ -442,7 +443,7 @@
                 Clear All
             </button>
             <button type="button" x-on:click="mobileFiltersOpen = false"
-                    class="flex-1 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm">
+                    class="flex-1 px-4 py-2.5 bg-[#1f5c3f] text-white text-sm font-semibold rounded-lg hover:bg-[#173d2b] transition-all shadow-sm">
                 Show Results
             </button>
         </div>

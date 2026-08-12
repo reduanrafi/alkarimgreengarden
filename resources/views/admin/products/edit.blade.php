@@ -206,7 +206,7 @@
                     <label class="block text-sm font-medium text-gray-400 mb-1.5">Thumbnail Image <span class="text-red-400">*</span></label>
                     @if($product->image)
                         <div class="mb-3">
-                            <img src="{{ asset('storage/' . $product->image) }}" class="w-20 h-20 rounded-lg object-cover border border-gray-700/50">
+                            <img src="{{ asset('storage/' . $product->image) }}" class="w-20 h-20 rounded-lg object-cover border border-gray-700/50" onerror="this.onerror=null;this.insertAdjacentHTML('afterend','<div class=&quot;w-20 h-20 rounded-lg bg-gray-800/50 flex items-center justify-center text-2xl&quot;>🌿</div>');this.remove();">
                         </div>
                     @endif
                     <div class="border-2 border-dashed border-gray-700/50 rounded-lg p-4 text-center hover:border-emerald-500/30 transition cursor-pointer" onclick="document.getElementById('thumbnailInput').click()">
@@ -354,7 +354,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1.5">Meta Keywords</label>
-                    <input type="text" name="meta_keywords" value="{{ old('meta_keywords', $product->meta_keywords) }}" placeholder="fashion, clothing, style"
+                    <input type="text" name="meta_keywords" value="{{ old('meta_keywords', $product->meta_keywords) }}" placeholder="plants, planters, gardening"
                            class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
                     <p class="text-xs text-gray-600 mt-1">Comma-separated keywords</p>
                 </div>

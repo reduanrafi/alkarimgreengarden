@@ -17,6 +17,38 @@
         get csrf() { return document.querySelector('meta[name=csrf-token]')?.content || ''; },
         get sym() { return '{{ getCurrencySymbol() }}'; },
         fmt(n) { return this.sym + Number(n).toFixed(2); },
+        applyCart(data) {
+            if (data.subtotal !== undefined) this.subtotal = Number(data.subtotal);
+            if (data.shipping_charge !== undefined) this.shipping = Number(data.shipping_charge);
+            if (data.discount !== undefined) this.discount = Number(data.discount);
+            if (data.tax !== undefined) this.tax = Number(data.tax);
+            if (data.grand_total !== undefined) this.grand = Number(data.grand_total);
+            if (data.count !== undefined) this.count = Number(data.count);
+        },
+        applyOptimisticChange(data) {
+            if (data.subtotal !== undefined) {
+                this.subtotal = Number(data.subtotal);
+            } else if (data.subtotalDelta !== undefined) {
+                this.subtotal = Math.max(0, this.subtotal + Number(data.subtotalDelta));
+            }
+
+            if (data.count !== undefined) {
+                this.count = Number(data.count);
+            } else if (data.countDelta !== undefined) {
+                this.count = Math.max(0, this.count + Number(data.countDelta));
+            }
+
+            this.shipping = data.shipping_charge !== undefined
+                ? Number(data.shipping_charge)
+                : (this.count === 0 || this.subtotal >= 100 ? 0 : 9.99);
+            this.tax = data.tax !== undefined
+                ? Number(data.tax)
+                : Math.round(this.subtotal * 0.05 * 100) / 100;
+            if (data.discount !== undefined) this.discount = Number(data.discount);
+            this.grand = data.grand_total !== undefined
+                ? Number(data.grand_total)
+                : Math.max(0, this.subtotal + this.shipping + this.tax - this.discount);
+        },
         async applyCoupon(form) {
             if (this.couponLoading) return;
             const formData = new FormData(form);
@@ -38,7 +70,7 @@
                 this.couponMsg = data.message;
                 window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
                 setTimeout(() => this.couponMsg = '', 4000);
-            } catch(e) { this.couponError = window.Fashion?.friendlyError ? window.Fashion.friendlyError(e) : 'Could not apply this coupon.'; }
+            } catch(e) { this.couponError = window.GG?.friendlyError ? window.GG.friendlyError(e) : 'Could not apply this coupon.'; }
             finally { this.couponLoading = false; }
         },
         async removeCoupon() {
@@ -63,14 +95,8 @@
             finally { this.couponRemoving = false; }
         }
      }"
-     x-on:cart-updated.window="
-        if ($event.detail.subtotal !== undefined) subtotal = $event.detail.subtotal;
-        if ($event.detail.shipping_charge !== undefined) shipping = $event.detail.shipping_charge;
-        if ($event.detail.discount !== undefined) discount = $event.detail.discount;
-        if ($event.detail.tax !== undefined) tax = $event.detail.tax;
-        if ($event.detail.grand_total !== undefined) grand = $event.detail.grand_total;
-        if ($event.detail.count !== undefined) count = $event.detail.count;
-     ">
+     x-on:cart-updating.window="applyOptimisticChange($event.detail)"
+     x-on:cart-updated.window="applyCart($event.detail)">
 
     <div class="flex items-center justify-between">
         <h3 class="font-display text-lg font-semibold text-ink">Order Summary</h3>

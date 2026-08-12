@@ -1,5 +1,21 @@
 <?php
 
+if (!function_exists('settings')) {
+    function settings(): array
+    {
+        return cache()->remember('app_settings', 3600, function () {
+            return \App\Models\Setting::pluck('value', 'key')->all();
+        });
+    }
+}
+
+if (!function_exists('setting')) {
+    function setting(string $key, mixed $default = null): mixed
+    {
+        return settings()[$key] ?? $default;
+    }
+}
+
 if (!function_exists('getActiveCurrency')) {
     function getActiveCurrency(): ?\App\Models\CurrencySetting
     {

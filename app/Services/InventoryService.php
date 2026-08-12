@@ -34,11 +34,10 @@ class InventoryService
 
     public function getTopSellingProducts(int $limit = 10)
     {
-        return Product::withCount(['orderItems as total_sold' => function ($q) {
-            $q->select(\DB::raw('COALESCE(SUM(quantity), 0)'));
-        }])
-            ->groupBy('products.id')
-            ->having('total_sold', '>', 0)
+        return Product::whereHas('orderItems')
+            ->withCount(['orderItems as total_sold' => function ($q) {
+                $q->select(\DB::raw('COALESCE(SUM(quantity), 0)'));
+            }])
             ->orderByDesc('total_sold')
             ->limit($limit)
             ->get();

@@ -31,7 +31,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-400 mb-1.5">Image</label>
             @if($category->image)
-                <div class="mb-2"><img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="w-16 h-16 rounded-lg object-cover border border-gray-700/50"></div>
+                <div class="mb-2"><img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="w-16 h-16 rounded-lg object-cover border border-gray-700/50" onerror="this.onerror=null;this.insertAdjacentHTML('afterend','<div class=&quot;w-16 h-16 rounded-lg bg-gray-800 flex items-center justify-center text-xl&quot;>📁</div>');this.remove();"></div>
             @endif
             <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-500/10 file:text-emerald-400 hover:file:bg-emerald-500/20 transition">
         </div>

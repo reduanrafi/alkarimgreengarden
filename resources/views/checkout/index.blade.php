@@ -65,6 +65,36 @@
         <p class="text-sm text-ink-soft mt-1">Complete your order by filling in the details below</p>
     </div>
 
+    {{-- Progress Stepper --}}
+    <nav class="mb-8" aria-label="Checkout progress">
+        <ol class="flex items-center gap-2 sm:gap-3">
+            <li class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <a href="{{ route('cart.index') }}"
+                   class="flex items-center gap-2 sm:gap-2.5 min-w-0 rounded-lg transition hover:opacity-80 group"
+                   aria-label="Step 1: Cart (completed)">
+                    <span class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-brand-700 text-white shadow-sm shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    </span>
+                    <span class="text-xs sm:text-sm font-semibold text-brand-700 hidden sm:inline">Cart</span>
+                </a>
+                <span class="h-0.5 flex-1 rounded-full bg-brand-700"></span>
+            </li>
+            <li class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <span class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                    <span class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white border-2 border-brand-700 text-brand-700 font-bold text-xs sm:text-sm shrink-0" aria-current="step">2</span>
+                    <span class="text-xs sm:text-sm font-semibold text-ink hidden sm:inline">Delivery</span>
+                </span>
+                <span class="h-0.5 flex-1 rounded-full bg-line"></span>
+            </li>
+            <li class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <span class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                    <span class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white border-2 border-line text-ink-soft font-bold text-xs sm:text-sm shrink-0">3</span>
+                    <span class="text-xs sm:text-sm font-semibold text-ink-soft hidden sm:inline">Payment</span>
+                </span>
+            </li>
+        </ol>
+    </nav>
+
     {{-- Flash / Validation Errors --}}
     @if(session('error'))
         <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-3.5 text-sm mb-6 flex items-center gap-2">

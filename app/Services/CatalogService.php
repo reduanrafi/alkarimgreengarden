@@ -123,8 +123,8 @@ class CatalogService
                 ->active();
 
             $bestSellers = (clone $query)
+                ->whereHas('orderItems')
                 ->withCount('orderItems')
-                ->having('order_items_count', '>', 0)
                 ->orderByDesc('order_items_count')
                 ->limit(8)
                 ->get();

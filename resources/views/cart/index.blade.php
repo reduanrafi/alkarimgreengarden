@@ -35,7 +35,7 @@ input[type=number] { -moz-appearance: textfield; }
                 const data = await res.json();
                 if (!res.ok) throw new Error();
                 window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-            } catch(e) { window.Fashion?.error ? window.Fashion.error('Could not clear the cart. Please try again.') : null; }
+            } catch(e) { window.GG?.error ? window.GG.error('Could not clear the cart. Please try again.') : null; }
             finally { this.clearing = false; }
         }
      }"
@@ -46,6 +46,30 @@ input[type=number] { -moz-appearance: textfield; }
         cartTax = $event.detail.tax;
         cartDiscount = $event.detail.discount;
         cartGrand = $event.detail.grand_total;
+     "
+     x-on:cart-updating.window="
+        if ($event.detail.count !== undefined) {
+            cartCount = Number($event.detail.count);
+        } else if ($event.detail.countDelta !== undefined) {
+            cartCount = Math.max(0, cartCount + Number($event.detail.countDelta));
+        }
+
+        if ($event.detail.subtotal !== undefined) {
+            cartSubtotal = Number($event.detail.subtotal);
+        } else if ($event.detail.subtotalDelta !== undefined) {
+            cartSubtotal = Math.max(0, cartSubtotal + Number($event.detail.subtotalDelta));
+        }
+
+        cartShipping = $event.detail.shipping_charge !== undefined
+            ? Number($event.detail.shipping_charge)
+            : (cartCount === 0 || cartSubtotal >= 100 ? 0 : 9.99);
+        cartTax = $event.detail.tax !== undefined
+            ? Number($event.detail.tax)
+            : Math.round(cartSubtotal * 0.05 * 100) / 100;
+        cartDiscount = $event.detail.discount !== undefined ? Number($event.detail.discount) : cartDiscount;
+        cartGrand = $event.detail.grand_total !== undefined
+            ? Number($event.detail.grand_total)
+            : Math.max(0, cartSubtotal + cartShipping + cartTax - cartDiscount);
      ">
 
     {{-- Header --}}

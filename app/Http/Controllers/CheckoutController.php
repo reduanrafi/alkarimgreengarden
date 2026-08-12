@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreOrderRequest;
-use App\Mail\OrderPlaced;
+use App\Jobs\SendOrderConfirmationEmail;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\CartService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class CheckoutController extends Controller
 {
@@ -93,6 +92,8 @@ class CheckoutController extends Controller
         $discount = $data['discount'];
         $tax = $data['tax'];
         $grandTotal = $data['grandTotal'];
+        $couponCode = session('coupon.code');
+        $paymentMethod = $request->payment_method;
 
         DB::beginTransaction();
 
@@ -113,11 +114,12 @@ class CheckoutController extends Controller
                 'upazila' => $request->upazila,
                 'postal_code' => $request->postal_code,
                 'address' => $request->address,
-                'payment_method' => $request->payment_method,
+                'payment_method' => $paymentMethod,
                 'payment_status' => 'pending',
                 'subtotal' => $subtotal,
                 'shipping_charge' => $shippingCharge,
                 'discount' => $discount,
+                'coupon_code' => $couponCode,
                 'tax' => $tax,
                 'grand_total' => $grandTotal,
                 'total' => $grandTotal,
@@ -127,10 +129,10 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($data['raw'] as $id => $item) {
-                $product = Product::findOrFail($id);
+                $product = Product::query()->lockForUpdate()->findOrFail($id);
 
-                if ($product->stock < $item['quantity']) {
-                    throw new \Exception("Insufficient stock for {$product->name}.");
+                if (! $product->status || $product->stock < $item['quantity']) {
+                    throw new \Exception("{$product->name} is no longer available in the requested quantity.");
                 }
 
                 $order->items()->create([
@@ -142,7 +144,7 @@ class CheckoutController extends Controller
                 $product->decrement('stock', $item['quantity']);
             }
 
-            if ($couponCode = session('coupon.code')) {
+            if ($couponCode) {
                 Coupon::where('code', $couponCode)->increment('used_count');
             }
 
@@ -208,13 +210,16 @@ class CheckoutController extends Controller
         // Send the confirmation email after the response has been sent to the
         // client, so a slow/unreachable mail server can never leave the user
         // stuck on "Processing..." — the response always returns immediately.
-        app()->terminating(function () use ($order) {
+        if (filled($order->email)) {
             try {
-                Mail::to($order->email)->send(new OrderPlaced($order));
+                SendOrderConfirmationEmail::dispatch($order->id);
             } catch (\Throwable $e) {
-                Log::warning('Order confirmation email failed: ' . $e->getMessage());
+                Log::warning('Order confirmation email could not be queued.', [
+                    'order_id' => $order->id,
+                    'exception' => $e->getMessage(),
+                ]);
             }
-        });
+        }
 
         return $response;
     }

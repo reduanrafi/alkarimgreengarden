@@ -1,4 +1,4 @@
-@php
+﻿@php
     $user = Auth::user();
     $ordersCount = $user->orders()->count();
     $wishlistCount = $user->wishlists()->count();
@@ -13,7 +13,7 @@
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight font-serif">Dashboard</h2>
                 <p class="text-sm text-gray-500 mt-0.5">Welcome back, {{ $user->name }}!</p>
             </div>
-            <a href="{{ route('products.index') }}" class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm">
+            <a href="{{ route('products.index') }}" class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-[#1f5c3f] text-white text-sm font-semibold rounded-xl hover:bg-[#173d2b] transition shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                 Start Shopping
             </a>
@@ -26,8 +26,8 @@
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
-                            <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <div class="w-12 h-12 rounded-xl bg-[#e4efe4] flex items-center justify-center shrink-0">
+                            <svg class="w-6 h-6 text-[#1f5c3f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         </div>
                         <div>
                             <p class="text-2xl font-bold text-gray-900">{{ $ordersCount }}</p>
@@ -76,10 +76,10 @@
             {{-- Quick Links + Profile --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <a href="{{ route('orders.index') }}" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
-                    <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors">
-                        <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    <div class="w-12 h-12 rounded-xl bg-[#e4efe4] flex items-center justify-center mb-4 group-hover:bg-[#d5e6d5] transition-colors">
+                        <svg class="w-6 h-6 text-[#1f5c3f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                     </div>
-                    <h3 class="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">My Orders</h3>
+                    <h3 class="font-semibold text-gray-900 group-hover:text-[#1f5c3f] transition-colors">My Orders</h3>
                     <p class="text-sm text-gray-500 mt-1">View and track your orders</p>
                 </a>
 
@@ -105,7 +105,7 @@
                 {{-- Profile Card --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:col-span-1">
                     <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-600 flex items-center justify-center text-2xl font-bold shrink-0">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#e4efe4] to-[#d5e6d5] text-[#1f5c3f] flex items-center justify-center text-2xl font-bold shrink-0">
                             {{ substr($user->name, 0, 1) }}
                         </div>
                         <div class="min-w-0">
@@ -137,27 +137,27 @@
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <div class="flex items-center justify-between mb-5">
                             <h3 class="font-semibold text-gray-900">Recent Orders</h3>
-                            <a href="{{ route('orders.index') }}" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">View All</a>
+                            <a href="{{ route('orders.index') }}" class="text-sm text-[#1f5c3f] hover:text-[#173d2b] font-medium">View All</a>
                         </div>
 
                         @if($recentOrders->count() > 0)
                             <div class="space-y-3">
                                 @foreach($recentOrders as $order)
                                     <a href="{{ route('orders.show', $order) }}" class="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition group">
-                                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 group-hover:from-indigo-100 group-hover:to-indigo-200 transition-colors">
+                                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#e4efe4] to-[#d5e6d5] text-[#1f5c3f] flex items-center justify-center shrink-0 group-hover:from-[#e4efe4] group-hover:to-[#d5e6d5] transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-gray-900 truncate">Order #{{ $order->id }}</p>
-                                            <p class="text-xs text-gray-400">{{ $order->created_at->format('M d, Y') }} · {{ $order->items->count() }} item(s)</p>
+                                            <p class="text-xs text-gray-400">{{ $order->created_at->format('M d, Y') }} Â· {{ $order->items->count() }} item(s)</p>
                                         </div>
                                         <div class="text-right shrink-0">
                                             <p class="text-sm font-semibold text-gray-900">{{ formatPrice($order->grand_total) }}</p>
                                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold
                                                 @if($order->status === 'delivered' || $order->status === 'completed') bg-emerald-50 text-emerald-700
                                                 @elseif($order->status === 'cancelled') bg-red-50 text-red-700
-                                                @elseif($order->status === 'shipped') bg-purple-50 text-purple-700
-                                                @elseif($order->status === 'processing') bg-indigo-50 text-indigo-700
+                                                @elseif($order->status === 'shipped') bg-[#e4efe4] text-[#1f5c3f]
+                                                @elseif($order->status === 'processing') bg-[#e4efe4] text-[#1f5c3f]
                                                 @else bg-amber-50 text-amber-700 @endif">
                                                 {{ ucfirst($order->status) }}
                                             </span>
@@ -171,7 +171,7 @@
                                     <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                 </div>
                                 <p class="text-gray-500 text-sm mb-4">No orders yet</p>
-                                <a href="{{ route('products.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition shadow-sm">
+                                <a href="{{ route('products.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1f5c3f] text-white text-sm font-semibold rounded-xl hover:bg-[#173d2b] transition shadow-sm">
                                     Start Shopping
                                 </a>
                             </div>

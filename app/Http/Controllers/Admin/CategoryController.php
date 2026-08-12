@@ -78,14 +78,14 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         if ($category->products()->count() > 0) {
-            return back()->with('error', 'Cannot delete category with existing products.');
+            $category->products()->update(['category_id' => null]);
         }
 
         $this->imageUpload->delete($category->image);
         $category->delete();
 
         return redirect()->route('admin.categories.index')
-            ->with('success', 'Category deleted successfully.');
+            ->with('success', 'Category deleted successfully. Its products were uncategorized.');
     }
 
     public function restore($id)

@@ -8,8 +8,17 @@
     $siteParts = explode(' ', $siteName, 2);
 @endphp
 
-<nav x-data="{ open: false, searchOpen: false, accountOpen: false, announcementVisible: true, cartCount: {{ $cartCount }} }"
-     x-on:cart-updated.window="cartCount = $event.detail.count || 0">
+<nav x-data="{ open: false, searchOpen: false, accountOpen: false, announcementVisible: true, cartCount: {{ $cartCount }}, scrolled: false }"
+     x-init="scrolled = window.scrollY > 8"
+     @scroll.window.passive="scrolled = window.scrollY > 8"
+      x-on:cart-updated.window="cartCount = Number($event.detail.count || 0)"
+      x-on:cart-updating.window="
+        if ($event.detail.count !== undefined) {
+            cartCount = Number($event.detail.count);
+        } else if ($event.detail.countDelta !== undefined) {
+            cartCount = Math.max(0, cartCount + Number($event.detail.countDelta));
+        }
+      ">
 
     {{-- Announcement Bar --}}
     <div x-show="announcementVisible" x-cloak class="topbar">
@@ -20,7 +29,7 @@
     </div>
 
     {{-- Main Header --}}
-    <div class="site-header">
+    <div class="site-header" :class="{ 'is-scrolled': scrolled }">
         <div class="gg-container nav-row">
 
             {{-- Logo --}}
@@ -42,7 +51,7 @@
                     <div class="search-box">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         <input type="text" name="q" x-model="query" @keydown="keydown" @focus="query.length >= 2 && (open = true)"
-                               placeholder="Search plants, gifts, essentials..." autocomplete="off">
+                               placeholder="Search plants, gifts, essentials..." autocomplete="off" aria-label="Search products">
                         <div x-show="loading" x-cloak>
                             <svg class="animate-spin w-4 h-4 text-[#5b6259]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                         </div>
@@ -72,7 +81,7 @@
             {{-- Icons --}}
             <div class="nav-icons">
 
-                <button @click="searchOpen = !searchOpen" class="icon-btn lg:hidden" title="Search">
+                <button @click="searchOpen = !searchOpen" class="icon-btn lg:hidden" title="Search" aria-label="Toggle search" :aria-expanded="searchOpen.toString()" aria-controls="mobile-search">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </button>
 
@@ -83,7 +92,7 @@
                 {{-- Account --}}
                 @auth
                     <div class="relative hidden sm:block" @click.away="accountOpen = false">
-                        <button @click="accountOpen = !accountOpen" class="icon-btn" title="Account">
+                        <button @click="accountOpen = !accountOpen" class="icon-btn" title="Account" aria-haspopup="true" :aria-expanded="accountOpen.toString()">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         </button>
                         <div x-show="accountOpen" x-cloak class="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-[#e6e9e2] py-2 min-w-[220px] z-50">
@@ -116,7 +125,7 @@
                 @endauth
 
                 {{-- Cart --}}
-                <button type="button" @click="$dispatch('open-mini-cart')" class="icon-btn relative" title="Cart">
+                <button type="button" @click="window.dispatchEvent(new CustomEvent('open-mini-cart'))" class="icon-btn relative" title="Cart" aria-label="Open cart">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
                     <template x-if="cartCount > 0">
                         <span id="cartCount" class="cart-count" x-text="cartCount"></span>
@@ -124,7 +133,7 @@
                 </button>
 
                 {{-- Mobile Menu Toggle --}}
-                <button @click="open = !open" class="icon-btn lg:hidden" title="Menu">
+                <button @click="open = !open" class="icon-btn lg:hidden" title="Menu" aria-label="Toggle menu" :aria-expanded="open.toString()" aria-controls="mobile-menu">
                     <svg class="w-5 h-5" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': !open}" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         <path :class="{'hidden': !open, 'inline-flex': open}" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -147,7 +156,10 @@
     </div>
 
     {{-- Mobile Menu --}}
-    <div x-show="open" x-cloak class="lg:hidden bg-white border-b border-[#e6e9e2] shadow-lg max-h-[80vh] overflow-y-auto">
+    <div id="mobile-menu" x-show="open" x-cloak
+         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
+         class="lg:hidden bg-white border-b border-[#e6e9e2] shadow-lg max-h-[80vh] overflow-y-auto">
         <div class="px-4 py-3 space-y-1">
             <a href="{{ route('products.index') }}" class="block px-3 py-2.5 text-sm font-medium text-[#22281f] hover:text-[#1f5c3f] hover:bg-[#e4efe4] rounded-xl transition">All Products</a>
             @if($categories->count() > 0)
@@ -190,11 +202,14 @@
     </div>
 
     {{-- Mobile Search --}}
-    <div x-show="searchOpen" x-cloak class="lg:hidden bg-white border-b border-[#e6e9e2] shadow-sm">
+    <div id="mobile-search" x-show="searchOpen" x-cloak
+         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
+         class="lg:hidden bg-white border-b border-[#e6e9e2] shadow-sm">
         <div class="px-4 py-3">
             <form action="{{ route('products.index') }}" method="GET" class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#5b6259]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" name="q" placeholder="Search plants, gifts, essentials..."
+                <input type="text" name="q" placeholder="Search plants, gifts, essentials..." aria-label="Search products"
                        class="w-full pl-9 pr-10 py-2.5 rounded-full border border-[#e6e9e2] bg-[#f7f9f6] text-sm focus:border-[#3f8a5c] outline-none transition">
                 <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[#1f5c3f]">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>

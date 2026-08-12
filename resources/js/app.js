@@ -1,7 +1,7 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import Swiper from 'swiper';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import { Navigation, Pagination, Autoplay, Keyboard } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -70,18 +70,20 @@ document.addEventListener('alpine:init', () => {
                 this.loading = false;
                 if (data.success) {
                     const badge = document.getElementById('cartCount');
-                    if (badge) badge.textContent = data.count;
-                    if (data.message) {
-                        const toast = document.createElement('div');
-                        toast.className = 'toast toast-success';
-                        toast.textContent = data.message;
-                        document.body.appendChild(toast);
-                        setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(40px)'; toast.style.transition = 'all 0.3s ease-out'; setTimeout(() => toast.remove(), 300); }, 3000);
+                    if (badge) {
+                        badge.textContent = data.count;
+                        badge.classList.remove('cart-count-pop');
+                        requestAnimationFrame(() => badge.classList.add('cart-count-pop'));
                     }
+                    window.GG.success(data.message || 'Added to your cart.');
                     window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
+                    window.dispatchEvent(new CustomEvent('open-mini-cart', { detail: data }));
                 }
             })
-            .catch(() => { this.loading = false; });
+            .catch(() => {
+                this.loading = false;
+                window.GG.error('Could not add this item to your cart. Please try again.');
+            });
         }
     }));
 
@@ -173,20 +175,24 @@ document.addEventListener('alpine:init', () => {
             .then(r => r.json())
             .then(data => {
                 this.loading = false;
+                const icon = btn.querySelector('svg');
                 if (data.in_wishlist) {
-                    btn.querySelector('svg').classList.add('text-red-500', 'fill-red-500');
+                    icon?.classList.add('text-red-500', 'fill-red-500');
+                    btn.title = 'Remove from wishlist';
+                    btn.setAttribute('aria-label', 'Remove from wishlist');
                 } else {
-                    btn.querySelector('svg').classList.remove('text-red-500', 'fill-red-500');
+                    icon?.classList.remove('text-red-500', 'fill-red-500');
+                    btn.title = 'Add to wishlist';
+                    btn.setAttribute('aria-label', 'Add to wishlist');
                 }
-                if (data.message) {
-                    const toast = document.createElement('div');
-                    toast.className = 'toast toast-success';
-                    toast.textContent = data.message;
-                    document.body.appendChild(toast);
-                    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(40px)'; toast.style.transition = 'all 0.3s ease-out'; setTimeout(() => toast.remove(), 300); }, 3000);
-                }
+                btn.classList.remove('wishlist-pop');
+                requestAnimationFrame(() => btn.classList.add('wishlist-pop'));
+                window.GG.success(data.message || 'Wishlist updated.');
             })
-            .catch(() => { this.loading = false; });
+            .catch(() => {
+                this.loading = false;
+                window.GG.error('Could not update your wishlist. Please try again.');
+            });
         }
     }));
 
@@ -343,11 +349,11 @@ document.addEventListener('alpine:init', () => {
             const max = Number(this.filters.max_price);
             if ((this.filters.min_price !== '' && (isNaN(min) || min < 0)) ||
                 (this.filters.max_price !== '' && (isNaN(max) || max < 0))) {
-                window.Fashion.error('Please enter a valid price range.');
+                window.GG.error('Please enter a valid price range.');
                 return;
             }
             if (this.filters.min_price !== '' && this.filters.max_price !== '' && min > max) {
-                window.Fashion.error('Minimum price cannot be greater than maximum price.');
+                window.GG.error('Minimum price cannot be greater than maximum price.');
                 return;
             }
             this.page = 1;
@@ -377,14 +383,30 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
-window.Fashion = {
+window.GG = {
     csrf() {
         return document.querySelector('meta[name="csrf-token"]')?.content || '';
     },
     showToast(message, type = 'success') {
+        document.getElementById('gg-toast-region')?.remove();
+
         const toast = document.createElement('div');
+        toast.id = 'gg-toast-region';
         toast.className = type === 'error' ? 'toast toast-error' : 'toast toast-success';
-        toast.textContent = message;
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+
+        const text = document.createElement('span');
+        text.textContent = message;
+        toast.appendChild(text);
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'toast-close';
+        close.setAttribute('aria-label', 'Dismiss notification');
+        close.textContent = '×';
+        close.addEventListener('click', () => toast.remove());
+        toast.appendChild(close);
         document.body.appendChild(toast);
         setTimeout(() => {
             toast.style.opacity = '0';
@@ -470,6 +492,19 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => { if (document.body.contains(btn)) btn.disabled = false; }, 2500);
         }
     }, true);
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.scroll-fade-in').forEach(el => observer.observe(el));
+
+    document.querySelectorAll('[data-toast]').forEach(el => {
+        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(40px)'; el.style.transition = 'all 0.3s ease-out'; setTimeout(() => el.remove(), 300); }, 4000);
+    });
 });
 
 function initProductCarousels(scope = document) {
@@ -496,16 +531,39 @@ function initProductCarousels(scope = document) {
 
 window.initProductCarousels = initProductCarousels;
 
-document.addEventListener('DOMContentLoaded', () => initProductCarousels());
-
 function initHomepageSliders(scope = document) {
     scope.querySelectorAll('.hero-slider.swiper').forEach((el) => {
         if (el._heroSwiper) return;
 
         el._heroSwiper = new Swiper(el, {
+            modules: [Navigation, Pagination, Autoplay, Keyboard],
+            loop: true,
+            speed: 500,
+            autoplay: { delay: 2000, disableOnInteraction: false, pauseOnMouseEnter: true },
+            keyboard: { enabled: true, onlyInViewport: true },
+            allowTouchMove: true,
+            pagination: {
+                el: el.querySelector('.swiper-pagination'),
+                clickable: true,
+                renderBullet(index, className) {
+                    return `<button type="button" class="${className}" aria-label="Go to banner ${index + 1}"></button>`;
+                },
+            },
+            navigation: {
+                nextEl: el.querySelector('.swiper-button-next'),
+                prevEl: el.querySelector('.swiper-button-prev'),
+            },
+        });
+    });
+
+    scope.querySelectorAll('.homepage-carousel-banner.swiper').forEach((el) => {
+        if (el._promoSwiper) return;
+
+        el._promoSwiper = new Swiper(el, {
+            modules: [Navigation, Pagination, Autoplay],
             loop: true,
             speed: 700,
-            autoplay: { delay: 6000, disableOnInteraction: false },
+            autoplay: { delay: 2000, disableOnInteraction: false },
             pagination: {
                 el: el.querySelector('.swiper-pagination'),
                 clickable: true,
@@ -516,35 +574,13 @@ function initHomepageSliders(scope = document) {
             },
         });
     });
-
-    scope.querySelectorAll('.promo-slider.swiper').forEach((el) => {
-        if (el._promoSwiper) return;
-
-        el._promoSwiper = new Swiper(el, {
-            loop: true,
-            speed: 700,
-            autoplay: { delay: 5000, disableOnInteraction: false },
-        });
-    });
 }
 
 window.initHomepageSliders = initHomepageSliders;
 
-document.addEventListener('DOMContentLoaded', () => initHomepageSliders());
+document.addEventListener('DOMContentLoaded', () => {
+    initProductCarousels();
+    initHomepageSliders();
+});
 
 Alpine.start();
-
-document.addEventListener('DOMContentLoaded', function () {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.scroll-fade-in').forEach(el => observer.observe(el));
-
-    document.querySelectorAll('[data-toast]').forEach(el => {
-        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(40px)'; el.style.transition = 'all 0.3s ease-out'; setTimeout(() => el.remove(), 300); }, 4000);
-    });
-});

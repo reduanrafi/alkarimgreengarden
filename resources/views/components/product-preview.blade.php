@@ -34,13 +34,19 @@
             </div>
 
             <div id="previewDetails" class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                <div><span class="text-gray-400">Fabric:</span> <span id="previewFabric" class="text-gray-700 font-medium"></span></div>
+                <div><span class="text-gray-400">Light:</span> <span id="previewFabric" class="text-gray-700 font-medium"></span></div>
                 <div><span class="text-gray-400">Color:</span> <span id="previewColor" class="text-gray-700 font-medium"></span></div>
-                <div><span class="text-gray-400">Print:</span> <span id="previewPrint" class="text-gray-700 font-medium"></span></div>
+                <div><span class="text-gray-400">Type:</span> <span id="previewPrint" class="text-gray-700 font-medium"></span></div>
                 <div><span class="text-gray-400">Size:</span> <span id="previewSize" class="text-gray-700 font-medium"></span></div>
             </div>
 
             <div id="previewDescription" class="text-sm text-gray-500 leading-relaxed"></div>
+
+            <button id="previewAddCartBtn" type="button" onclick="addPreviewToCart()" disabled
+                    class="w-full px-5 py-3 bg-[#1f5c3f] hover:bg-[#173d2b] text-white text-sm font-semibold rounded-xl transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+                <span>Add to Cart</span>
+            </button>
 
             <div class="flex items-center gap-3 pt-2 border-t border-gray-100">
                 <a id="previewOrderBtn" href="#" class="flex-1 text-center px-5 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition shadow-sm">
@@ -60,6 +66,50 @@
 let closeTimeout = null;
 let mouseOverPreview = false;
 let currentCard = null;
+let previewAdding = false;
+
+function addPreviewToCart() {
+    if (previewAdding) return;
+    const el = currentCard;
+    if (!el || !el.dataset.id) return;
+
+    const btn = document.getElementById('previewAddCartBtn');
+    if (!btn || btn.disabled) return;
+
+    previewAdding = true;
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Adding...';
+
+    const form = new FormData();
+    form.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '');
+    form.append('quantity', '1');
+
+    fetch('{{ route('cart.add', ['id' => '__id__']) }}'.replace('__id__', encodeURIComponent(el.dataset.id)), {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: form,
+    })
+    .then(r => r.json())
+    .then(data => {
+        previewAdding = false;
+        if (btn) btn.disabled = false;
+        if (data && data.success) {
+            if (btn) btn.querySelector('span').textContent = 'Added!';
+            window.GG?.success(data.message || 'Product added to cart!');
+            window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
+            window.dispatchEvent(new CustomEvent('open-mini-cart', { detail: data }));
+            setTimeout(() => { if (btn) btn.querySelector('span').textContent = 'Add to Cart'; }, 1200);
+        } else {
+            if (btn) btn.querySelector('span').textContent = 'Add to Cart';
+            window.GG?.error((data && data.message) || 'This product is not available.');
+        }
+    })
+    .catch(() => {
+        previewAdding = false;
+        if (btn) { btn.disabled = false; btn.querySelector('span').textContent = 'Add to Cart'; }
+        window.GG?.error('Could not add this item to your cart. Please try again.');
+    });
+}
 
 function showPreview(el) {
     clearTimeout(closeTimeout);
@@ -100,10 +150,19 @@ function showPreview(el) {
 
     const stock = parseInt(el.dataset.stock);
     const stockEl = document.getElementById('previewStock');
+    const addBtn = document.getElementById('previewAddCartBtn');
     if (stock > 0) {
         stockEl.innerHTML = '<span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> In Stock</span>';
+        if (addBtn) {
+            addBtn.disabled = false;
+            addBtn.querySelector('span').textContent = 'Add to Cart';
+        }
     } else {
         stockEl.innerHTML = '<span class="inline-flex items-center gap-1 text-xs font-medium text-red-500 bg-red-50 px-2.5 py-1 rounded-full">Out of Stock</span>';
+        if (addBtn) {
+            addBtn.disabled = true;
+            addBtn.querySelector('span').textContent = 'Out of Stock';
+        }
     }
 
     const imgDiv = document.getElementById('previewImage');

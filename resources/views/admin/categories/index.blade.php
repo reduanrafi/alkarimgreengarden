@@ -41,7 +41,7 @@
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
                                 @if($category->image)
-                                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="w-9 h-9 rounded-lg object-cover">
+                                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="w-9 h-9 rounded-lg object-cover" onerror="this.onerror=null;this.insertAdjacentHTML('afterend','<div class=&quot;w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-sm&quot;>📁</div>');this.remove();">
                                 @else
                                     <div class="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-sm">📁</div>
                                 @endif

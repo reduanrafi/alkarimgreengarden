@@ -1,4 +1,4 @@
-@extends('layouts.guest')
+﻿@extends('layouts.guest')
 
 @section('title', __('Verify Email') . ' — ' . config('app.name'))
 
@@ -13,8 +13,8 @@
         </div>
     @endif
 
-    <div class="p-4 bg-[#66D9F1]/5 border border-[#66D9F1]/20 rounded-xl text-sm text-gray-600 flex items-start gap-3">
-        <svg class="w-5 h-5 text-[#4CC9F0] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+    <div class="p-4 bg-[#e4efe4] border border-[#3f8a5c]/30 rounded-xl text-sm text-gray-600 flex items-start gap-3">
+        <svg class="w-5 h-5 text-[#3f8a5c] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
         <div>
             <p>Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn't receive the email, we will gladly send you another.</p>
         </div>
@@ -23,7 +23,7 @@
     <div class="flex items-center justify-between pt-2">
         <form method="POST" action="{{ route('verification.send') }}">
             @csrf
-            <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-[#66D9F1] to-[#4CC9F0] border border-transparent rounded-xl font-semibold text-sm text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+            <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-[#173d2b] to-[#3f8a5c] border border-transparent rounded-xl font-semibold text-sm text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
                 Resend Verification Email
             </button>
         </form>
