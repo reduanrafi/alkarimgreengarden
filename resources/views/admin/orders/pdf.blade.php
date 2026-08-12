@@ -105,7 +105,7 @@
 
     <div class="footer">
         <p>Thank you for your business!</p>
-        <p>{{ config('app.name') }} &mdash; Powered by Laravel</p>
+        <p>{{ config('app.name') }} &mdash; Powered by AlkarimGG</p>
     </div>
 </body>
 </html>

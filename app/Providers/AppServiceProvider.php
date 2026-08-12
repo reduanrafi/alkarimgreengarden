@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
+use Illuminate\Support\Facades\Schema;
+
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
@@ -20,6 +22,18 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Dynamically override app.name from settings
+        try {
+            if (Schema::hasTable('settings')) {
+                $siteName = setting('website_name');
+                if ($siteName) {
+                    config(['app.name' => $siteName]);
+                }
+            }
+        } catch (\Exception $e) {
+            // Avoid failing if migration has not run yet or db is not connected
+        }
+
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
