@@ -356,7 +356,7 @@
                                 <h4 class="gg-title" x-text="item.name"></h4>
                             </a>
                             <div class="gg-price-row">
-                                <span class="gg-price" x-text="'$' + parseFloat(item.price).toFixed(2)"></span>
+                                <span class="gg-price" x-text="'{{ getCurrencySymbol() }}' + parseFloat(item.price).toFixed({{ getCurrencySymbol() === '৳' ? 0 : 2 }})"></span>
                             </div>
                         </div>
                     </div>

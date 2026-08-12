@@ -25,7 +25,7 @@ class CartController extends Controller
         $tax = round($subtotal * 0.05, 2);
 
         return [
-            'items' => $items,
+            'items' => array_values($items),
             'count' => $count,
             'subtotal' => $subtotal,
             'shipping_charge' => $shippingCharge,

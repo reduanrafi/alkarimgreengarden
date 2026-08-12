@@ -73,7 +73,7 @@ function showPreview(el) {
 
     document.getElementById('previewName').textContent = el.dataset.name;
 
-    const priceFormatted = el.dataset.priceFormatted || '$' + parseFloat(el.dataset.price || 0).toFixed(2);
+    const priceFormatted = el.dataset.priceFormatted || '{{ getCurrencySymbol() }}' + parseFloat(el.dataset.price || 0).toFixed({{ getCurrencySymbol() === '৳' ? 0 : 2 }});
     const discountFormatted = el.dataset.discountFormatted || '';
     document.getElementById('previewPrice').textContent = priceFormatted;
     const discountEl = document.getElementById('previewDiscount');

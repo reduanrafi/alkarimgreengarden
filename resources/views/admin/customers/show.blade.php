@@ -289,7 +289,7 @@
                                 ticks: {
                                     color: 'rgba(255,255,255,0.4)',
                                     font: { size: 9 },
-                                    callback: v => '{{ config("app.currency", "$") }}' + v,
+                                    callback: v => '{{ getCurrencySymbol() }}' + v,
                                 },
                                 grid: { color: 'rgba(255,255,255,0.04)' },
                                 beginAtZero: true,

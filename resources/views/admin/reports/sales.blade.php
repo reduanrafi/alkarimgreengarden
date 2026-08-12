@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             scales: {
                 x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
-                y: { position: 'left', ticks: { color: textColor, font: { size: 10 }, callback: v => '$' + v }, grid: { color: gridColor } },
+                y: { position: 'left', ticks: { color: textColor, font: { size: 10 }, callback: v => '{{ getCurrencySymbol() }}' + v }, grid: { color: gridColor } },
                 y1: { position: 'right', ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } }
             }
         }

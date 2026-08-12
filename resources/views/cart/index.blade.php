@@ -64,11 +64,17 @@ input[type=number] { -moz-appearance: textfield; }
             </h1>
         </div>
         <template x-if="cartCount > 0">
-            <button @click="clearCart" :disabled="clearing" class="gg-btn-outline text-sm px-4 py-2.5 inline-flex items-center gap-1.5 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-wait">
-                <svg x-show="!clearing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                <svg x-show="clearing" x-cloak class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
-                <span x-text="clearing ? 'Clearing…' : 'Clear Cart'"></span>
-            </button>
+            <div class="flex items-center gap-3">
+                <button @click="clearCart" :disabled="clearing" class="gg-btn-outline text-sm px-4 py-2.5 inline-flex items-center gap-1.5 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-wait">
+                    <svg x-show="!clearing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <svg x-show="clearing" x-cloak class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                    <span x-text="clearing ? 'Clearing…' : 'Clear Cart'"></span>
+                </button>
+                <a href="{{ route('checkout.create') }}" class="gg-btn text-sm px-5 py-2.5 inline-flex items-center gap-1.5 font-semibold">
+                    <span>Checkout</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+            </div>
         </template>
     </div>
 

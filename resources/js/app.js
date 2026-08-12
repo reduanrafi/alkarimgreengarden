@@ -85,6 +85,81 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
+    Alpine.data('miniCart', () => ({
+        open: false,
+        items: [],
+        subtotal: 0,
+        count: 0,
+        loading: false,
+        busy: false,
+        get csrf() { return document.querySelector('meta[name="csrf-token"]')?.content || ''; },
+        get sym() { return this.$el.dataset.symbol || '৳'; },
+        get routeRefresh() { return this.$el.dataset.url || '/cart/items'; },
+        fmt(n) { return this.sym + Number(n).toFixed(this.sym === '৳' ? 0 : 2); },
+        emojiFor(item) {
+            switch (item.category_slug) {
+                case 'mens-t-shirt': return '👕';
+                case 'womens-t-shirt': return '👚';
+                case 'bags': return '👜';
+                case 'others': return '🪴';
+                default: return '🌿';
+            }
+        },
+        init() {
+            if (this.$el.dataset.items) {
+                try {
+                    this.items = JSON.parse(this.$el.dataset.items);
+                } catch (e) {
+                    this.items = [];
+                }
+            }
+            this.subtotal = parseFloat(this.$el.dataset.subtotal || 0);
+            this.count = parseInt(this.$el.dataset.count || 0);
+        },
+        async refresh() {
+            try {
+                const res = await fetch(this.routeRefresh, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) return;
+                const data = await res.json();
+                this.items = data.items || [];
+                this.subtotal = data.subtotal || 0;
+                this.count = data.count || 0;
+            } catch(e) {}
+        },
+        async updateQty(id, qty) {
+            const item = this.items.find(i => i.id === id);
+            if (!item || qty < 1 || qty > item.stock || this.busy) return;
+            this.busy = true;
+            try {
+                const form = new FormData();
+                form.append('_token', this.csrf);
+                form.append('quantity', qty);
+                form.append('_method', 'PATCH');
+                const res = await fetch('/cart/update/' + id, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
+                await this.refresh();
+            } catch(e) {}
+            finally { this.busy = false; }
+        },
+        async removeItem(id) {
+            if (this.busy) return;
+            this.busy = true;
+            try {
+                const form = new FormData();
+                form.append('_token', this.csrf);
+                form.append('_method', 'DELETE');
+                const res = await fetch('/cart/remove/' + id, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
+                await this.refresh();
+            } catch(e) {}
+            finally { this.busy = false; }
+        }
+    }));
+
     Alpine.data('wishlistToggle', () => ({
         loading: false,
         toggle(form, btn) {

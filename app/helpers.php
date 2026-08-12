@@ -13,7 +13,7 @@ if (!function_exists('getActiveCurrency')) {
 if (!function_exists('getCurrencySymbol')) {
     function getCurrencySymbol(): string
     {
-        return getActiveCurrency()?->symbol ?? '$';
+        return getActiveCurrency()?->symbol ?? '৳';
     }
 }
 
@@ -30,7 +30,7 @@ if (!function_exists('formatPrice')) {
         $currency = getActiveCurrency();
 
         if (!$currency) {
-            return '$' . number_format($amount, 2);
+            return '৳' . number_format($amount, 0);
         }
 
         $converted = $amount * $currency->exchange_rate;

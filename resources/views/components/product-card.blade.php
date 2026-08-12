@@ -1,6 +1,6 @@
 @props(['product'])
 
-<div class="group relative flex flex-col h-full bg-white rounded-xl shadow-sm hover:shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
+<div class="group relative flex flex-col h-full bg-white rounded-xl shadow-sm hover:shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
      data-id="{{ $product->id }}"
      data-name="{{ $product->name }}"
      data-price="{{ number_format($product->price, 2) }}"
@@ -17,8 +17,7 @@
      data-description="{{ \Illuminate\Support\Str::limit(strip_tags((string) $product->description), 200) }}"
      data-image="{{ $product->image ? asset('storage/' . $product->image) : '' }}"
      data-slug="{{ $product->slug }}"
-     onmouseenter="if (window.showPreview) showPreview(this)"
-     onmouseleave="if (window.onCardLeave) onCardLeave(this)">
+     onclick="if(!event.target.closest('button, form, a')) window.location.href = '{{ route('products.show', $product->slug) }}'">
 
     <div class="aspect-square bg-gray-50 flex items-center justify-center p-4 relative overflow-hidden">
         <a href="{{ route('products.show', $product->slug) }}" class="block w-full h-full">
@@ -138,7 +137,7 @@
         </div>
 
         @if($product->stock_status !== 'out_of_stock')
-            <form action="{{ route('cart.add', $product->id) }}" method="POST" class="mt-3">
+            <form action="{{ route('cart.add', $product->id) }}" method="POST" class="mt-3" x-data="addToCart" @submit.prevent="submit($event.target)">
                 @csrf
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit"

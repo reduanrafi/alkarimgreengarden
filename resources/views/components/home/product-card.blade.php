@@ -1,6 +1,6 @@
 @props(['product'])
 
-<div class="gg-card group"
+<div class="gg-card group cursor-pointer"
      data-id="{{ $product->id }}"
      data-name="{{ $product->name }}"
      data-price="{{ number_format($product->price, 2) }}"
@@ -17,8 +17,7 @@
      data-description="{{ \Illuminate\Support\Str::limit(strip_tags((string) $product->description), 200) }}"
      data-image="{{ $product->image ? asset('storage/' . $product->image) : '' }}"
      data-slug="{{ $product->slug }}"
-     onmouseenter="if (window.showPreview) showPreview(this)"
-     onmouseleave="if (window.onCardLeave) onCardLeave(this)">
+     onclick="if(!event.target.closest('button, form, a')) window.location.href = '{{ route('products.show', $product->slug) }}'">
 
     <div class="gg-media">
         @if($product->stock_status === 'out_of_stock')

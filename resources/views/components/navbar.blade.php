@@ -13,7 +13,7 @@
 
     {{-- Announcement Bar --}}
     <div x-show="announcementVisible" x-cloak class="topbar">
-        <p>Free shipping on all orders over $100</p>
+        <p>Free shipping on all orders over ৳100</p>
         <button @click="announcementVisible = false" aria-label="Dismiss" class="absolute right-3 top-1/2 -translate-y-1/2 text-green-100/70 hover:text-white transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
@@ -202,6 +202,25 @@
             </form>
         </div>
     </div>
+
+    {{-- Floating Cart Button --}}
+    <button type="button" 
+            @click="$dispatch('open-mini-cart')"
+            class="fixed bottom-6 right-6 z-[130] flex items-center justify-center w-14 h-14 bg-[#1f5c3f] text-white rounded-full shadow-2xl hover:bg-[#173d2b] transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#3f8a5c] focus:ring-offset-2 md:bottom-8 md:right-8"
+            aria-label="View Cart"
+            x-show="cartCount > 0"
+            x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="translate-y-12 opacity-0 scale-75"
+            x-transition:enter-end="translate-y-0 opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="translate-y-0 opacity-100 scale-100"
+            x-transition:leave-end="translate-y-12 opacity-0 scale-75"
+            x-cloak>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
+        </svg>
+        <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white" x-text="cartCount"></span>
+    </button>
 </nav>
 
 <x-mini-cart :items="$miniCartItems" :subtotal="$miniSubtotal" />

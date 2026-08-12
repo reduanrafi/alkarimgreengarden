@@ -3,7 +3,7 @@
         <div class="trust-card">
             <div class="ico">🚚</div>
             <h4>Free Shipping</h4>
-            <p>On all orders over $100</p>
+            <p>On all orders over ৳100</p>
         </div>
         <div class="trust-card">
             <div class="ico">🌱</div>

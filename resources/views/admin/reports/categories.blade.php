@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { ticks: { color: textColor, font: { size: 10 }, callback: v => '$' + v }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { ticks: { color: textColor, font: { size: 10 }, callback: v => '{{ getCurrencySymbol() }}' + v }, grid: { color: 'rgba(255,255,255,0.05)' } },
                     y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
                 }
             }

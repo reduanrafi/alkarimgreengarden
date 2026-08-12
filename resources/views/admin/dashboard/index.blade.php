@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
-                y: { ticks: { color: textColor, font: { size: 10 }, callback: v => '$' + v }, grid: { color: gridColor } }
+                y: { ticks: { color: textColor, font: { size: 10 }, callback: v => '{{ getCurrencySymbol() }}' + v }, grid: { color: gridColor } }
             }
         }
     });
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
-                y: { ticks: { color: textColor, font: { size: 10 }, callback: v => '$' + v }, grid: { color: gridColor } }
+                y: { ticks: { color: textColor, font: { size: 10 }, callback: v => '{{ getCurrencySymbol() }}' + v }, grid: { color: gridColor } }
             }
         }
     });

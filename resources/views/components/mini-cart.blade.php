@@ -1,67 +1,11 @@
 @props(['items' => [], 'subtotal' => 0])
 
-<div x-data="{
-    open: false,
-    items: @json($items),
-    subtotal: {{ $subtotal }},
-    count: {{ array_sum(array_column($items, 'quantity')) }},
-    loading: false,
-    busy: false,
-    get csrf() { return document.querySelector('meta[name=csrf-token]')?.content || ''; },
-    get sym() { return '{{ getCurrencySymbol() }}'; },
-    fmt(n) { return this.sym + Number(n).toFixed(2); },
-    emojiFor(item) {
-        switch (item.category_slug) {
-            case 'mens-t-shirt': return '👕';
-            case 'womens-t-shirt': return '👚';
-            case 'bags': return '👜';
-            case 'others': return '🪴';
-            default: return '🌿';
-        }
-    },
-    async refresh() {
-        try {
-            const res = await fetch('{{ route('cart.items') }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            if (!res.ok) return;
-            const data = await res.json();
-            this.items = data.items || [];
-            this.subtotal = data.subtotal || 0;
-            this.count = data.count || 0;
-        } catch(e) {}
-    },
-    async updateQty(id, qty) {
-        const item = this.items.find(i => i.id === id);
-        if (!item || qty < 1 || qty > item.stock || this.busy) return;
-        this.busy = true;
-        try {
-            const form = new FormData();
-            form.append('_token', this.csrf);
-            form.append('quantity', qty);
-            form.append('_method', 'PATCH');
-            const res = await fetch('/cart/update/' + id, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-            await this.refresh();
-        } catch(e) {}
-        finally { this.busy = false; }
-    },
-    async removeItem(id) {
-        if (this.busy) return;
-        this.busy = true;
-        try {
-            const form = new FormData();
-            form.append('_token', this.csrf);
-            form.append('_method', 'DELETE');
-            const res = await fetch('/cart/remove/' + id, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: form });
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-            await this.refresh();
-        } catch(e) {}
-        finally { this.busy = false; }
-    }
-}"
+<div x-data="miniCart"
+     data-url="{{ route('cart.items') }}"
+     data-symbol="{{ getCurrencySymbol() }}"
+     data-items="{{ json_encode(array_values($items)) }}"
+     data-subtotal="{{ $subtotal }}"
+     data-count="{{ array_sum(array_column($items, 'quantity')) }}"
      x-on:open-mini-cart.window="open = true; refresh();"
      x-on:cart-updated.window="refresh()">
 
@@ -74,7 +18,7 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          @click="open = false"
-         class="fixed inset-0 bg-ink/40 backdrop-blur-[2px] z-[70]"></div>
+         class="fixed inset-0 bg-ink/40 backdrop-blur-[2px] z-[140]"></div>
 
     {{-- Panel --}}
     <aside x-show="open" x-cloak
@@ -84,7 +28,7 @@
            x-transition:leave="transition ease-in duration-200"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="translate-x-full"
-           class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[80] shadow-2xl flex flex-col">
+           class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[150] shadow-2xl flex flex-col">
 
         {{-- Header --}}
         <div class="flex items-center justify-between px-5 py-4 border-b border-line bg-cream/60">
@@ -113,7 +57,7 @@
                 </div>
             </template>
 
-            <template x-if="!loading && items.length > 0" x-for="item in items" :key="item.id">
+            <template x-for="item in items" :key="item.id">
                 <div class="flex items-start gap-3 pb-4 border-b border-line last:border-0" :class="busy ? 'opacity-60 pointer-events-none' : ''">
                     <a :href="'/products/' + item.slug" class="shrink-0 w-16 h-16 rounded-xl bg-cream border border-line overflow-hidden flex items-center justify-center">
                         <img x-show="item.image" :src="'/storage/' + item.image" :alt="item.name" class="w-full h-full object-cover">
@@ -163,3 +107,4 @@
         </div>
     </aside>
 </div>
+

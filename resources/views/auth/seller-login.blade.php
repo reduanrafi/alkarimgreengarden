@@ -11,7 +11,7 @@
 
         <div class="space-y-1.5">
             <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
-            <input id="email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="seller@example.com"
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="seller@example.com"
                    class="w-full bg-white/60 border border-gray-200 rounded-xl py-3 px-4 text-gray-800 placeholder-gray-400 text-sm outline-none transition-all duration-200 focus:border-[#66D9F1] focus:ring-2 focus:ring-[#66D9F1]/20 @error('email') border-red-300 bg-red-50 @enderror">
             <x-input-error :messages="$errors->get('email')" class="mt-1" />
         </div>

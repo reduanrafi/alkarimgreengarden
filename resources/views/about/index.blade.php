@@ -41,7 +41,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 sm:p-12 text-center">
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Why Shop With Us?</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-            <div><div class="text-3xl mb-2">🚚</div><p class="font-semibold text-gray-900">Fast Shipping</p><p class="text-sm text-gray-500">Free delivery on orders over $100</p></div>
+            <div><div class="text-3xl mb-2">🚚</div><p class="font-semibold text-gray-900">Fast Shipping</p><p class="text-sm text-gray-500">Free delivery on orders over ৳100</p></div>
             <div><div class="text-3xl mb-2">🛡️</div><p class="font-semibold text-gray-900">Secure Payments</p><p class="text-sm text-gray-500">Safe and encrypted transactions</p></div>
             <div><div class="text-3xl mb-2">↩️</div><p class="font-semibold text-gray-900">Easy Returns</p><p class="text-sm text-gray-500">30-day return policy</p></div>
             <div><div class="text-3xl mb-2">💬</div><p class="font-semibold text-gray-900">24/7 Support</p><p class="text-sm text-gray-500">We're here to help anytime</p></div>
