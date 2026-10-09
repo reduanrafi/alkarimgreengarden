@@ -1,4 +1,4 @@
-# Green Garden Website
+# Fodkart Website
 
 A full-featured plant & gardening e-commerce platform built with Laravel 12, Blade, Tailwind CSS, and MySQL.
 
@@ -46,8 +46,8 @@ A full-featured plant & gardening e-commerce platform built with Laravel 12, Bla
 
 ### 1. Clone the repository
 ```bash
-git clone <repository-url> greengarden
-cd greengarden
+git clone <repository-url> Fodkart
+cd Fodkart
 ```
 
 ### 2. Install PHP dependencies
@@ -69,7 +69,7 @@ Edit `.env` and configure:
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=greengarden
+DB_DATABASE=Fodkart
 DB_USERNAME=root
 DB_PASSWORD=
 
@@ -89,7 +89,7 @@ php artisan key:generate
 ```
 
 ### 6. Create database
-Create a MySQL database named `greengarden` (or your configured name).
+Create a MySQL database named `Fodkart` (or your configured name).
 
 ### 7. Run migrations and seeders
 ```bash
@@ -115,7 +115,7 @@ Visit `http://127.0.0.1:8000` in your browser.
 ## Default Accounts
 
 ### Admin Login
-- **Email:** admin@greengarden.test
+- **Email:** admin@Fodkart.test
 - **Password:** password
 
 ### Customer Registration
@@ -167,7 +167,7 @@ MAIL_FROM_ADDRESS=your@email.com
 ## Folder Structure
 
 ```
-greengarden/
+Fodkart/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
